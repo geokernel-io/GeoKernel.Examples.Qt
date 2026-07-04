@@ -1,0 +1,14 @@
+.vs/
+build/
+outputs/
+intermediates/
+CMakeUserPresets.json
+**/bin/
+**/obj/
+*.user
+*.suo
+*.pdb
+*.ilk
+*.log
+*.pgidx
+data/
