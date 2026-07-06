@@ -27,7 +27,13 @@ int main(int argc, char* argv[])
     miniMap->raise();
     miniMap->show();
 
-    if (!loadWorldLayer(*viewer, &window))
+    const QString worldLayerPath = ensureSampleFile(
+        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_4326.zip")),
+        QStringLiteral("world_4326.zip"),
+        QStringLiteral("world_4326"),
+        QStringLiteral("world_4326.shp"),
+        &window);
+    if (worldLayerPath.isEmpty() || !loadLayer(*viewer, worldLayerPath, &window))
         return 1;
 
     if (!loadLayer(*viewer, sampleDataPath(QStringLiteral("shapefile/cities_4326.shp")), &window))

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(GeoKernelSamples
+project(GeoKernelExamples
     VERSION 0.1.0
     DESCRIPTION "GeoKernel Qt sample applications"
     LANGUAGES CXX)
@@ -25,6 +25,7 @@ else()
 endif()
 set(GEOKERNEL_SAMPLES_PLATFORM_OUTPUT_DIR "${GEOKERNEL_SAMPLES_OUTPUT_DIR}/${GEOKERNEL_SAMPLES_PLATFORM_NAME}")
 set(GEOKERNEL_SAMPLES_BIN_DIR "${GEOKERNEL_SAMPLES_PLATFORM_OUTPUT_DIR}/$<CONFIG>/bin")
+option(GEOKERNEL_USE_DEBUG_SDK_FOR_DEBUG "Link Debug samples against GeoKernel Debug binaries" OFF)
 
 if(WIN32)
     set(GEOKERNEL_SAMPLE_APP_ICON "${GEOKERNEL_SAMPLES_ROOT_DIR}/images/ico/GeoKernelAppIcon.ico")
@@ -68,22 +69,22 @@ function(geokernel_import_library target_name library_base_name)
 
     if(WIN32)
         foreach(_config IN ITEMS DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
-            if(_config STREQUAL "DEBUG")
+            if(_config STREQUAL "DEBUG" AND GEOKERNEL_USE_DEBUG_SDK_FOR_DEBUG)
                 set(_sdk_config "Debug")
             else()
                 set(_sdk_config "Release")
             endif()
 
             set_target_properties(${target_name} PROPERTIES
-                "IMPORTED_IMPLIB_${_config}" "${GEOKERNEL_ROOT}/outputs/${_sdk_config}/${library_base_name}.lib"
-                "IMPORTED_LOCATION_${_config}" "${GEOKERNEL_ROOT}/outputs/${_sdk_config}/${library_base_name}.dll")
+                "IMPORTED_IMPLIB_${_config}" "${GEOKERNEL_ROOT}/outputs/build/${_sdk_config}/${library_base_name}.lib"
+                "IMPORTED_LOCATION_${_config}" "${GEOKERNEL_ROOT}/outputs/build/${_sdk_config}/${library_base_name}.dll")
         endforeach()
     elseif(APPLE)
         set_target_properties(${target_name} PROPERTIES
-            IMPORTED_LOCATION "${GEOKERNEL_ROOT}/outputs/Release/lib${library_base_name}.dylib")
+            IMPORTED_LOCATION "${GEOKERNEL_ROOT}/outputs/build/Release/lib${library_base_name}.dylib")
     else()
         set_target_properties(${target_name} PROPERTIES
-            IMPORTED_LOCATION "${GEOKERNEL_ROOT}/outputs/Release/lib${library_base_name}.so")
+            IMPORTED_LOCATION "${GEOKERNEL_ROOT}/outputs/build/Release/lib${library_base_name}.so")
     endif()
 endfunction()
 
@@ -104,6 +105,7 @@ add_custom_target(GeoKernelSampleRuntime ALL
         -D "GEOKERNEL_ROOT=${GEOKERNEL_ROOT}"
         -D "QT_BIN_DIR=$<TARGET_FILE_DIR:Qt6::Core>"
         -D "CONFIG=$<CONFIG>"
+        -D "USE_DEBUG_SDK_FOR_DEBUG=${GEOKERNEL_USE_DEBUG_SDK_FOR_DEBUG}"
         -D "DESTINATION=${GEOKERNEL_SAMPLES_BIN_DIR}"
         -P "${GEOKERNEL_SAMPLES_ROOT_DIR}/cmake/CopyGeoKernelRuntime.cmake"
     COMMENT "Copying GeoKernel runtime")
@@ -111,10 +113,10 @@ add_custom_target(GeoKernelSampleRuntime ALL
 function(geokernel_add_sample sample_relative_dir)
     get_filename_component(sample_name "${sample_relative_dir}" NAME)
     get_filename_component(sample_group "${sample_relative_dir}" DIRECTORY)
-    set(_sample_dir "${GEOKERNEL_SAMPLES_ROOT_DIR}/samples/${sample_relative_dir}")
+    set(_sample_dir "${GEOKERNEL_SAMPLES_ROOT_DIR}/examples/${sample_relative_dir}")
     set(_sample_sources
         "${_sample_dir}/main.cpp"
-        "${GEOKERNEL_SAMPLES_ROOT_DIR}/samples/Common/SampleAppIcon.cpp")
+        "${GEOKERNEL_SAMPLES_ROOT_DIR}/examples/Common/SampleAppIcon.cpp")
 
     if(WIN32)
         list(APPEND _sample_sources "${GEOKERNEL_SAMPLE_APP_ICON_RESOURCE}")
@@ -146,7 +148,7 @@ function(geokernel_add_sample sample_relative_dir)
         QT_SQL_LIB)
 
     target_include_directories(${sample_name} PRIVATE
-        "${GEOKERNEL_SAMPLES_ROOT_DIR}/samples/Common")
+        "${GEOKERNEL_SAMPLES_ROOT_DIR}/examples/Common")
 
     target_link_libraries(${sample_name} PRIVATE
         GeoKernel::Viewer
@@ -170,9 +172,9 @@ endfunction()
 
 file(GLOB _geokernel_sample_main_files
     LIST_DIRECTORIES false
-    RELATIVE "${GEOKERNEL_SAMPLES_ROOT_DIR}/samples"
-    "${GEOKERNEL_SAMPLES_ROOT_DIR}/samples/*/main.cpp"
-    "${GEOKERNEL_SAMPLES_ROOT_DIR}/samples/*/*/main.cpp")
+    RELATIVE "${GEOKERNEL_SAMPLES_ROOT_DIR}/examples"
+    "${GEOKERNEL_SAMPLES_ROOT_DIR}/examples/*/main.cpp"
+    "${GEOKERNEL_SAMPLES_ROOT_DIR}/examples/*/*/main.cpp")
 list(SORT _geokernel_sample_main_files)
 
 foreach(_geokernel_sample_main_file IN LISTS _geokernel_sample_main_files)

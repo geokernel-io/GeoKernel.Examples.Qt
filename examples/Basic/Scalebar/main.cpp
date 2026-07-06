@@ -26,7 +26,13 @@ int main(int argc, char* argv[])
     scaleBar->raise();
     scaleBar->show();
 
-    if (!loadWorldLayer(*viewer, &window))
+    const QString worldLayerPath = ensureSampleFile(
+        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_4326.zip")),
+        QStringLiteral("world_4326.zip"),
+        QStringLiteral("world_4326"),
+        QStringLiteral("world_4326.shp"),
+        &window);
+    if (worldLayerPath.isEmpty() || !loadLayer(*viewer, worldLayerPath, &window))
         return 1;
 
     window.show();

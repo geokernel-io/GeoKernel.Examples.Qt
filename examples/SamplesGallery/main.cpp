@@ -5429,16 +5429,16 @@ QWidget* createSourcePage(SampleId sample)
     if (!standardFolder.isEmpty())
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/%1/main.cpp").arg(standardFolder)), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/%1/main.cpp").arg(standardFolder)), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/%1.Winforms/MainForm.cs").arg(standardFolder)), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/%1.Winforms/MainForm.cs").arg(standardFolder)), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/%1.Wpf/MainWindow.xaml").arg(standardFolder)) +
+                readTextFile(QStringLiteral("examples/%1.Wpf/MainWindow.xaml").arg(standardFolder)) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/%1.Wpf/MainWindow.xaml.cs").arg(standardFolder)),
+                readTextFile(QStringLiteral("examples/%1.Wpf/MainWindow.xaml.cs").arg(standardFolder)),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5447,16 +5447,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::AddLayers)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/Basic/AddLayers/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/Basic/AddLayers/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/AddLayers.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/AddLayers.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/AddLayers.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/AddLayers.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/AddLayers.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/AddLayers.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5465,16 +5465,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::Project)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/Basic/Project/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/Basic/Project/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/Project.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/Project.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/Project.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/Project.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/Project.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/Project.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5483,16 +5483,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::LayerVisibility)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerManagement/LayerVisibility/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerManagement/LayerVisibility/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerVisibility.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerVisibility.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/LayerVisibility.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/LayerVisibility.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/LayerVisibility.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/LayerVisibility.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5501,16 +5501,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::AddPointInteractive)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/EditingAndDigitizing/AddPointInteractive/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/EditingAndDigitizing/AddPointInteractive/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/AddPointInteractive.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/AddPointInteractive.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/AddPointInteractive.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/AddPointInteractive.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/AddPointInteractive.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/AddPointInteractive.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5519,16 +5519,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::EditSession)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/EditingAndDigitizing/EditSession/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/EditingAndDigitizing/EditSession/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/EditSession.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/EditSession.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/EditSession.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/EditSession.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/EditSession.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/EditSession.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5537,16 +5537,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::Scalebar)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/Basic/Scalebar/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/Basic/Scalebar/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/Scalebar.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/Scalebar.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/Scalebar.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/Scalebar.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/Scalebar.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/Scalebar.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5555,16 +5555,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::Minimap)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/Basic/Minimap/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/Basic/Minimap/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/Minimap.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/Minimap.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/Minimap.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/Minimap.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/Minimap.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/Minimap.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5573,16 +5573,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::LayerAddRemove)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerManagement/LayerAddRemove/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerManagement/LayerAddRemove/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerAddRemove.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerAddRemove.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/LayerAddRemove.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/LayerAddRemove.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/LayerAddRemove.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/LayerAddRemove.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5591,16 +5591,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::LayerReorder)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerManagement/LayerReorder/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerManagement/LayerReorder/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerReorder.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerReorder.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/LayerReorder.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/LayerReorder.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/LayerReorder.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/LayerReorder.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5609,16 +5609,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::LayerZoomTo)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerManagement/LayerZoomTo/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerManagement/LayerZoomTo/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerZoomTo.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerZoomTo.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/LayerZoomTo.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/LayerZoomTo.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/LayerZoomTo.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/LayerZoomTo.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5627,16 +5627,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::LayerEvents)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerManagement/LayerEvents/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerManagement/LayerEvents/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerEvents.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerEvents.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/LayerEvents.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/LayerEvents.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/LayerEvents.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/LayerEvents.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5645,16 +5645,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::LayerLoadOptions)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerManagement/LayerLoadOptions/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerManagement/LayerLoadOptions/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerLoadOptions.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerLoadOptions.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/LayerLoadOptions.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/LayerLoadOptions.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/LayerLoadOptions.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/LayerLoadOptions.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5663,16 +5663,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::LayerLoadCancel)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerManagement/LayerLoadCancel/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerManagement/LayerLoadCancel/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerLoadCancel.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerLoadCancel.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/LayerLoadCancel.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/LayerLoadCancel.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/LayerLoadCancel.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/LayerLoadCancel.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5681,16 +5681,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::InMemoryLayers)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerManagement/InMemoryLayers/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerManagement/InMemoryLayers/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/InMemoryLayers.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/InMemoryLayers.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/InMemoryLayers.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/InMemoryLayers.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/InMemoryLayers.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/InMemoryLayers.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5699,16 +5699,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::LayerRefresh)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerManagement/LayerRefresh/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerManagement/LayerRefresh/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerRefresh.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerRefresh.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/LayerRefresh.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/LayerRefresh.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/LayerRefresh.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/LayerRefresh.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5717,16 +5717,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::LayerExtent)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerManagement/LayerExtent/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerManagement/LayerExtent/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/LayerExtent.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/LayerExtent.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/LayerExtent.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/LayerExtent.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/LayerExtent.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/LayerExtent.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5735,16 +5735,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::SimpleStyle)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/StyleAndSymbology/SimpleStyle/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/StyleAndSymbology/SimpleStyle/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/SimpleStyle.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/SimpleStyle.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/SimpleStyle.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/SimpleStyle.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/SimpleStyle.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/SimpleStyle.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5753,16 +5753,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::CategorizedRenderer)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/StyleAndSymbology/CategorizedRenderer/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/StyleAndSymbology/CategorizedRenderer/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/CategorizedRenderer.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/CategorizedRenderer.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/CategorizedRenderer.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/CategorizedRenderer.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/CategorizedRenderer.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/CategorizedRenderer.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5771,16 +5771,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::ClearRenderer)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/StyleAndSymbology/ClearRenderer/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/StyleAndSymbology/ClearRenderer/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/ClearRenderer.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/ClearRenderer.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/ClearRenderer.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/ClearRenderer.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/ClearRenderer.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/ClearRenderer.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5789,16 +5789,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::GraduatedRenderer)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/StyleAndSymbology/GraduatedRenderer/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/StyleAndSymbology/GraduatedRenderer/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/GraduatedRenderer.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/GraduatedRenderer.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/GraduatedRenderer.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/GraduatedRenderer.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/GraduatedRenderer.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/GraduatedRenderer.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5807,16 +5807,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::GraduatedRendererSize)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/StyleAndSymbology/GraduatedRendererSize/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/StyleAndSymbology/GraduatedRendererSize/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/GraduatedRendererSize.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/GraduatedRendererSize.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/GraduatedRendererSize.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/GraduatedRendererSize.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/GraduatedRendererSize.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/GraduatedRendererSize.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5825,16 +5825,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::ClassificationMethods)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/StyleAndSymbology/ClassificationMethods/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/StyleAndSymbology/ClassificationMethods/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/ClassificationMethods.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/ClassificationMethods.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/ClassificationMethods.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/ClassificationMethods.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/ClassificationMethods.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/ClassificationMethods.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5843,16 +5843,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::RuleBasedRenderer)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/StyleAndSymbology/RuleBasedRenderer/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/StyleAndSymbology/RuleBasedRenderer/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/RuleBasedRenderer.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/RuleBasedRenderer.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/RuleBasedRenderer.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/RuleBasedRenderer.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/RuleBasedRenderer.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/RuleBasedRenderer.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5861,16 +5861,16 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::SelectionStyle)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/StyleAndSymbology/SelectionStyle/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/StyleAndSymbology/SelectionStyle/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/SelectionStyle.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/SelectionStyle.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/SelectionStyle.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/SelectionStyle.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/SelectionStyle.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/SelectionStyle.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
@@ -5879,32 +5879,32 @@ QWidget* createSourcePage(SampleId sample)
     if (sample == SampleId::StylePerFeature)
     {
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/StyleAndSymbology/StylePerFeature/main.cpp")), QStringLiteral("cpp")),
+            createSourceView(readTextFile(QStringLiteral("examples/StyleAndSymbology/StylePerFeature/main.cpp")), QStringLiteral("cpp")),
             QStringLiteral("Qt"));
         tabs->addTab(
-            createSourceView(readTextFile(QStringLiteral("samples/StylePerFeature.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+            createSourceView(readTextFile(QStringLiteral("examples/StylePerFeature.Winforms/MainForm.cs")), QStringLiteral("csharp")),
             QStringLiteral("WinForms"));
         tabs->addTab(
             createSourceView(
-                readTextFile(QStringLiteral("samples/StylePerFeature.Wpf/MainWindow.xaml")) +
+                readTextFile(QStringLiteral("examples/StylePerFeature.Wpf/MainWindow.xaml")) +
                 QStringLiteral("\n\n") +
-                readTextFile(QStringLiteral("samples/StylePerFeature.Wpf/MainWindow.xaml.cs")),
+                readTextFile(QStringLiteral("examples/StylePerFeature.Wpf/MainWindow.xaml.cs")),
                 QStringLiteral("xaml")),
             QStringLiteral("WPF"));
         return finalizeSourceTabs(tabs);
     }
 
     tabs->addTab(
-        createSourceView(readTextFile(QStringLiteral("samples/Basic/HelloMap/main.cpp")), QStringLiteral("cpp")),
+        createSourceView(readTextFile(QStringLiteral("examples/Basic/HelloMap/main.cpp")), QStringLiteral("cpp")),
         QStringLiteral("Qt"));
     tabs->addTab(
-        createSourceView(readTextFile(QStringLiteral("samples/HelloMap.Winforms/MainForm.cs")), QStringLiteral("csharp")),
+        createSourceView(readTextFile(QStringLiteral("examples/HelloMap.Winforms/MainForm.cs")), QStringLiteral("csharp")),
         QStringLiteral("WinForms"));
     tabs->addTab(
         createSourceView(
-            readTextFile(QStringLiteral("samples/HelloMap.Wpf/MainWindow.xaml")) +
+            readTextFile(QStringLiteral("examples/HelloMap.Wpf/MainWindow.xaml")) +
             QStringLiteral("\n\n") +
-            readTextFile(QStringLiteral("samples/HelloMap.Wpf/MainWindow.xaml.cs")),
+            readTextFile(QStringLiteral("examples/HelloMap.Wpf/MainWindow.xaml.cs")),
             QStringLiteral("xaml")),
         QStringLiteral("WPF"));
     return finalizeSourceTabs(tabs);
