@@ -1,6 +1,6 @@
-# GeoKernel Qt Samples
+# GeoKernel Qt Examples
 
-This repository contains Qt/C++ sample applications for the GeoKernel native SDK.
+This repository contains Qt/C++ example applications for the GeoKernel native SDK.
 
 ## Configure
 
@@ -8,7 +8,7 @@ The default presets expect the GeoKernel SDK repository next to this repository:
 
 ```text
 D:/projects/GeoKernel
-D:/projects/GeoKernel Samples
+D:/projects/GeoKernel.Examples.Qt
 ```
 
 If GeoKernel is somewhere else, pass `GEOKERNEL_ROOT` when configuring.
@@ -22,7 +22,7 @@ cmake --build --preset windows-msvc-release --target HelloMap
 
 ### Visual Studio
 
-Open `D:\projects\GeoKernel Samples` with **File > Open > Folder**.
+Open `D:\projects\GeoKernel.Examples.Qt` with **File > Open > Folder**.
 Visual Studio should pick the `windows-msvc` CMake preset, configure the folder, and list the executable CMake targets such as `HelloMap`, `AddLayers`, and `SamplesGallery`.
 In Solution Explorer, switch to **Targets View**, right-click `HelloMap`, then choose **Set as Startup Item** or **Build**.
 

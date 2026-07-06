@@ -10,13 +10,17 @@ if(NOT DEFINED CONFIG OR CONFIG STREQUAL "")
     set(CONFIG "Release")
 endif()
 
-if(CONFIG STREQUAL "Debug")
+if(NOT DEFINED USE_DEBUG_SDK_FOR_DEBUG)
+    set(USE_DEBUG_SDK_FOR_DEBUG OFF)
+endif()
+
+if(CONFIG STREQUAL "Debug" AND USE_DEBUG_SDK_FOR_DEBUG)
     set(_geokernel_sdk_config "Debug")
 else()
     set(_geokernel_sdk_config "Release")
 endif()
 
-set(_geokernel_runtime_dir "${GEOKERNEL_ROOT}/outputs/${_geokernel_sdk_config}")
+set(_geokernel_runtime_dir "${GEOKERNEL_ROOT}/outputs/build/${_geokernel_sdk_config}")
 
 if(NOT EXISTS "${_geokernel_runtime_dir}")
     message(FATAL_ERROR "GeoKernel runtime output directory was not found: ${_geokernel_runtime_dir}")

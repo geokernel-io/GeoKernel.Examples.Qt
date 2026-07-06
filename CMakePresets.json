@@ -50,18 +50,6 @@
         "CMAKE_BUILD_TYPE": "Release",
         "GEOKERNEL_ROOT": "${sourceDir}/../GeoKernel"
       }
-    },
-    {
-      "hidden": true,
-      "name": "Qt",
-      "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{QTDIR}"
-      },
-      "vendor": {
-        "qt-project.org/Qt": {
-          "checksum": "wVa86FgEkvdCTVp1/nxvrkaemJc="
-        }
-      }
     }
   ],
   "buildPresets": [
@@ -85,10 +73,5 @@
       "name": "macos-release",
       "configurePreset": "macos"
     }
-  ],
-  "vendor": {
-    "qt-project.org/Presets": {
-      "checksum": "b0SUazXkMjxyD11eAOb6viSLmwM="
-    }
-  }
+  ]
 }
