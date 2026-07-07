@@ -31,6 +31,10 @@
 #include "Shapes/GisShapePoint.h"
 #include "Viewer/GisViewer.h"
 
+#define GEOKERNEL_SAMPLE_ICONS_ONLY
+#include "Helpers.h"
+#undef GEOKERNEL_SAMPLE_ICONS_ONLY
+
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Layers::Defs;
 using namespace GeoKernel::Core::Shapes;
@@ -39,21 +43,6 @@ using namespace GeoKernel::Viewer::FeatureSources;
 
 namespace
 {
-    QIcon sampleIcon(const QString& fileName)
-    {
-        const QDir appDir(QCoreApplication::applicationDirPath());
-        const QString path = QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/images/%1").arg(fileName)));
-        QIcon icon;
-
-        for (const auto mode : { QIcon::Normal, QIcon::Active, QIcon::Selected, QIcon::Disabled })
-        {
-            icon.addFile(path, QSize(), mode, QIcon::Off);
-            icon.addFile(path, QSize(), mode, QIcon::On);
-        }
-
-        return icon;
-    }
-
     QString sampleDataPath(const QString& relativePath)
     {
         const QDir appDir(QCoreApplication::applicationDirPath());

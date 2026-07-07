@@ -1,4 +1,4 @@
-﻿#include <QAbstractItemView>
+#include <QAbstractItemView>
 #include <QApplication>
 #include <QColor>
 #include <QDir>

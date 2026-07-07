@@ -1,4 +1,4 @@
-﻿#include <QApplication>
+#include <QApplication>
 #include <QColor>
 #include <QHBoxLayout>
 #include <QLabel>

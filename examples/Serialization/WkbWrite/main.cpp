@@ -1,4 +1,4 @@
-﻿#include <QApplication>
+#include <QApplication>
 #include <QByteArray>
 #include <QColor>
 #include <QComboBox>

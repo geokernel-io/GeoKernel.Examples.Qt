@@ -106,7 +106,7 @@ void createToolbar(QMainWindow& window, GisViewer& viewer)
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
-    app.setWindowIcon(sampleIcon(QStringLiteral("GeoKernelAppIcon.ico")));
+    app.setWindowIcon(sampleIcon());
 
     QMainWindow window;
     window.resize(1200, 800);

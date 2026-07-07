@@ -58,6 +58,14 @@ if(WIN32 AND DEFINED QT_BIN_DIR AND NOT QT_BIN_DIR STREQUAL "")
     get_filename_component(_qt_root_dir "${QT_BIN_DIR}/.." ABSOLUTE)
     set(_qt_plugin_dir "${_qt_root_dir}/plugins")
 
+    if(DEFINED QT_RUNTIME_FILES AND NOT QT_RUNTIME_FILES STREQUAL "")
+        foreach(_qt_runtime_file IN LISTS QT_RUNTIME_FILES)
+            if(EXISTS "${_qt_runtime_file}")
+                file(COPY "${_qt_runtime_file}" DESTINATION "${DESTINATION}")
+            endif()
+        endforeach()
+    endif()
+
     foreach(_qt_plugin_folder IN ITEMS
         platforms
         imageformats
@@ -83,3 +91,4 @@ unset(_geokernel_sdk_config)
 unset(_qt_plugin_folder)
 unset(_qt_plugin_dir)
 unset(_qt_root_dir)
+unset(_qt_runtime_file)

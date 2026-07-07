@@ -106,7 +106,7 @@ int layerIndexByName(const GisViewer& viewer, const QString& name)
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
-    app.setWindowIcon(sampleIcon(QStringLiteral("GeoKernelAppIcon.ico")));
+    app.setWindowIcon(sampleIcon());
 
     const QVector<CityLayer> cities = loadCityLayerList();
 

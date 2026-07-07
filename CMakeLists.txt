@@ -27,29 +27,32 @@ set(GEOKERNEL_SAMPLES_PLATFORM_OUTPUT_DIR "${GEOKERNEL_SAMPLES_OUTPUT_DIR}/${GEO
 set(GEOKERNEL_SAMPLES_BIN_DIR "${GEOKERNEL_SAMPLES_PLATFORM_OUTPUT_DIR}/$<CONFIG>/bin")
 option(GEOKERNEL_USE_DEBUG_SDK_FOR_DEBUG "Link Debug samples against GeoKernel Debug binaries" OFF)
 
-if(WIN32)
-    set(GEOKERNEL_SAMPLE_APP_ICON "${GEOKERNEL_SAMPLES_ROOT_DIR}/images/ico/GeoKernelAppIcon.ico")
-    configure_file(
-        "${GEOKERNEL_SAMPLES_ROOT_DIR}/cmake/GeoKernelSampleAppIcon.rc.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/GeoKernelSampleAppIcon.rc"
-        @ONLY)
-    set(GEOKERNEL_SAMPLE_APP_ICON_RESOURCE "${CMAKE_CURRENT_BINARY_DIR}/GeoKernelSampleAppIcon.rc")
-endif()
-
 get_filename_component(_geokernel_default_root "${GEOKERNEL_SAMPLES_ROOT_DIR}/../GeoKernel" ABSOLUTE)
 set(GEOKERNEL_ROOT "${_geokernel_default_root}" CACHE PATH "GeoKernel native SDK repository or package root")
 unset(_geokernel_default_root)
 
 if(WIN32)
+    enable_language(RC)
+
     if(DEFINED ENV{QTDIR})
         list(PREPEND CMAKE_PREFIX_PATH "$ENV{QTDIR}")
     endif()
     if(EXISTS "C:/Qt/6.11.0/msvc2022_64")
         list(PREPEND CMAKE_PREFIX_PATH "C:/Qt/6.11.0/msvc2022_64")
     endif()
+
+    set(GEOKERNEL_SAMPLE_APP_ICON "${GEOKERNEL_SAMPLES_ROOT_DIR}/GeoKernelAppIcon.ico")
+    set(GEOKERNEL_SAMPLE_APP_ICON_RESOURCE "${CMAKE_CURRENT_BINARY_DIR}/GeoKernelSampleAppIcon.rc")
+    if(NOT EXISTS "${GEOKERNEL_SAMPLE_APP_ICON}")
+        message(FATAL_ERROR "GeoKernel sample app icon was not found: ${GEOKERNEL_SAMPLE_APP_ICON}")
+    endif()
+    configure_file(
+        "${GEOKERNEL_SAMPLES_ROOT_DIR}/cmake/GeoKernelSampleAppIcon.rc.in"
+        "${GEOKERNEL_SAMPLE_APP_ICON_RESOURCE}"
+        @ONLY)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets Network Sql)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets Network Sql Svg)
 
 set(_geokernel_include_dirs
     "${GEOKERNEL_ROOT}/src/GeoKernel.Core"
@@ -92,18 +95,11 @@ geokernel_import_library(GeoKernel::Core GeoKernel.Core)
 geokernel_import_library(GeoKernel::Formats GeoKernel.Formats)
 geokernel_import_library(GeoKernel::Viewer GeoKernel.Viewer)
 
-add_custom_target(GeoKernelSampleAssets ALL
-    COMMAND ${CMAKE_COMMAND}
-        -D "SOURCE_DATA_DIR=${GEOKERNEL_SAMPLES_ROOT_DIR}/data"
-        -D "SOURCE_IMAGES_DIR=${GEOKERNEL_SAMPLES_ROOT_DIR}/images"
-        -D "DESTINATION_ASSETS_DIR=${GEOKERNEL_SAMPLES_OUTPUT_DIR}/assets"
-        -P "${GEOKERNEL_SAMPLES_ROOT_DIR}/cmake/CopySampleAssets.cmake"
-    COMMENT "Copying GeoKernel sample assets")
-
 add_custom_target(GeoKernelSampleRuntime ALL
     COMMAND ${CMAKE_COMMAND}
         -D "GEOKERNEL_ROOT=${GEOKERNEL_ROOT}"
         -D "QT_BIN_DIR=$<TARGET_FILE_DIR:Qt6::Core>"
+        -D "QT_RUNTIME_FILES=$<TARGET_FILE:Qt6::Core>;$<TARGET_FILE:Qt6::Gui>;$<TARGET_FILE:Qt6::Widgets>;$<TARGET_FILE:Qt6::OpenGL>;$<TARGET_FILE:Qt6::OpenGLWidgets>;$<TARGET_FILE:Qt6::Network>;$<TARGET_FILE:Qt6::Sql>;$<TARGET_FILE:Qt6::Svg>"
         -D "CONFIG=$<CONFIG>"
         -D "USE_DEBUG_SDK_FOR_DEBUG=${GEOKERNEL_USE_DEBUG_SDK_FOR_DEBUG}"
         -D "DESTINATION=${GEOKERNEL_SAMPLES_BIN_DIR}"
@@ -115,15 +111,15 @@ function(geokernel_add_sample sample_relative_dir)
     get_filename_component(sample_group "${sample_relative_dir}" DIRECTORY)
     set(_sample_dir "${GEOKERNEL_SAMPLES_ROOT_DIR}/examples/${sample_relative_dir}")
     set(_sample_sources
-        "${_sample_dir}/main.cpp"
-        "${GEOKERNEL_SAMPLES_ROOT_DIR}/examples/Common/SampleAppIcon.cpp")
+        "${_sample_dir}/main.cpp")
 
     if(WIN32)
         list(APPEND _sample_sources "${GEOKERNEL_SAMPLE_APP_ICON_RESOURCE}")
     endif()
 
     add_executable(${sample_name} ${_sample_sources})
-    add_dependencies(${sample_name} GeoKernelSampleAssets GeoKernelSampleRuntime)
+
+    add_dependencies(${sample_name} GeoKernelSampleRuntime)
 
     if(WIN32)
         set_target_properties(${sample_name} PROPERTIES WIN32_EXECUTABLE TRUE)
@@ -160,7 +156,8 @@ function(geokernel_add_sample sample_relative_dir)
         Qt6::OpenGL
         Qt6::OpenGLWidgets
         Qt6::Network
-        Qt6::Sql)
+        Qt6::Sql
+        Qt6::Svg)
 
     if(MSVC)
         target_compile_options(${sample_name} PRIVATE /W3 /permissive- /FS)

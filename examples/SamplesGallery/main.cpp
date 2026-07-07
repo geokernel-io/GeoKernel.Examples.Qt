@@ -59,6 +59,10 @@
 #include "Symbology/GisSymbolRendererFactory.h"
 #include "Viewer/GisViewer.h"
 
+#define GEOKERNEL_SAMPLE_ICONS_ONLY
+#include "Helpers.h"
+#undef GEOKERNEL_SAMPLE_ICONS_ONLY
+
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Viewer::Controls::Minimap;
 using namespace GeoKernel::Viewer::Controls::ScaleBar;
@@ -132,20 +136,6 @@ QString repositoryPath(const QString& relativePath)
 {
     const QDir appDir(QCoreApplication::applicationDirPath());
     return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../%1").arg(relativePath)));
-}
-
-QIcon sampleIcon(const QString& fileName)
-{
-    const QString path = repositoryPath(QStringLiteral("assets/images/%1").arg(fileName));
-    QIcon icon;
-
-    for (const auto mode : { QIcon::Normal, QIcon::Active, QIcon::Selected, QIcon::Disabled })
-    {
-        icon.addFile(path, QSize(), mode, QIcon::Off);
-        icon.addFile(path, QSize(), mode, QIcon::On);
-    }
-
-    return icon;
 }
 
 QString readTextFile(const QString& relativePath)

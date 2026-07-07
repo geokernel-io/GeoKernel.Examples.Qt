@@ -23,22 +23,11 @@
 #include "CoordinateSystems/Database/CrsDatabaseOptions.h"
 #include "CoordinateSystems/Database/CrsDatabaseRecord.h"
 
+#define GEOKERNEL_SAMPLE_ICONS_ONLY
+#include "Helpers.h"
+#undef GEOKERNEL_SAMPLE_ICONS_ONLY
+
 using namespace GeoKernel::Core::CoordinateSystems::Database;
-
-QIcon sampleIcon(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    const QString path = QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/images/%1").arg(fileName)));
-
-    QIcon icon;
-    for (const auto mode : { QIcon::Normal, QIcon::Active, QIcon::Selected, QIcon::Disabled })
-    {
-        icon.addFile(path, QSize(), mode, QIcon::Off);
-        icon.addFile(path, QSize(), mode, QIcon::On);
-    }
-
-    return icon;
-}
 
 QString assetPath(const QString& relativePath)
 {
@@ -116,7 +105,7 @@ void lookupAuthority(
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
-    app.setWindowIcon(sampleIcon(QStringLiteral("GeoKernelAppIcon.ico")));
+    app.setWindowIcon(sampleIcon());
 
     const QString databasePath = assetPath(QStringLiteral("spatial_ref_sys.sqlite"));
     if (!QFileInfo::exists(databasePath))

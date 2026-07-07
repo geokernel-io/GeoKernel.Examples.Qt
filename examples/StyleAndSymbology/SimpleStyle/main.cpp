@@ -1,4 +1,4 @@
-﻿#include <QApplication>
+#include <QApplication>
 #include <QColor>
 #include <QColorDialog>
 #include <QCoreApplication>
@@ -16,6 +16,10 @@
 #include "Shapes/GisExtent.h"
 #include "Layers/GisLayerVector.h"
 
+#define GEOKERNEL_SAMPLE_ICONS_ONLY
+#include "Helpers.h"
+#undef GEOKERNEL_SAMPLE_ICONS_ONLY
+
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
@@ -27,21 +31,6 @@ struct StyleValues
     double lineWidth = 2.0;
     double pointSize = 10.0;
 };
-
-QIcon sampleIcon(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    const QString path = QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/images/%1").arg(fileName)));
-    QIcon icon;
-
-    for (const auto mode : { QIcon::Normal, QIcon::Active, QIcon::Selected, QIcon::Disabled })
-    {
-        icon.addFile(path, QSize(), mode, QIcon::Off);
-        icon.addFile(path, QSize(), mode, QIcon::On);
-    }
-
-    return icon;
-}
 
 GisShapePolygon samplePolygon()
 {
@@ -119,7 +108,7 @@ QDoubleSpinBox* createSpinBox(QWidget* parent, double minValue, double maxValue,
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
-    app.setWindowIcon(sampleIcon(QStringLiteral("GeoKernelAppIcon.ico")));
+    app.setWindowIcon(sampleIcon());
 
     QMainWindow window;
     window.resize(1100, 720);

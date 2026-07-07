@@ -25,24 +25,13 @@
 #include "Raster/Xyz/PredefinedXyzLayers.h"
 #include "Raster/Xyz/XyzLayerPreset.h"
 
+#define GEOKERNEL_SAMPLE_ICONS_ONLY
+#include "Helpers.h"
+#undef GEOKERNEL_SAMPLE_ICONS_ONLY
+
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Shapes;
 using namespace GeoKernel::Formats::Raster::Xyz;
-
-QIcon sampleIcon(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    const QString path = QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/images/%1").arg(fileName)));
-    QIcon icon;
-
-    for (const auto mode : { QIcon::Normal, QIcon::Active, QIcon::Selected, QIcon::Disabled })
-    {
-        icon.addFile(path, QSize(), mode, QIcon::Off);
-        icon.addFile(path, QSize(), mode, QIcon::On);
-    }
-
-    return icon;
-}
 
 GisExtent defaultExtent3857()
 {

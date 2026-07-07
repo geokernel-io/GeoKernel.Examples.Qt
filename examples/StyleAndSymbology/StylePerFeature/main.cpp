@@ -1,4 +1,4 @@
-﻿#include <QApplication>
+#include <QApplication>
 #include <QColor>
 #include <QComboBox>
 #include <QGroupBox>
@@ -24,27 +24,16 @@
 #include "Shapes/GisShapePolygon.h"
 #include "Symbology/GisRuleBasedSymbolRenderer.h"
 
+#define GEOKERNEL_SAMPLE_ICONS_ONLY
+#include "Helpers.h"
+#undef GEOKERNEL_SAMPLE_ICONS_ONLY
+
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
 using namespace GeoKernel::Core::Symbology;
 
 constexpr int ShapeIdRole = Qt::UserRole + 1;
-
-QIcon sampleIcon(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    const QString path = QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/images/%1").arg(fileName)));
-    QIcon icon;
-
-    for (const auto mode : { QIcon::Normal, QIcon::Active, QIcon::Selected, QIcon::Disabled })
-    {
-        icon.addFile(path, QSize(), mode, QIcon::Off);
-        icon.addFile(path, QSize(), mode, QIcon::On);
-    }
-
-    return icon;
-}
 
 GisLayerStyle parcelStyle(const QString& fillColor, const QString& lineColor)
 {
@@ -183,7 +172,7 @@ void setComboToSelectedZone(QComboBox& combo, QListWidget& list, const GisLayerV
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
-    app.setWindowIcon(sampleIcon(QStringLiteral("GeoKernelAppIcon.ico")));
+    app.setWindowIcon(sampleIcon());
 
     QMainWindow window;
     window.resize(1100, 760);

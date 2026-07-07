@@ -27,26 +27,15 @@
 #include "CoordinateSystems/Defs/ProjectedCoordinateSystem.h"
 #include "CoordinateSystems/Transform/CoordinateTransformer.h"
 
+#define GEOKERNEL_SAMPLE_ICONS_ONLY
+#include "Helpers.h"
+#undef GEOKERNEL_SAMPLE_ICONS_ONLY
+
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::CoordinateSystems::Defs;
 using namespace GeoKernel::Core::CoordinateSystems::Transform;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
-
-QIcon sampleIcon(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    const QString path = QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/images/%1").arg(fileName)));
-    QIcon icon;
-
-    for (const auto mode : { QIcon::Normal, QIcon::Active, QIcon::Selected, QIcon::Disabled })
-    {
-        icon.addFile(path, QSize(), mode, QIcon::Off);
-        icon.addFile(path, QSize(), mode, QIcon::On);
-    }
-
-    return icon;
-}
 
 QString sampleDataPath(const QString& fileName)
 {
@@ -99,7 +88,7 @@ QString coordinateText(const GisShapePoint& lonLat, const GisShapePoint& webMerc
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
-    app.setWindowIcon(sampleIcon(QStringLiteral("GeoKernelAppIcon.ico")));
+    app.setWindowIcon(sampleIcon());
 
     QMainWindow window;
     window.resize(1200, 800);

@@ -43,4 +43,4 @@ cmake --build --preset macos-release --target HelloMap
 ```
 
 Sample executables and runtime files are written under `outputs/<platform>/<Configuration>/bin/`, for example `outputs/windows/Release/bin/HelloMap.exe`.
-The build also copies sample data and icons under `outputs/assets/` so existing sample code can resolve `assets/data` and `assets/images` at runtime.
+Sample icons are embedded in the common helper code. Sample data is downloaded by examples that have been migrated to the remote-data flow.
