@@ -1,33 +1,45 @@
 #include "Helpers.h"
 #include "Layers/GisLayer.h"
-#include "Symbology/GisDefaultSymbolStyles.h"
 #include "Viewer/GisViewer.h"
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
-using namespace GeoKernel::Core::Symbology;
 
-void applyAddLayersStyle(GisLayer* countryLayer, GisLayer* cityLayer)
+GisLayer* loadNamedLayer(GisViewer& viewer, const QString& path, const QString& name, QWidget* parent)
 {
-    if (countryLayer != nullptr)
+    if (!loadLayer(viewer, path, parent))
+        return nullptr;
+
+    GisLayer* layer = viewer.mapLayerAt(0);
+    if (layer == nullptr)
     {
-        countryLayer->style().setFillColor(QStringLiteral("#667C92"));
-        countryLayer->style().setFillOpacity(205);
-        countryLayer->style().setLineColor(QStringLiteral("#E8EEF4"));
-        countryLayer->style().setLineWidth(0.8f);
-        countryLayer->style().setLabelColor(QStringLiteral("#FFFFFF"));
-        countryLayer->style().setLabelHaloColor(QStringLiteral("#1C2B3A"));
+        QMessageBox::critical(
+            parent,
+            QStringLiteral("AddLayers"),
+            QStringLiteral("Layer was loaded but could not be resolved:\n%1").arg(path));
+        return nullptr;
     }
 
-    if (cityLayer != nullptr)
-    {
-        cityLayer->style().setPointColor(QStringLiteral("#FDB52A"));
-        cityLayer->style().setLineColor(QStringLiteral("#FFF4D0"));
-        cityLayer->style().setLineWidth(1.2f);
-        cityLayer->style().setPointSize(4.5f);
-        cityLayer->style().setLabelColor(QStringLiteral("#FFFFFF"));
-        cityLayer->style().setLabelHaloColor(QStringLiteral("#1C2B3A"));
-    }
+    layer->setName(name);
+    return layer;
+}
+
+void applyCountryStyle(GisLayer& layer)
+{
+    layer.style().setFillColor(QStringLiteral("#35475B"));
+    layer.style().setFillOpacity(172);
+    layer.style().setLineColor(QStringLiteral("#B7E8FF"));
+    layer.style().setLineWidth(0.85f);
+    layer.style().setLabelColor(QStringLiteral("#FFFFFF"));
+    layer.style().setLabelHaloColor(QStringLiteral("#10263A"));
+}
+
+void applyCityStyle(GisLayer& layer)
+{
+    layer.style().setPointColor(QStringLiteral("#1D8FC7"));
+    layer.style().setLineColor(QStringLiteral("#74C3E8"));    
+    layer.style().setLineWidth(0.9f);
+    layer.style().setPointSize(4.2f);
 }
 
 bool loadSampleLayers(GisViewer& viewer, QWidget* parent)
@@ -40,7 +52,7 @@ bool loadSampleLayers(GisViewer& viewer, QWidget* parent)
         QStringLiteral("world_8km_png"),
         QStringLiteral("world_8km.png"),
         parent);
-    if (rasterPath.isEmpty() || !loadLayer(viewer, rasterPath, parent))
+    if (rasterPath.isEmpty() || loadNamedLayer(viewer, rasterPath, QStringLiteral("World raster"), parent) == nullptr)
         return false;
 
     const QString worldPath = ensureSampleFile(
@@ -49,9 +61,14 @@ bool loadSampleLayers(GisViewer& viewer, QWidget* parent)
         QStringLiteral("world_4326"),
         QStringLiteral("world_4326.shp"),
         parent);
-    if (worldPath.isEmpty() || !loadLayer(viewer, worldPath, parent))
+    if (worldPath.isEmpty())
         return false;
-    GisLayer* countryLayer = viewer.mapLayerAt(0);
+
+    GisLayer* countryLayer = loadNamedLayer(viewer, worldPath, QStringLiteral("Countries"), parent);
+    if (countryLayer == nullptr)
+        return false;
+
+    applyCountryStyle(*countryLayer);
 
     const QString citiesPath = ensureSampleFile(
         QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_cities_4326.zip")),
@@ -59,12 +76,15 @@ bool loadSampleLayers(GisViewer& viewer, QWidget* parent)
         QStringLiteral("world_cities_4326"),
         QStringLiteral("world_cities_4326.shp"),
         parent);
-    if (citiesPath.isEmpty() || !loadLayer(viewer, citiesPath, parent))
+    if (citiesPath.isEmpty())
         return false;
-    GisLayer* cityLayer = viewer.mapLayerAt(0);
 
-    viewer.setMapStyle(GisSymbolTheme::SoftProfessional);
-    applyAddLayersStyle(countryLayer, cityLayer);
+    GisLayer* cityLayer = loadNamedLayer(viewer, citiesPath, QStringLiteral("Cities"), parent);
+    if (cityLayer == nullptr)
+        return false;
+
+    applyCityStyle(*cityLayer);
+
     viewer.refreshLayers();
     return true;
 }
