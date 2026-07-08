@@ -238,7 +238,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Edit Vertices: drag vertices, double-click segments to add, Delete to remove."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::EditVertices);
     window.setCentralWidget(viewer);
 

@@ -1,9 +1,6 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
-#include <QColor>
-#include <QCoreApplication>
-#include <QDir>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
@@ -32,32 +29,6 @@ QAction* addToolbarIcon(QToolBar& toolbar, const QString& iconName, const QStrin
     return action;
 }
 
-bool loadWorldLayer(GisViewer& viewer, const QString& title)
-{
-    QString errorMessage;
-    if (!viewer.addLayerFromPath(sampleDataPath(QStringLiteral("shapefile/world_4326.shp")), &errorMessage))
-    {
-        QMessageBox::critical(
-            nullptr,
-            QStringLiteral("MultiWindowSync"),
-            QStringLiteral("%1 layer could not be loaded:\n%2")
-                .arg(title, errorMessage.isEmpty() ? QStringLiteral("shapefile/world_4326.shp") : errorMessage));
-        return false;
-    }
-
-    if (GisLayer* layer = viewer.mapLayerAt(0))
-    {
-        layer->setName(title);
-        layer->style().setFillColor(QStringLiteral("#D8E5E1"));
-        layer->style().setFillOpacity(220);
-        layer->style().setLineColor(QStringLiteral("#6F8883"));
-        layer->style().setLineWidth(0.8f);
-    }
-
-    viewer.refreshLayers();
-    return true;
-}
-
 QWidget* createViewerPane(QWidget* parent, const QString& title, GisViewer*& viewer)
 {
     auto* pane = new QWidget(parent);
@@ -71,7 +42,6 @@ QWidget* createViewerPane(QWidget* parent, const QString& title, GisViewer*& vie
     label->setStyleSheet(QStringLiteral("background:#eef2f1; border-bottom:1px solid #c7d1ce;"));
 
     viewer = new GisViewer(pane);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(label);
@@ -114,6 +84,9 @@ int main(int argc, char* argv[])
     panAction->setChecked(true);
     toolGroup.addAction(panAction);
 
+    for (QAction* action : { zoomInAction, zoomOutAction, fullExtentAction, syncAction, zoomBoxAction, panAction })
+        action->setEnabled(false);
+
     auto* centralWidget = new QWidget(&window);
     auto* layout = new QHBoxLayout(centralWidget);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -124,12 +97,6 @@ int main(int argc, char* argv[])
     layout->addWidget(createViewerPane(centralWidget, QStringLiteral("Viewer A"), leftViewer), 1);
     layout->addWidget(createViewerPane(centralWidget, QStringLiteral("Viewer B"), rightViewer), 1);
     window.setCentralWidget(centralWidget);
-
-    if (!loadWorldLayer(*leftViewer, QStringLiteral("World A")))
-        return 1;
-
-    if (!loadWorldLayer(*rightViewer, QStringLiteral("World B")))
-        return 1;
 
     bool syncing = false;
     QObject::connect(leftViewer, &GisViewer::visibleExtentChanged, rightViewer, [rightViewer, syncAction, &syncing](const GisExtent& extent)
@@ -194,9 +161,51 @@ int main(int argc, char* argv[])
 
     window.show();
 
-    const GisExtent initialExtent(-151.2, 16.4, -41.6, 55.6);
-    leftViewer->setViewExtent(initialExtent);
-    rightViewer->setViewExtent(initialExtent);
+    QMetaObject::invokeMethod(&window, [&window, leftViewer, rightViewer, zoomInAction, zoomOutAction, fullExtentAction, syncAction, zoomBoxAction, panAction]
+    {
+        const QString worldPath = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_4326.zip")),
+            QStringLiteral("world_4326.zip"),
+            QStringLiteral("world_4326"),
+            QStringLiteral("world_4326.shp"),
+            &window);
+        if (worldPath.isEmpty())
+            return;
+
+        if (!loadLayer(*leftViewer, worldPath, &window))
+            return;
+
+        if (GisLayer* layer = leftViewer->mapLayerAt(0))
+        {
+            layer->setName(QStringLiteral("World A"));
+            layer->style().setFillColor(QStringLiteral("#D8E5E1"));
+            layer->style().setFillOpacity(220);
+            layer->style().setLineColor(QStringLiteral("#6F8883"));
+            layer->style().setLineWidth(0.8f);
+        }
+
+        if (!loadLayer(*rightViewer, worldPath, &window))
+            return;
+
+        if (GisLayer* layer = rightViewer->mapLayerAt(0))
+        {
+            layer->setName(QStringLiteral("World B"));
+            layer->style().setFillColor(QStringLiteral("#D8E5E1"));
+            layer->style().setFillOpacity(220);
+            layer->style().setLineColor(QStringLiteral("#6F8883"));
+            layer->style().setLineWidth(0.8f);
+        }
+
+        leftViewer->refreshLayers();
+        rightViewer->refreshLayers();
+
+        for (QAction* action : { zoomInAction, zoomOutAction, fullExtentAction, syncAction, zoomBoxAction, panAction })
+            action->setEnabled(true);
+
+        const GisExtent initialExtent(-151.2, 16.4, -41.6, 55.6);
+        leftViewer->setViewExtent(initialExtent);
+        rightViewer->setViewExtent(initialExtent);
+    });
 
     return app.exec();
 }

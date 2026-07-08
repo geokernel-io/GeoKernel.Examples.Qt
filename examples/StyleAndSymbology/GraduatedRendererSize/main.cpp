@@ -1,9 +1,6 @@
 #include <QApplication>
 #include <QColor>
-#include <QCoreApplication>
-#include <QDir>
 #include <QDockWidget>
-#include <QFileInfo>
 #include <QIcon>
 #include <QListWidget>
 #include <QMainWindow>
@@ -19,15 +16,17 @@
 
 #include "Viewer/GisViewer.h"
 #include "Layers/GisLayerVector.h"
+#include "CoordinateSystems/Defs/ProjectedCoordinateSystem.h"
+#include "CoordinateSystems/Transform/CoordinateTransformer.h"
+#include "Shapes/GisExtent.h"
+#include "Shapes/GisShapePoint.h"
 #include "Symbology/GisColorRampRegistry.h"
 #include "Symbology/GisSymbolRendererFactory.h"
 #include "FeatureSources/GdalShapefileFeatureSource.h"
 #include "CoordinateSystems/Defs/GeographicCoordinateSystem.h"
 #include "CoordinateSystems/Defs/KnownCoordinateSystems.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Viewer::FeatureSources;
@@ -35,16 +34,11 @@ using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
 using namespace GeoKernel::Core::Symbology;
 using namespace GeoKernel::Core::CoordinateSystems::Defs;
+using namespace GeoKernel::Core::CoordinateSystems::Transform;
 
 constexpr const char* SizeField = "POP_CLASS_SIZE";
 constexpr double MinimumPointSize = 3.0;
 constexpr double MaximumPointSize = 36.0;
-
-QString sampleDataPath(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(fileName)));
-}
 
 double populationClassSize(const QString& popClass)
 {
@@ -65,21 +59,7 @@ double populationClassSize(const QString& popClass)
     return 0.0;
 }
 
-GisLayerStyle baseCityStyle()
-{
-    GisLayerStyle style;
-    QColor pointFill(QStringLiteral("#D95F35"));
-    pointFill.setAlpha(72);
-    QColor pointOutline(QStringLiteral("#8A3A24"));
-    pointOutline.setAlpha(175);
-    style.setPointColor(pointFill.name(QColor::HexArgb));
-    style.setLineColor(pointOutline.name(QColor::HexArgb));
-    style.setPointSize(static_cast<float>(MinimumPointSize));
-    style.setLineWidth(0.9f);
-    return style;
-}
-
-void makePointRangesReadable(GisGraduatedSymbolRenderer& renderer)
+void makePointRangesReadable(GisGraduatedSymbolRenderer& renderer, const GisLayerStyle& defaultStyle)
 {
     QVector<GisGraduatedSymbolRange> ranges = renderer.ranges();
     for (GisGraduatedSymbolRange& range : ranges)
@@ -99,8 +79,29 @@ void makePointRangesReadable(GisGraduatedSymbolRenderer& renderer)
         range.style.setLineWidth(static_cast<float>(std::clamp(range.style.pointSize() * 0.07f, 0.9f, 2.2f)));
     }
 
-    renderer.setDefaultStyle(baseCityStyle());
+    renderer.setDefaultStyle(defaultStyle);
     renderer.setRanges(std::move(ranges));
+}
+
+GisShapePoint toWebMercator(const GisShapePoint& lonLat)
+{
+    const GeographicCoordinateSystem wgs84 = KnownCoordinateSystems::wgs84();
+    const ProjectedCoordinateSystem webMercator = KnownCoordinateSystems::webMercator();
+    return CoordinateTransformer(wgs84, webMercator).transform(lonLat);
+}
+
+GisExtent projectedLayerExtent(const GisLayerVector& layer)
+{
+    const GisExtent lonLatExtent = layer.extent();
+    if (lonLatExtent.isEmpty())
+        return GisExtent(-20037508.342789244, -20037508.342789244, 20037508.342789244, 20037508.342789244);
+
+    const GisShapePoint minPoint = toWebMercator(GisShapePoint(lonLatExtent.xMin(), lonLatExtent.yMin()));
+    const GisShapePoint maxPoint = toWebMercator(GisShapePoint(lonLatExtent.xMax(), lonLatExtent.yMax()));
+    const GisExtent projectedExtent(minPoint.x(), minPoint.y(), maxPoint.x(), maxPoint.y());
+    const double paddingX = std::max(500000.0, projectedExtent.width() * 0.12);
+    const double paddingY = std::max(500000.0, projectedExtent.height() * 0.12);
+    return projectedExtent.inflate(paddingX, paddingY);
 }
 
 QIcon legendIcon(const GisLayerStyle& style)
@@ -148,7 +149,7 @@ void updateLegend(QListWidget& legend, const GisLayerVector& layer)
     }
 }
 
-std::unique_ptr<GisLayerVector> loadCitiesAsMemoryLayer(const QString& path, QString* errorMessage)
+std::unique_ptr<GisLayerVector> loadCitiesAsMemoryLayer(const QString& path, const GisLayerStyle& defaultStyle, QString* errorMessage)
 {
     auto source = std::make_unique<GdalShapefileFeatureSource>(path);
     if (!source->open())
@@ -161,7 +162,7 @@ std::unique_ptr<GisLayerVector> loadCitiesAsMemoryLayer(const QString& path, QSt
     auto layer = std::make_unique<GisLayerVector>();
     layer->setName(QStringLiteral("Cities - graduated size by POP_CLASS"));
     layer->setCoordinateSystem(std::make_shared<GeographicCoordinateSystem>(KnownCoordinateSystems::wgs84()));
-    layer->style() = baseCityStyle();
+    layer->style() = defaultStyle;
 
     int added = 0;
     for (int row = 0; row < source->featureCount(); ++row)
@@ -203,7 +204,6 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("GraduatedRendererSize"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 
@@ -213,62 +213,89 @@ int main(int argc, char* argv[])
     legendDock->setMinimumWidth(245);
     window.addDockWidget(Qt::LeftDockWidgetArea, legendDock);
 
-    const QString path = sampleDataPath(QStringLiteral("shapefile/cities_4326.shp"));
-    if (!QFileInfo::exists(path))
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("GraduatedRendererSize"),
-            QStringLiteral("Sample shapefile was not found:\n%1").arg(path));
-        return 1;
-    }
-
-    viewer->addOpenStreetMapLayer();
-
-    QString errorMessage;
-    auto cityLayer = loadCitiesAsMemoryLayer(path, &errorMessage);
-    if (!cityLayer)
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("GraduatedRendererSize"),
-            errorMessage.isEmpty() ? QStringLiteral("cities_4326.shp could not be loaded.") : errorMessage);
-        return 1;
-    }
-
-    auto renderer = GisSymbolRendererFactory::createGraduatedRenderer(
-        *cityLayer,
-        QString::fromLatin1(SizeField),
-        GisClassificationMethod::EqualInterval,
-        6,
-        GisColorRampRegistry::ramp(QStringLiteral("Plasma")),
-        baseCityStyle(),
-        0.0,
-        {},
-        GisColorRampMode::Discrete,
-        false,
-        GisSymbolRendererFactory::DefaultProviderBackedSampleRowLimit,
-        GisSymbolStyleTarget::SizeOrWidth,
-        MinimumPointSize,
-        MaximumPointSize);
-
-    if (!renderer)
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("GraduatedRendererSize"),
-            QStringLiteral("Could not create graduated size renderer from POP_CLASS."));
-        return 1;
-    }
-
-    makePointRangesReadable(*renderer);
-    cityLayer->setSymbolRenderer(std::move(renderer));
-    updateLegend(*legendList, *cityLayer);
-    viewer->addLayer(cityLayer);    
-    window.statusBar()->showMessage(QStringLiteral("Graduated size renderer applied: POP_CLASS"));
-
     window.show();
-    viewer->fullExtent();
+
+    QMetaObject::invokeMethod(&window, [&window, viewer, legendList]
+    {
+        legendList->clear();
+        legendList->addItem(QStringLiteral("Preparing USA cities sample data..."));
+
+        const QString path = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/usa_cities.zip")),
+            QStringLiteral("usa_cities.zip"),
+            QStringLiteral("usa_cities"),
+            QStringLiteral("usa_cities.shp"),
+            &window);
+        if (path.isEmpty())
+        {
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Sample data could not be prepared."));
+            window.statusBar()->showMessage(QStringLiteral("Sample data could not be prepared."));
+            return;
+        }
+
+        GisLayerStyle cityStyle;
+        QColor pointFill(QStringLiteral("#D95F35"));
+        pointFill.setAlpha(72);
+        QColor pointOutline(QStringLiteral("#8A3A24"));
+        pointOutline.setAlpha(175);
+        cityStyle.setPointColor(pointFill.name(QColor::HexArgb));
+        cityStyle.setLineColor(pointOutline.name(QColor::HexArgb));
+        cityStyle.setPointSize(static_cast<float>(MinimumPointSize));
+        cityStyle.setLineWidth(0.9f);
+
+        viewer->addOpenStreetMapLayer();
+
+        QString errorMessage;
+        auto cityLayer = loadCitiesAsMemoryLayer(path, cityStyle, &errorMessage);
+        if (!cityLayer)
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("GraduatedRendererSize"),
+                errorMessage.isEmpty() ? QStringLiteral("usa_cities.shp could not be loaded.") : errorMessage);
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Cities layer could not be loaded."));
+            window.statusBar()->showMessage(QStringLiteral("Cities layer could not be loaded."));
+            return;
+        }
+
+        auto renderer = GisSymbolRendererFactory::createGraduatedRenderer(
+            *cityLayer,
+            QString::fromLatin1(SizeField),
+            GisClassificationMethod::EqualInterval,
+            6,
+            GisColorRampRegistry::ramp(QStringLiteral("Plasma")),
+            cityStyle,
+            0.0,
+            {},
+            GisColorRampMode::Discrete,
+            false,
+            GisSymbolRendererFactory::DefaultProviderBackedSampleRowLimit,
+            GisSymbolStyleTarget::SizeOrWidth,
+            MinimumPointSize,
+            MaximumPointSize);
+
+        if (!renderer)
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("GraduatedRendererSize"),
+                QStringLiteral("Could not create graduated size renderer from POP_CLASS."));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Graduated size renderer could not be created."));
+            window.statusBar()->showMessage(QStringLiteral("Graduated size renderer could not be created."));
+            return;
+        }
+
+        makePointRangesReadable(*renderer, cityStyle);
+        cityLayer->setSymbolRenderer(std::move(renderer));
+        const GisExtent viewExtent = projectedLayerExtent(*cityLayer);
+        updateLegend(*legendList, *cityLayer);
+        viewer->addLayer(cityLayer);
+        window.statusBar()->showMessage(QStringLiteral("Graduated size renderer applied: POP_CLASS"));
+        viewer->setViewExtent(viewExtent);
+    });
 
     return app.exec();
 }

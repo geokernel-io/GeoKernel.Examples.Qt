@@ -170,7 +170,6 @@ int main(int argc, char* argv[])
     toolbar->addWidget(distanceLabel);
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
 
     auto* detailsDock = new QTextEdit(&window);
     detailsDock->setReadOnly(true);

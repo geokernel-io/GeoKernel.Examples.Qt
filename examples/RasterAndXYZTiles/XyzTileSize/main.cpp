@@ -91,7 +91,6 @@ namespace
         layout->addWidget(label);
 
         viewer = new GisViewer(panel);
-        viewer->setMapBackgroundColor(QColor(244, 246, 245));
         viewer->setActiveTool(GisViewerTool::Pan);
         layout->addWidget(viewer, 1);
 

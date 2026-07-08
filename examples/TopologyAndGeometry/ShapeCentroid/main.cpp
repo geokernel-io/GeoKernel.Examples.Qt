@@ -157,8 +157,7 @@ int main(int argc, char* argv[])
     toolbar->addSeparator();
     toolbar->addWidget(new QLabel(QStringLiteral("GisShapePolygon::centroid() / labelPoint()"), toolbar));
 
-    auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
+    auto* viewer = new GisViewer(&window);    
 
     auto* detailsDock = new QTextEdit(&window);
     detailsDock->setReadOnly(true);

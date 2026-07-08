@@ -8,7 +8,7 @@ using namespace GeoKernel::Core::Layers;
 struct CityLayer
 {
     QString name;
-    QString fileName;
+    QString path;
     QString fillColor;
 };
 
@@ -29,7 +29,7 @@ QString displayNameFromFileName(const QString& fileName)
     return titleWords.join(QLatin1Char(' '));
 }
 
-QVector<CityLayer> loadCityLayerList()
+QVector<CityLayer> prepareCityLayerList(QWidget* parent)
 {
     const QStringList palette
     {
@@ -41,7 +41,16 @@ QVector<CityLayer> loadCityLayerList()
         QStringLiteral("#B9D8C5")
     };
 
-    const QDir cityDir(sampleDataPath(QStringLiteral("shapefile/california")));
+    const QString firstCityPath = ensureSampleFile(
+        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/california_cities.zip")),
+        QStringLiteral("california_cities.zip"),
+        QStringLiteral("california_cities"),
+        QStringLiteral("alameda.shp"),
+        parent);
+    if (firstCityPath.isEmpty())
+        return {};
+
+    const QDir cityDir(QFileInfo(firstCityPath).absolutePath());
     const QFileInfoList files = cityDir.entryInfoList(
         QStringList { QStringLiteral("*.shp") },
         QDir::Files,
@@ -55,7 +64,7 @@ QVector<CityLayer> loadCityLayerList()
         const QFileInfo& file = files[i];
         layers.append(CityLayer {
             displayNameFromFileName(file.fileName()),
-            QStringLiteral("shapefile/california/%1").arg(file.fileName()),
+            file.absoluteFilePath(),
             palette[i % palette.size()]
         });
     }
@@ -66,13 +75,13 @@ QVector<CityLayer> loadCityLayerList()
 bool addLayer(GisViewer& viewer, const CityLayer& city)
 {
     QString errorMessage;
-    if (!viewer.addLayerFromPath(sampleDataPath(city.fileName), &errorMessage))
+    if (!viewer.addLayerFromPath(city.path, &errorMessage))
     {
         QMessageBox::critical(
             nullptr,
             QStringLiteral("LayerZoomTo"),
             QStringLiteral("Layer could not be loaded:\n%1")
-            .arg(errorMessage.isEmpty() ? city.fileName : errorMessage));
+            .arg(errorMessage.isEmpty() ? city.path : errorMessage));
         return false;
     }
 
@@ -108,8 +117,6 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     app.setWindowIcon(sampleIcon());
 
-    const QVector<CityLayer> cities = loadCityLayerList();
-
     QMainWindow window;
     window.resize(1200, 800);
     window.setWindowTitle(QStringLiteral("Layer ZoomTo"));
@@ -127,26 +134,15 @@ int main(int argc, char* argv[])
     auto* comboBox = new QComboBox(topPanel);
     comboBox->setMinimumWidth(220);
     comboBox->addItem(QStringLiteral("-"));
-    for (const CityLayer& city : cities)
-        comboBox->addItem(city.name);
     topLayout->addWidget(comboBox);
     topLayout->addStretch(1);
 
     auto* viewer = new GisViewer(centralWidget);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(topPanel);
     layout->addWidget(viewer, 1);
     window.setCentralWidget(centralWidget);
-
-    for (const CityLayer& city : cities)
-    {
-        if (!addLayer(*viewer, city))
-            return 1;
-    }
-
-    viewer->refreshLayers();
 
     QObject::connect(comboBox, &QComboBox::currentTextChanged, viewer, [viewer](const QString& text)
     {
@@ -162,7 +158,25 @@ int main(int argc, char* argv[])
     });
 
     window.show();
-    viewer->fullExtent();
+
+    QMetaObject::invokeMethod(&window, [&window, viewer, comboBox]
+    {
+        const QVector<CityLayer> cities = prepareCityLayerList(&window);
+        if (cities.isEmpty())
+            return;
+
+        for (const CityLayer& city : cities)
+            comboBox->addItem(city.name);
+
+        for (const CityLayer& city : cities)
+        {
+            if (!addLayer(*viewer, city))
+                return;
+        }
+
+        viewer->refreshLayers();
+        viewer->fullExtent();
+    });
 
     return app.exec();
 }

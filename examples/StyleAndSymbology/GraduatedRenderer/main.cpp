@@ -1,10 +1,7 @@
 #include <QApplication>
 #include <QColor>
 #include <QComboBox>
-#include <QCoreApplication>
-#include <QDir>
 #include <QDockWidget>
-#include <QFileInfo>
 #include <QIcon>
 #include <QLabel>
 #include <QListWidget>
@@ -23,29 +20,11 @@
 #include "Symbology/GisColorRampRegistry.h"
 #include "Symbology/GisSymbolRendererFactory.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Symbology;
-
-QString sampleDataPath(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(fileName)));
-}
-
-GisLayerStyle baseCountyStyle()
-{
-    GisLayerStyle style;
-    style.setFillColor(QStringLiteral("#DCE8E4"));
-    style.setFillOpacity(225);
-    style.setLineColor(QStringLiteral("#536B68"));
-    style.setLineWidth(0.8f);
-    return style;
-}
 
 QIcon legendIcon(const GisLayerStyle& style)
 {
@@ -90,8 +69,7 @@ int main(int argc, char* argv[])
     window.resize(1200, 800);
     window.setWindowTitle(QStringLiteral("GraduatedRenderer"));
 
-    auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
+    auto* viewer = new GisViewer(&window);    
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 
@@ -100,6 +78,7 @@ int main(int argc, char* argv[])
     auto* rampCombo = new QComboBox(toolbar);
     rampCombo->addItems(GisColorRampRegistry::names());
     rampCombo->setCurrentIndex(rampCombo->findText(QStringLiteral("GreenBlue"), Qt::MatchFixedString));
+    rampCombo->setEnabled(false);
     toolbar->addWidget(new QLabel(QStringLiteral("Color ramp: "), toolbar));
     toolbar->addWidget(rampCombo);
     window.addToolBar(toolbar);
@@ -110,86 +89,113 @@ int main(int argc, char* argv[])
     legendDock->setMinimumWidth(230);
     window.addDockWidget(Qt::LeftDockWidgetArea, legendDock);
 
-    const QString path = sampleDataPath(QStringLiteral("shapefile/california.shp"));
-    if (!QFileInfo::exists(path))
+    window.show();
+
+    QMetaObject::invokeMethod(&window, [&window, viewer, legendList, rampCombo]
     {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("GraduatedRenderer"),
-            QStringLiteral("Sample shapefile was not found:\n%1").arg(path));
-        return 1;
-    }
+        legendList->clear();
+        legendList->addItem(QStringLiteral("Preparing California sample data..."));
 
-    viewer->addOpenStreetMapLayer();
+        const QString path = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/california.zip")),
+            QStringLiteral("california.zip"),
+            QStringLiteral("california"),
+            QStringLiteral("california.shp"),
+            &window);
+        if (path.isEmpty())
+        {
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Sample data could not be prepared."));
+            window.statusBar()->showMessage(QStringLiteral("Sample data could not be prepared."));
+            return;
+        }
 
-    QString errorMessage;
-    if (!viewer->addLayerFromPath(path, &errorMessage))
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("GraduatedRenderer"),
-            QStringLiteral("Layer could not be loaded:\n%1")
-                .arg(errorMessage.isEmpty() ? path : errorMessage));
-        return 1;
-    }
+        viewer->addOpenStreetMapLayer();
 
-    auto* countiesLayer = dynamic_cast<GisLayerVector*>(viewer->mapLayerAt(0));
-    if (countiesLayer == nullptr)
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("GraduatedRenderer"),
-            QStringLiteral("Loaded layer is not a vector layer."));
-        return 1;
-    }
+        QString errorMessage;
+        if (!viewer->addLayerFromPath(path, &errorMessage))
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("GraduatedRenderer"),
+                QStringLiteral("Layer could not be loaded:\n%1")
+                    .arg(errorMessage.isEmpty() ? path : errorMessage));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Layer could not be loaded."));
+            window.statusBar()->showMessage(QStringLiteral("Layer could not be loaded."));
+            return;
+        }
 
-    countiesLayer->setName(QStringLiteral("California counties - graduated by POPULATION"));
-    countiesLayer->style() = baseCountyStyle();
+        auto* countiesLayer = dynamic_cast<GisLayerVector*>(viewer->mapLayerAt(0));
+        if (countiesLayer == nullptr)
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("GraduatedRenderer"),
+                QStringLiteral("Loaded layer is not a vector layer."));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Loaded layer is not a vector layer."));
+            window.statusBar()->showMessage(QStringLiteral("Loaded layer is not a vector layer."));
+            return;
+        }
 
-    auto applyRenderer = [&]() -> bool
-    {
-        auto renderer = GisSymbolRendererFactory::createGraduatedRenderer(
-            *countiesLayer,
-            QStringLiteral("POPULATION"),
-            GisClassificationMethod::NaturalBreaks,
-            5,
-            GisColorRampRegistry::ramp(rampCombo->currentText()),
-            baseCountyStyle());
+        GisLayerStyle countyStyle;
+        countyStyle.setFillColor(QStringLiteral("#DCE8E4"));
+        countyStyle.setFillOpacity(225);
+        countyStyle.setLineColor(QStringLiteral("#536B68"));
+        countyStyle.setLineWidth(0.8f);
 
-        if (!renderer)
-            return false;
+        countiesLayer->setName(QStringLiteral("California counties - graduated by POPULATION"));
+        countiesLayer->style() = countyStyle;
 
-        countiesLayer->setSymbolRenderer(std::move(renderer));
-        updateLegend(*legendList, *countiesLayer);
-        viewer->invalidateRenderCache(true, true);
-        viewer->update();
-        window.statusBar()->showMessage(
-            QStringLiteral("Graduated renderer applied: POPULATION / %1").arg(rampCombo->currentText()));
-        return true;
-    };
+        auto applyRenderer = [viewer, legendList, rampCombo, countiesLayer, &window, countyStyle]() -> bool
+        {
+            auto renderer = GisSymbolRendererFactory::createGraduatedRenderer(
+                *countiesLayer,
+                QStringLiteral("POPULATION"),
+                GisClassificationMethod::NaturalBreaks,
+                5,
+                GisColorRampRegistry::ramp(rampCombo->currentText()),
+                countyStyle);
 
-    if (!applyRenderer())
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("GraduatedRenderer"),
-            QStringLiteral("Could not create graduated renderer from POPULATION field."));
-        return 1;
-    }
+            if (!renderer)
+                return false;
 
-    QObject::connect(rampCombo, &QComboBox::currentTextChanged, &window, [&]
-    {
+            countiesLayer->setSymbolRenderer(std::move(renderer));
+            updateLegend(*legendList, *countiesLayer);
+            viewer->invalidateRenderCache(true, true);
+            viewer->update();
+            window.statusBar()->showMessage(
+                QStringLiteral("Graduated renderer applied: POPULATION / %1").arg(rampCombo->currentText()));
+            return true;
+        };
+
         if (!applyRenderer())
         {
             QMessageBox::critical(
                 &window,
                 QStringLiteral("GraduatedRenderer"),
                 QStringLiteral("Could not create graduated renderer from POPULATION field."));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Graduated renderer could not be created."));
+            window.statusBar()->showMessage(QStringLiteral("Graduated renderer could not be created."));
+            return;
         }
-    });    
 
-    window.show();
-    viewer->zoomToLayer(0);
+        QObject::connect(rampCombo, &QComboBox::currentTextChanged, &window, [applyRenderer]
+        {
+            if (!applyRenderer())
+            {
+                QMessageBox::critical(
+                    nullptr,
+                    QStringLiteral("GraduatedRenderer"),
+                    QStringLiteral("Could not create graduated renderer from POPULATION field."));
+            }
+        });
+
+        rampCombo->setEnabled(true);
+        viewer->zoomToLayer(0);
+    });
 
     return app.exec();
 }

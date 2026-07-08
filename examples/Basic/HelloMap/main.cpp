@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("HelloMap"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setActiveTool(GisViewerTool::Pan);    
+    viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 
     createNavigationToolbar(window, *viewer);

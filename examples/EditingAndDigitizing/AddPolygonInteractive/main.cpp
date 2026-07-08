@@ -108,7 +108,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Choose Add Polygon, click vertices, then press Enter or double-click to finish."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

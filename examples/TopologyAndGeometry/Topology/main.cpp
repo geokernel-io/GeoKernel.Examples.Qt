@@ -434,8 +434,7 @@ int main(int argc, char* argv[])
     toolbar->addWidget(operationCombo);
 
     auto* splitter = new QSplitter(Qt::Horizontal, &window);
-    auto* viewer = new GisViewer(splitter);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
+    auto* viewer = new GisViewer(splitter);    
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* detailsView = new QTextEdit(splitter);

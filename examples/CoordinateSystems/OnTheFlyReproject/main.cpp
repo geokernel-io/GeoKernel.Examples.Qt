@@ -309,7 +309,6 @@ int main(int argc, char* argv[])
 
     auto* viewer = new GisViewer(centralWidget);
     viewer->setMouseTracking(true);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     layout->addWidget(viewer, 1);
 

@@ -1,7 +1,5 @@
 #include <QApplication>
 #include <QColor>
-#include <QCoreApplication>
-#include <QDir>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListWidget>
@@ -11,25 +9,15 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include <functional>
-
 #include "Viewer/GisViewer.h"
 #include "Shapes/GisExtent.h"
 #include "Layers/GisLayer.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
-
-QString sampleDataPath(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(fileName)));
-}
 
 QString scaleText(double value)
 {
@@ -39,55 +27,34 @@ QString scaleText(double value)
     return QString::number(value, 'f', value < 10.0 ? 2 : 0);
 }
 
-bool addLayer(GisViewer& viewer, const QString& name, const QString& fileName, const std::function<void(GisLayer&)>& configure)
+QString prepareLayerFile(QWidget* parent, const QString& zipName)
+{
+    return ensureSampleFile(
+        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/%1").arg(zipName)),
+        zipName,
+        zipName.left(zipName.size() - 4),
+        QString(zipName).replace(QStringLiteral(".zip"), QStringLiteral(".shp")),
+        parent);
+}
+
+GisLayer* addLayer(GisViewer& viewer, const QString& name, const QString& path)
 {
     QString errorMessage;
-    if (!viewer.addLayerFromPath(sampleDataPath(fileName), &errorMessage))
+    if (!viewer.addLayerFromPath(path, &errorMessage))
     {
         QMessageBox::critical(
-            nullptr,
+            &viewer,
             QStringLiteral("ScaleBasedLayerVisibility"),
             QStringLiteral("Layer could not be loaded:\n%1")
-            .arg(errorMessage.isEmpty() ? fileName : errorMessage));
-        return false;
+            .arg(errorMessage.isEmpty() ? path : errorMessage));
+        return nullptr;
     }
 
-    if (GisLayer* layer = viewer.mapLayerAt(0))
-    {
+    GisLayer* layer = viewer.mapLayerAt(0);
+    if (layer != nullptr)
         layer->setName(name);
-        configure(*layer);
-    }
 
-    viewer.refreshLayers();
-    return true;
-}
-
-void configureWorld(GisLayer& layer)
-{
-    layer.setMaxVisibleScale(11.0);
-    layer.style().setFillColor(QStringLiteral("#D8E5E1"));
-    layer.style().setFillOpacity(225);
-    layer.style().setLineColor(QStringLiteral("#7B918D"));
-    layer.style().setLineWidth(0.8f);
-}
-
-void configureStates(GisLayer& layer)
-{
-    layer.setMinVisibleScale(5.0);
-    layer.setMaxVisibleScale(45.0);
-    layer.style().setFillColor(QStringLiteral("#A9C8DB"));
-    layer.style().setFillOpacity(135);
-    layer.style().setLineColor(QStringLiteral("#356780"));
-    layer.style().setLineWidth(1.1f);
-}
-
-void configureCities(GisLayer& layer)
-{
-    layer.setMinVisibleScale(28.0);
-    layer.style().setPointColor(QStringLiteral("#D95D39"));
-    layer.style().setLineColor(QStringLiteral("#873A24"));
-    layer.style().setPointSize(7.0f);
-    layer.style().setLineWidth(1.0f);
+    return layer;
 }
 
 QString layerText(const GisViewer& viewer, int index)
@@ -138,21 +105,11 @@ int main(int argc, char* argv[])
     sideLayout->addWidget(layerList, 1);
 
     auto* viewer = new GisViewer(centralWidget);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     mainLayout->addWidget(sidePanel);
     mainLayout->addWidget(viewer, 1);
     window.setCentralWidget(centralWidget);
-
-    if (!addLayer(*viewer, QStringLiteral("World"), QStringLiteral("shapefile/world_4326.shp"), configureWorld))
-        return 1;
-
-    if (!addLayer(*viewer, QStringLiteral("States"), QStringLiteral("shapefile/usa_states_3857.shp"), configureStates))
-        return 1;
-
-    if (!addLayer(*viewer, QStringLiteral("Cities"), QStringLiteral("kml/usa_cities_4326.kml"), configureCities))
-        return 1;
 
     auto refreshUi = [viewer, layerList, scaleLabel]
     {
@@ -168,7 +125,68 @@ int main(int argc, char* argv[])
     
     refreshUi();
     window.show();
-    viewer->setViewExtent(GisExtent(-151.2, 16.4, -41.6, 55.6));
+
+    QMetaObject::invokeMethod(&window, [viewer, layerList, refreshUi]
+    {
+        layerList->clear();
+        layerList->addItem(QStringLiteral("Preparing sample data..."));
+
+        const QString worldPath = prepareLayerFile(viewer, QStringLiteral("world_4326.zip"));
+        if (worldPath.isEmpty())
+        {
+            refreshUi();
+            return;
+        }
+
+        const QString statesPath = prepareLayerFile(viewer, QStringLiteral("usa_states.zip"));
+        if (statesPath.isEmpty())
+        {
+            refreshUi();
+            return;
+        }
+
+        const QString citiesPath = prepareLayerFile(viewer, QStringLiteral("usa_cities.zip"));
+        if (citiesPath.isEmpty())
+        {
+            refreshUi();
+            return;
+        }
+
+        GisLayer* worldLayer = addLayer(*viewer, QStringLiteral("World"), worldPath);
+        if (worldLayer == nullptr)
+            return;
+
+        worldLayer->setMaxVisibleScale(11.0);
+        worldLayer->style().setFillColor(QStringLiteral("#D8E5E1"));
+        worldLayer->style().setFillOpacity(225);
+        worldLayer->style().setLineColor(QStringLiteral("#7B918D"));
+        worldLayer->style().setLineWidth(0.8f);
+
+        GisLayer* statesLayer = addLayer(*viewer, QStringLiteral("States"), statesPath);
+        if (statesLayer == nullptr)
+            return;
+
+        statesLayer->setMinVisibleScale(5.0);
+        statesLayer->setMaxVisibleScale(45.0);
+        statesLayer->style().setFillColor(QStringLiteral("#A9C8DB"));
+        statesLayer->style().setFillOpacity(135);
+        statesLayer->style().setLineColor(QStringLiteral("#356780"));
+        statesLayer->style().setLineWidth(1.1f);
+
+        GisLayer* citiesLayer = addLayer(*viewer, QStringLiteral("Cities"), citiesPath);
+        if (citiesLayer == nullptr)
+            return;
+
+        citiesLayer->setMinVisibleScale(28.0);
+        citiesLayer->style().setPointColor(QStringLiteral("#D95D39"));
+        citiesLayer->style().setLineColor(QStringLiteral("#873A24"));
+        citiesLayer->style().setPointSize(7.0f);
+        citiesLayer->style().setLineWidth(1.0f);
+
+        viewer->refreshLayers();
+        refreshUi();
+        viewer->setViewExtent(GisExtent(-151.2, 16.4, -41.6, 55.6));
+    });
 
     return app.exec();
 }

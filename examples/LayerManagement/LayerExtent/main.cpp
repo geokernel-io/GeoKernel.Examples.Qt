@@ -12,19 +12,6 @@ using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
 using namespace GeoKernel::Core::CoordinateSystems::Defs;
 
-void configureCaliforniaLayer(GisViewer& viewer)
-{
-    GisLayer* layer = viewer.mapLayerAt(0);
-    if (layer == nullptr)
-        return;
-
-    layer->setName(QStringLiteral("California"));
-    layer->style().setFillColor(QStringLiteral("#D8E5E1"));
-    layer->style().setFillOpacity(210);
-    layer->style().setLineColor(QStringLiteral("#6F8883"));
-    layer->style().setLineWidth(0.9f);
-}
-
 bool addLayerExtentRectangle(GisViewer& viewer, int layerIndex)
 {
     const GisLayer* layer = viewer.mapLayerAt(layerIndex);
@@ -67,28 +54,47 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("LayerExtent"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 
-    if (!loadLayer(*viewer, sampleDataPath(QStringLiteral("shapefile/california.shp")), &window))
-        return 1;
-
-    configureCaliforniaLayer(*viewer);
-
-    if (!addLayerExtentRectangle(*viewer, 0))
-    {
-        QMessageBox::critical(
-            nullptr,
-            QStringLiteral("LayerExtent"),
-            QStringLiteral("Layer extent rectangle could not be created."));
-        return 1;
-    }
-
-    viewer->refreshLayers();
-
     window.show();
-    viewer->fullExtent();
+
+    QMetaObject::invokeMethod(&window, [&window, viewer]
+    {
+        const QString californiaPath = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/california.zip")),
+            QStringLiteral("california.zip"),
+            QStringLiteral("california"),
+            QStringLiteral("california.shp"),
+            &window);
+        if (californiaPath.isEmpty())
+            return;
+
+        if (!loadLayer(*viewer, californiaPath, &window))
+            return;
+
+        GisLayer* layer = viewer->mapLayerAt(0);
+        if (layer == nullptr)
+            return;
+
+        layer->setName(QStringLiteral("California"));
+        layer->style().setFillColor(QStringLiteral("#D8E5E1"));
+        layer->style().setFillOpacity(210);
+        layer->style().setLineColor(QStringLiteral("#6F8883"));
+        layer->style().setLineWidth(0.9f);
+
+        if (!addLayerExtentRectangle(*viewer, 0))
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("LayerExtent"),
+                QStringLiteral("Layer extent rectangle could not be created."));
+            return;
+        }
+
+        viewer->refreshLayers();
+        viewer->fullExtent();
+    });
 
     return app.exec();
 }

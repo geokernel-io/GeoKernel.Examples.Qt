@@ -132,7 +132,6 @@ int main(int argc, char* argv[])
     mapLayout->setSpacing(0);
 
     auto* viewer = new GisViewer(mapHost);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     mapLayout->addWidget(viewer, 0, 0);
 

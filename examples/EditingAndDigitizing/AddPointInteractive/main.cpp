@@ -1,9 +1,6 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
-#include <QColor>
-#include <QCoreApplication>
-#include <QDir>
 #include <QIcon>
 #include <QLabel>
 #include <QMainWindow>
@@ -17,24 +14,16 @@
 
 #include "Viewer/GisViewer.h"
 #include "Shapes/GisExtent.h"
-#include "Layers/GisLayerStyle.h"
+#include "Shapes/GisShapePoint.h"
 #include "Layers/GisLayerVector.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
 
-QString sampleDataPath(const QString& relativePath)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(relativePath)));
-}
-
-bool loadLayer(GisViewer& viewer, const QString& path)
+bool loadWorldLayer(GisViewer& viewer, const QString& path)
 {
     QString errorMessage;
     if (viewer.addLayerFromPath(path, &errorMessage))
@@ -47,34 +36,12 @@ bool loadLayer(GisViewer& viewer, const QString& path)
     return false;
 }
 
-GisLayerStyle worldStyle()
-{
-    GisLayerStyle style;
-    style.setFillColor(QStringLiteral("#D8E5E1"));
-    style.setFillOpacity(210);
-    style.setLineColor(QStringLiteral("#6F8883"));
-    style.setLineWidth(0.7f);
-    return style;
-}
-
-GisLayerStyle pointStyle()
-{
-    GisLayerStyle style;
-    style.setPointColor(QStringLiteral("#D95D39"));
-    style.setLineColor(QStringLiteral("#8C321D"));
-    style.setPointSize(9.0f);
-    style.setLineWidth(1.2f);
-    return style;
-}
-
 std::unique_ptr<GisLayerVector> createPointLayer()
 {
-    auto layer = GisLayerVector::createInMemory(
+    return GisLayerVector::createInMemory(
         QStringLiteral("Clicked Points"),
         GisShapeType::Point,
         GisExtent(-180.0, -90.0, 180.0, 90.0));
-    layer->style() = pointStyle();
-    return layer;
 }
 
 int layerIndexOf(const GisViewer& viewer, const GisLayer* layer)
@@ -108,7 +75,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Choose Add Point, then click on the map."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 
@@ -118,6 +84,7 @@ int main(int argc, char* argv[])
     window.addToolBar(toolbar);
 
     QAction* fullExtentAction = toolbar->addAction(sampleIcon(QStringLiteral("FullExtent.svg")), QStringLiteral("Full Extent"));
+    fullExtentAction->setEnabled(false);
     toolbar->addSeparator();
 
     QActionGroup toolGroup(&window);
@@ -125,6 +92,7 @@ int main(int argc, char* argv[])
 
     QAction* addPointAction = toolbar->addAction(sampleIcon(QStringLiteral("Point.svg")), QStringLiteral("Add Point"));
     addPointAction->setCheckable(true);
+    addPointAction->setEnabled(false);
     toolGroup.addAction(addPointAction);
 
     QAction* panAction = toolbar->addAction(sampleIcon(QStringLiteral("Pan.svg")), QStringLiteral("Pan"));
@@ -133,23 +101,14 @@ int main(int argc, char* argv[])
 
     toolbar->addSeparator();
     QAction* clearAction = toolbar->addAction(sampleIcon(QStringLiteral("Delete.svg")), QStringLiteral("Clear Points"));
+    clearAction->setEnabled(false);
 
     auto* countLabel = new QLabel(&window);
     countLabel->setContentsMargins(12, 0, 12, 0);
     toolbar->addWidget(countLabel);
 
-    if (!loadLayer(*viewer, sampleDataPath(QStringLiteral("shapefile/world_4326.shp"))))
-        return 1;
-
-    if (auto* worldLayer = viewer->mapLayerAt(0))
-    {
-        worldLayer->setName(QStringLiteral("World"));
-        worldLayer->style() = worldStyle();
-    }
-
-    auto pointLayer = createPointLayer();
-    auto* pointLayerPtr = pointLayer.get();
-    viewer->addLayer(pointLayer);
+    std::unique_ptr<GisLayerVector> pointLayer;
+    GisLayerVector* pointLayerPtr = nullptr;
 
     const auto updateCount = [&] {
         countLabel->setText(QStringLiteral("Point count: %1").arg(pointLayerPtr != nullptr ? pointLayerPtr->count() : 0));
@@ -178,8 +137,6 @@ int main(int argc, char* argv[])
         return true;
     };
 
-    activatePointEditing();
-
     QObject::connect(fullExtentAction, &QAction::triggered, viewer, &GisViewer::fullExtent);
 
     QObject::connect(addPointAction, &QAction::triggered, viewer, [&] {
@@ -196,7 +153,13 @@ int main(int argc, char* argv[])
     });
 
     QObject::connect(clearAction, &QAction::triggered, viewer, [&] {
+        if (pointLayerPtr == nullptr)
+            return;
+
         const int pointLayerIndex = layerIndexOf(*viewer, pointLayerPtr);
+        if (pointLayerIndex < 0)
+            return;
+
         viewer->rollbackEditLayer(pointLayerIndex);
         activatePointEditing();
         refreshViewer(*viewer);
@@ -230,12 +193,62 @@ int main(int argc, char* argv[])
             .arg(point.y(), 0, 'f', 4));
     });
 
-    addPointAction->setChecked(true);
-    viewer->setActiveTool(GisViewerTool::AddPoint);
     updateCount();
-
     window.show();
-    viewer->setViewExtent(GisExtent(-130.0, 20.0, -65.0, 52.0));
+
+    QMetaObject::invokeMethod(&window, [&window, viewer, fullExtentAction, addPointAction, clearAction, &pointLayer, &pointLayerPtr, &activatePointEditing, &updateCount]
+    {
+        window.statusBar()->showMessage(QStringLiteral("Preparing world sample data..."));
+
+        const QString worldPath = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_4326.zip")),
+            QStringLiteral("world_4326.zip"),
+            QStringLiteral("world_4326"),
+            QStringLiteral("world_4326.shp"),
+            &window);
+
+        if (worldPath.isEmpty())
+        {
+            window.statusBar()->showMessage(QStringLiteral("World sample data could not be prepared."));
+            updateCount();
+            return;
+        }
+
+        if (!loadWorldLayer(*viewer, worldPath))
+        {
+            updateCount();
+            return;
+        }
+
+        if (auto* worldLayer = viewer->mapLayerAt(0))
+        {
+            worldLayer->setName(QStringLiteral("World"));
+            worldLayer->style().setFillColor(QStringLiteral("#D8E5E1"));
+            worldLayer->style().setFillOpacity(210);
+            worldLayer->style().setLineColor(QStringLiteral("#6F8883"));
+            worldLayer->style().setLineWidth(0.7f);
+        }
+
+        pointLayer = createPointLayer();
+        pointLayerPtr = pointLayer.get();
+        pointLayerPtr->style().setPointColor(QStringLiteral("#D95D39"));
+        pointLayerPtr->style().setLineColor(QStringLiteral("#8C321D"));
+        pointLayerPtr->style().setPointSize(9.0f);
+        pointLayerPtr->style().setLineWidth(1.2f);
+        viewer->addLayer(pointLayer);
+
+        fullExtentAction->setEnabled(true);
+        addPointAction->setEnabled(true);
+        clearAction->setEnabled(true);
+        addPointAction->setChecked(true);
+        if (activatePointEditing())
+        {
+            viewer->setActiveTool(GisViewerTool::AddPoint);
+            window.statusBar()->showMessage(QStringLiteral("Add Point tool active. Click the map to add points."));
+        }
+        viewer->setViewExtent(GisExtent(-130.0, 20.0, -65.0, 52.0));
+        updateCount();
+    });
 
     return app.exec();
 }

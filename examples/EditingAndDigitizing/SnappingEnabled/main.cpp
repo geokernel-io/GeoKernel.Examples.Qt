@@ -169,7 +169,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Draw near the guide line. Toggle snapping and tolerance to compare."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::AddPolyline);
     viewer->setEditSnappingEnabled(true);
     viewer->setEditSnappingTolerancePixels(14.0);

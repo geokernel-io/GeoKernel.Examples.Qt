@@ -16,9 +16,7 @@
 #include "Shapes/GisExtent.h"
 #include "Layers/GisLayerVector.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
@@ -57,11 +55,6 @@ GisShapePolyline samplePolyline()
         GisShapePoint(13.0, -2.0)
     });
     return polyline;
-}
-
-GisExtent initialViewExtent()
-{
-    return GisExtent(-19.5, -14.2, 20.5, 18.9);
 }
 
 void setColorButtonSwatch(QPushButton& button, const QColor& color)
@@ -143,7 +136,6 @@ int main(int argc, char* argv[])
     sideLayout->addStretch(1);
 
     auto* viewer = new GisViewer(centralWidget);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     mainLayout->addWidget(sidePanel);
@@ -223,7 +215,7 @@ int main(int argc, char* argv[])
     });
     
     window.show();
-    viewer->setViewExtent(initialViewExtent());
+    viewer->setViewExtent(GisExtent(-19.5, -14.2, 20.5, 18.9));
 
     return app.exec();
 }

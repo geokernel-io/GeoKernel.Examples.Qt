@@ -196,7 +196,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Use Select, click a point, then delete one feature or all selected features."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

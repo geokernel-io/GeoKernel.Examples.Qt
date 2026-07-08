@@ -123,7 +123,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Use Add Feature to turn isLayerDirty on, then commit or rollback."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

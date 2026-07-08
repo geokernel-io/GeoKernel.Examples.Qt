@@ -94,8 +94,7 @@ int main(int argc, char* argv[])
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    auto* viewer = new GisViewer(root);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
+    auto* viewer = new GisViewer(root);    
     viewer->setActiveTool(GisViewerTool::Pan);
     layout->addWidget(viewer, 1);
 

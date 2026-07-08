@@ -210,7 +210,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Select a point, switch to Move Feature, then drag it."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

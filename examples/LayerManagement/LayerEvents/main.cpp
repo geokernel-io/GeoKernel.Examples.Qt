@@ -1,8 +1,5 @@
 #include <QApplication>
-#include <QColor>
-#include <QCoreApplication>
 #include <QDateTime>
-#include <QDir>
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QMainWindow>
@@ -20,19 +17,21 @@
 #include "Layers/GisLayer.h"
 #include "Layers/GisLayerVector.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
 
-QString sampleDataPath(const QString& fileName)
+struct LayerRequest
 {
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(fileName)));
-}
+    QString name;
+    QString zipName;
+    QString targetFolder;
+    QString requiredFileName;
+    QString path;
+    std::function<void(GisLayer&)> applyStyle;
+};
 
 QString layerName(const GisLayer* layer)
 {
@@ -46,28 +45,6 @@ void appendLog(QTextEdit& log, const QString& text)
     log.append(QStringLiteral("%1  %2")
         .arg(QDateTime::currentDateTime().toString(QStringLiteral("HH:mm:ss.zzz")))
         .arg(text));
-}
-
-void configureWorld(GisLayer& layer)
-{
-    layer.style().setFillColor(QStringLiteral("#D8E5E1"));
-    layer.style().setFillOpacity(220);
-    layer.style().setLineColor(QStringLiteral("#7B918D"));
-    layer.style().setLineWidth(0.8f);
-}
-
-void configureStates(GisLayer& layer)
-{
-    layer.style().setFillColor(QStringLiteral("#A9C8DB"));
-    layer.style().setFillOpacity(115);
-    layer.style().setLineColor(QStringLiteral("#356780"));
-    layer.style().setLineWidth(1.2f);
-}
-
-void configureCities(GisLayer& layer)
-{
-    layer.style().setPointColor(QStringLiteral("#D95D39"));
-    layer.style().setPointSize(7.0f);
 }
 
 bool layerMatches(const GisLayer& layer, const QString& name)
@@ -87,33 +64,83 @@ int layerIndex(const GisViewer& viewer, const QString& name)
     return -1;
 }
 
-bool addLayer(GisViewer& viewer, QTextEdit& log, const QString& name, const QString& fileName, const std::function<void(GisLayer&)>& configure)
+QString prepareLayerFile(QTextEdit& log, const LayerRequest& request, QWidget* parent)
 {
-    if (layerIndex(viewer, name) >= 0)
+    appendLog(log, QStringLiteral("Action: prepareSampleData(%1)").arg(request.zipName));
+    return ensureSampleFile(
+        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/%1").arg(request.zipName)),
+        request.zipName,
+        request.targetFolder,
+        request.requiredFileName,
+        parent);
+}
+
+bool prepareLayerFiles(QTextEdit& log, QVector<LayerRequest>& requests, QWidget* parent)
+{
+    for (LayerRequest& request : requests)
     {
-        appendLog(log, QStringLiteral("Action skipped: %1 already exists").arg(name));
+        request.path = prepareLayerFile(log, request, parent);
+        if (request.path.isEmpty())
+            return false;
+    }
+
+    return true;
+}
+
+bool addLayer(GisViewer& viewer, QTextEdit& log, const LayerRequest& request)
+{
+    if (layerIndex(viewer, request.name) >= 0)
+    {
+        appendLog(log, QStringLiteral("Action skipped: %1 already exists").arg(request.name));
         return true;
     }
 
-    appendLog(log, QStringLiteral("Action: addLayerFromPath(%1)").arg(fileName));
+    appendLog(log, QStringLiteral("Action: addLayerFromPath(%1)").arg(request.path));
 
     QString errorMessage;
-    if (!viewer.addLayerFromPath(sampleDataPath(fileName), &errorMessage))
+    if (!viewer.addLayerFromPath(request.path, &errorMessage))
     {
         QMessageBox::critical(
-            nullptr,
+            &viewer,
             QStringLiteral("LayerEvents"),
             QStringLiteral("Layer could not be loaded:\n%1")
-                .arg(errorMessage.isEmpty() ? fileName : errorMessage));
+                .arg(errorMessage.isEmpty() ? request.path : errorMessage));
         return false;
     }
 
     if (GisLayer* layer = viewer.mapLayerAt(0))
     {
-        layer->setName(name);
-        if (configure)
-            configure(*layer);
+        layer->setName(request.name);
+        if (request.applyStyle)
+            request.applyStyle(*layer);
     }
+
+    return true;
+}
+
+bool addPreparedLayers(GisViewer& viewer, QTextEdit& log, const QVector<LayerRequest>& requests)
+{
+    for (const LayerRequest& request : requests)
+    {
+        if (!addLayer(viewer, log, request))
+            return false;
+    }
+
+    viewer.refreshLayers();
+    return true;
+}
+
+bool prepareAndAddLayer(GisViewer& viewer, QTextEdit& log, LayerRequest request, QWidget* parent)
+{
+    if (layerIndex(viewer, request.name) >= 0)
+        return addLayer(viewer, log, request);
+
+    request.path = prepareLayerFile(log, request, parent);
+    if (request.path.isEmpty())
+        return false;
+
+    if (!addLayer(viewer, log, request))
+        return false;
 
     viewer.refreshLayers();
     return true;
@@ -301,7 +328,6 @@ int main(int argc, char* argv[])
     sideLayout->addWidget(eventLog, 1);
 
     auto* viewer = new GisViewer(centralWidget);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     mainLayout->addWidget(sidePanel);
@@ -310,19 +336,62 @@ int main(int argc, char* argv[])
 
     connectLayerSignals(*viewer, *eventLog, *layerList);
 
-    QObject::connect(addWorldButton, &QPushButton::clicked, viewer, [viewer, eventLog]
+    const LayerRequest worldLayer {
+        QStringLiteral("World"),
+        QStringLiteral("world_4326.zip"),
+        QStringLiteral("world_4326"),
+        QStringLiteral("world_4326.shp"),
+        QString(),
+        [](GisLayer& layer)
+        {
+            layer.style().setFillColor(QStringLiteral("#D8E5E1"));
+            layer.style().setFillOpacity(220);
+            layer.style().setLineColor(QStringLiteral("#7B918D"));
+            layer.style().setLineWidth(0.8f);
+        }
+    };
+
+    const LayerRequest statesLayer {
+        QStringLiteral("States"),
+        QStringLiteral("usa_states.zip"),
+        QStringLiteral("usa_states"),
+        QStringLiteral("usa_states.shp"),
+        QString(),
+        [](GisLayer& layer)
+        {
+            layer.style().setFillColor(QStringLiteral("#A9C8DB"));
+            layer.style().setFillOpacity(115);
+            layer.style().setLineColor(QStringLiteral("#356780"));
+            layer.style().setLineWidth(1.2f);
+        }
+    };
+
+    const LayerRequest citiesLayer {
+        QStringLiteral("Cities"),
+        QStringLiteral("usa_cities.zip"),
+        QStringLiteral("usa_cities"),
+        QStringLiteral("usa_cities.shp"),
+        QString(),
+        [](GisLayer& layer)
+        {
+            layer.style().setPointColor(QStringLiteral("#D95D39"));
+            layer.style().setPointSize(7.0f);
+        }
+    };
+
+    QObject::connect(addWorldButton, &QPushButton::clicked, viewer, [viewer, eventLog, worldLayer]
     {
-        addLayer(*viewer, *eventLog, QStringLiteral("World"), QStringLiteral("shapefile/world_4326.shp"), configureWorld);
+        prepareAndAddLayer(*viewer, *eventLog, worldLayer, viewer);
     });
 
-    QObject::connect(addStatesButton, &QPushButton::clicked, viewer, [viewer, eventLog]
+    QObject::connect(addStatesButton, &QPushButton::clicked, viewer, [viewer, eventLog, statesLayer]
     {
-        addLayer(*viewer, *eventLog, QStringLiteral("States"), QStringLiteral("shapegfile/usa_states.shp"), configureStates);
+        prepareAndAddLayer(*viewer, *eventLog, statesLayer, viewer);
     });
 
-    QObject::connect(addCitiesButton, &QPushButton::clicked, viewer, [viewer, eventLog]
+    QObject::connect(addCitiesButton, &QPushButton::clicked, viewer, [viewer, eventLog, citiesLayer]
     {
-        addLayer(*viewer, *eventLog, QStringLiteral("Cities"), QStringLiteral("kml/usa_cities_4326.kml"), configureCities);
+        prepareAndAddLayer(*viewer, *eventLog, citiesLayer, viewer);
     });
 
     QObject::connect(removeSelectedButton, &QPushButton::clicked, viewer, [viewer, eventLog, layerList]
@@ -359,13 +428,20 @@ int main(int argc, char* argv[])
 
     QObject::connect(clearLogButton, &QPushButton::clicked, eventLog, &QTextEdit::clear);
 
-    addLayer(*viewer, *eventLog, QStringLiteral("World"), QStringLiteral("shapefile/world_4326.shp"), configureWorld);
-    addLayer(*viewer, *eventLog, QStringLiteral("States"), QStringLiteral("shapefile/usa_states.shp"), configureStates);
-    addLayer(*viewer, *eventLog, QStringLiteral("Cities"), QStringLiteral("kml/usa_cities_4326.kml"), configureCities);
-    refreshLayerList(*viewer, *layerList);    
-
     window.show();
-    viewer->setViewExtent(GisExtent(-151.2, 16.4, -41.6, 55.6));
+
+    QMetaObject::invokeMethod(&window, [viewer, eventLog, layerList, worldLayer, statesLayer, citiesLayer]
+    {
+        QVector<LayerRequest> initialLayers { worldLayer, statesLayer, citiesLayer };
+        if (!prepareLayerFiles(*eventLog, initialLayers, viewer))
+            return;
+
+        if (!addPreparedLayers(*viewer, *eventLog, initialLayers))
+            return;
+
+        refreshLayerList(*viewer, *layerList);
+        viewer->setViewExtent(GisExtent(-151.2, 16.4, -41.6, 55.6));
+    });
 
     return app.exec();
 }

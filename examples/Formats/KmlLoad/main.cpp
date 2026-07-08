@@ -216,7 +216,6 @@ int main(int argc, char* argv[])
     splitter->setOrientation(Qt::Horizontal);
 
     auto* viewer = new GisViewer(splitter);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* rightPanel = new QWidget(splitter);

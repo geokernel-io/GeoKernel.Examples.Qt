@@ -197,7 +197,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Choose Add Point, click the map, then save the points as a shapefile."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

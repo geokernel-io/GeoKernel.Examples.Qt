@@ -1,8 +1,5 @@
 #include <QAction>
 #include <QApplication>
-#include <QColor>
-#include <QCoreApplication>
-#include <QDir>
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QStatusBar>
@@ -14,32 +11,11 @@
 #include "Viewer/GisViewer.h"
 #include "Layers/GisLayerVector.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
-
-QString sampleDataPath(const QString& relativePath)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(relativePath)));
-}
-
-bool loadLayer(GisViewer& viewer, const QString& path)
-{
-    QString errorMessage;
-    if (viewer.addLayerFromPath(path, &errorMessage))
-        return true;
-
-    QMessageBox::critical(
-        nullptr,
-        QStringLiteral("InMemoryLayers"),
-        QStringLiteral("Layer could not be loaded:\n%1").arg(errorMessage.isEmpty() ? path : errorMessage));
-    return false;
-}
 
 GisShapePolyline routeShape(double offset)
 {
@@ -106,7 +82,6 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("InMemoryLayers"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
     window.statusBar()->showMessage(QStringLiteral("Ready"));
@@ -122,17 +97,8 @@ int main(int argc, char* argv[])
     QAction* clearMemoryAction = toolbar->addAction(QStringLiteral("Clear Memory Layers"));
     QAction* fullExtentAction = toolbar->addAction(QStringLiteral("Full Extent"));
 
-    if (!loadLayer(*viewer, sampleDataPath(QStringLiteral("shapefile/world_4326.shp"))))
-        return 1;
-
-    if (auto* worldLayer = viewer->mapLayerAt(0))
-    {
-        worldLayer->setName(QStringLiteral("World"));
-        worldLayer->style().setFillColor(QStringLiteral("#D8E5E1"));
-        worldLayer->style().setFillOpacity(210);
-        worldLayer->style().setLineColor(QStringLiteral("#6F8883"));
-        worldLayer->style().setLineWidth(0.7f);
-    }
+    for (QAction* action : { addPointAction, addLineAction, addPolygonAction, clearMemoryAction, fullExtentAction })
+        action->setEnabled(false);
 
     GisLayerStyle pointStyle;
     pointStyle.setPointColor(QStringLiteral("#D95F35"));
@@ -179,8 +145,6 @@ int main(int argc, char* argv[])
         cityLayerPtr = cityLayer.get();
         viewer->addLayer(cityLayer);
     };
-
-    addMemoryLayers();
 
     auto clearLayerShapes = [](GisLayerVector* layer)
     {
@@ -264,8 +228,44 @@ int main(int argc, char* argv[])
     QObject::connect(fullExtentAction, &QAction::triggered, viewer, &GisViewer::fullExtent);
 
     window.show();
-    updateStatus(*window.statusBar(), cityLayerPtr, routeLayerPtr, regionLayerPtr);
-    viewer->setViewExtent(GisExtent(-130.0, 20.0, -65.0, 52.0));
+
+    QMetaObject::invokeMethod(&window, [&window, viewer, addPointAction, addLineAction, addPolygonAction, clearMemoryAction, fullExtentAction, &addMemoryLayers, &cityLayerPtr, &routeLayerPtr, &regionLayerPtr]
+    {
+        const QString worldPath = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_4326.zip")),
+            QStringLiteral("world_4326.zip"),
+            QStringLiteral("world_4326"),
+            QStringLiteral("world_4326.shp"),
+            &window);
+        if (worldPath.isEmpty())
+        {
+            window.statusBar()->showMessage(QStringLiteral("Sample data could not be prepared."));
+            return;
+        }
+
+        if (!loadLayer(*viewer, worldPath, &window))
+        {
+            window.statusBar()->showMessage(QStringLiteral("World layer could not be loaded."));
+            return;
+        }
+
+        if (auto* worldLayer = viewer->mapLayerAt(0))
+        {
+            worldLayer->setName(QStringLiteral("World"));
+            worldLayer->style().setFillColor(QStringLiteral("#D8E5E1"));
+            worldLayer->style().setFillOpacity(210);
+            worldLayer->style().setLineColor(QStringLiteral("#6F8883"));
+            worldLayer->style().setLineWidth(0.7f);
+        }
+
+        addMemoryLayers();
+
+        for (QAction* action : { addPointAction, addLineAction, addPolygonAction, clearMemoryAction, fullExtentAction })
+            action->setEnabled(true);
+
+        updateStatus(*window.statusBar(), cityLayerPtr, routeLayerPtr, regionLayerPtr);
+        viewer->setViewExtent(GisExtent(-130.0, 20.0, -65.0, 52.0));
+    });
 
     return app.exec();
 }

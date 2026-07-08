@@ -319,7 +319,6 @@ int main(int argc, char* argv[])
     wkbEdit->setPlainText(QString::fromLatin1(PointWkb));
 
     auto* viewer = new GisViewer(leftPanel);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     leftLayout->addWidget(wkbEdit);

@@ -187,7 +187,6 @@ int main(int argc, char* argv[])
     QAction* runRelateAction = toolbar->addAction(QStringLiteral("Run Relate"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
 
     auto* detailsDock = new QTextEdit(&window);
     detailsDock->setReadOnly(true);

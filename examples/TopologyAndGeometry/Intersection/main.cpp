@@ -198,8 +198,7 @@ int main(int argc, char* argv[])
     toolbar->addSeparator();
     QAction* runIntersectionAction = toolbar->addAction(QStringLiteral("Run Intersection"));
 
-    auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
+    auto* viewer = new GisViewer(&window);    
 
     auto* detailsDock = new QTextEdit(&window);
     detailsDock->setReadOnly(true);

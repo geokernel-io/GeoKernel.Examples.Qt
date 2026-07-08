@@ -211,7 +211,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Select one or more points, then move them with delta buttons."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

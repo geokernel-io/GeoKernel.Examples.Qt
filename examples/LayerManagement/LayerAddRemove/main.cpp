@@ -5,19 +5,28 @@
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 
-bool addLayer(GisViewer& viewer, const QString& name, const QString& fileName, const std::function<void(GisLayer&)>& configure = {})
+bool addLayer(GisViewer& viewer, const QString& name, const QString& zipName, const QString& targetFolder, const QString& requiredFileName, QWidget* parent, const std::function<void(GisLayer&)>& configure = {})
 {
     if (viewer.mapLayerByName(name) != nullptr)
         return true;
 
+    const QString path = ensureSampleFile(
+        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/%1").arg(zipName)),
+        zipName,
+        targetFolder,
+        requiredFileName,
+        parent);
+    if (path.isEmpty())
+        return false;
+    
     QString errorMessage;
-    if (!viewer.addLayerFromPath(sampleDataPath(fileName), &errorMessage))
+    if (!viewer.addLayerFromPath(path, &errorMessage))
     {
         QMessageBox::critical(
-            nullptr,
+            parent,
             QStringLiteral("LayerAddRemove"),
             QStringLiteral("Layer could not be loaded:\n%1")
-            .arg(errorMessage.isEmpty() ? fileName : errorMessage));
+            .arg(errorMessage.isEmpty() ? path : errorMessage));
         return false;
     }
 
@@ -29,29 +38,8 @@ bool addLayer(GisViewer& viewer, const QString& name, const QString& fileName, c
     }
 
     viewer.refreshLayers();
+
     return true;
-}
-
-void configureWorld(GisLayer& layer)
-{
-    layer.style().setFillColor(QStringLiteral("#D8E5E1"));
-    layer.style().setFillOpacity(210);
-    layer.style().setLineColor(QStringLiteral("#7B918D"));
-    layer.style().setLineWidth(0.8f);
-}
-
-void configureStates(GisLayer& layer)
-{
-    layer.style().setFillColor(QStringLiteral("#A9C8DB"));
-    layer.style().setFillOpacity(100);
-    layer.style().setLineColor(QStringLiteral("#356780"));
-    layer.style().setLineWidth(1.2f);
-}
-
-void configureCities(GisLayer& layer)
-{
-    layer.style().setPointColor(QStringLiteral("#D95D39"));
-    layer.style().setPointSize(7.0f);
 }
 
 void createToolbar(QMainWindow& window, GisViewer& viewer)
@@ -72,17 +60,54 @@ void createToolbar(QMainWindow& window, GisViewer& viewer)
 
     QObject::connect(addWorldAction, &QAction::triggered, &viewer, [&viewer]
     {
-        addLayer(viewer, QStringLiteral("World"), QStringLiteral("shapefile/world_4326.shp"), configureWorld);
+        addLayer(
+            viewer,
+            QStringLiteral("World"),
+            QStringLiteral("world_4326.zip"),
+            QStringLiteral("world_4326"),
+            QStringLiteral("world_4326.shp"),
+            &viewer,
+            [](GisLayer& layer)
+            {
+                layer.style().setFillColor(QStringLiteral("#D8E5E1"));
+                layer.style().setFillOpacity(210);
+                layer.style().setLineColor(QStringLiteral("#7B918D"));
+                layer.style().setLineWidth(0.8f);
+            });
     });
 
     QObject::connect(addStatesAction, &QAction::triggered, &viewer, [&viewer]
     {
-        addLayer(viewer, QStringLiteral("States"), QStringLiteral("shapefile/usa_states.shp"), configureStates);
+        addLayer(
+            viewer,
+            QStringLiteral("States"),
+            QStringLiteral("usa_states.zip"),
+            QStringLiteral("usa_states"),
+            QStringLiteral("usa_states.shp"),
+            &viewer,
+            [](GisLayer& layer)
+            {
+                layer.style().setFillColor(QStringLiteral("#A9C8DB"));
+                layer.style().setFillOpacity(100);
+                layer.style().setLineColor(QStringLiteral("#356780"));
+                layer.style().setLineWidth(1.2f);
+            });
     });
 
     QObject::connect(addCitiesAction, &QAction::triggered, &viewer, [&viewer]
     {
-        addLayer(viewer, QStringLiteral("Cities"), QStringLiteral("kml/usa_cities_4326.kml"), configureCities);
+        addLayer(
+            viewer,
+            QStringLiteral("Cities"),
+            QStringLiteral("usa_cities.zip"),
+            QStringLiteral("usa_cities"),
+            QStringLiteral("usa_cities.shp"),
+            &viewer,
+            [](GisLayer& layer)
+            {
+                layer.style().setPointColor(QStringLiteral("#D95D39"));
+                layer.style().setPointSize(7.0f);
+            });
     });
 
     QObject::connect(removeWorldAction, &QAction::triggered, &viewer, [&viewer]
@@ -113,7 +138,6 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("LayerAddRemove"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

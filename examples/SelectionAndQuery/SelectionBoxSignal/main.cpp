@@ -269,7 +269,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Drag a box with Select to emit mapSelectionBoxFinished(rect, extent, modifiers)."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Select);
     window.setCentralWidget(viewer);
 

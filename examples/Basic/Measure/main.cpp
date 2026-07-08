@@ -1,7 +1,6 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
-#include <QColor>
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QSize>
@@ -11,13 +10,37 @@
 #include "Helpers.h"
 #include "Controls/Measure/GisMeasureTool.h"
 #include "Controls/ScaleBar/GisScaleBar.h"
-#include "Shapes/GisExtent.h"
 #include "Viewer/GisViewer.h"
 
-using namespace GeoKernel::Core::Shapes;
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Viewer::Controls::Measure;
 using namespace GeoKernel::Viewer::Controls::ScaleBar;
+
+bool loadSampleLayers(GisViewer& viewer, QWidget* parent)
+{
+    const QString worldLayerPath = ensureSampleFile(
+        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_4326.zip")),
+        QStringLiteral("world_4326.zip"),
+        QStringLiteral("world_4326"),
+        QStringLiteral("world_4326.shp"),
+        parent);
+    if (worldLayerPath.isEmpty())
+        return false;
+
+    const QString citiesLayerPath = ensureSampleFile(
+        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_cities_4326.zip")),
+        QStringLiteral("world_cities_4326.zip"),
+        QStringLiteral("world_cities_4326"),
+        QStringLiteral("world_cities_4326.shp"),
+        parent);
+    if (citiesLayerPath.isEmpty())
+        return false;
+
+    if (!loadLayer(viewer, worldLayerPath, parent))
+        return false;
+
+    return loadLayer(viewer, citiesLayerPath, parent);
+}
 
 int main(int argc, char* argv[])
 {
@@ -29,7 +52,6 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("Measure"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     window.setCentralWidget(viewer);
 
     auto* measureTool = new GisMeasureTool(viewer);
@@ -91,16 +113,13 @@ int main(int argc, char* argv[])
     panAction->setChecked(true);
     viewer->setActiveTool(GisViewerTool::Pan);
 
-    if (!loadLayer(*viewer, sampleDataPath(QStringLiteral("shapefile/world_3857.shp")), &window))
-        return 1;
-
-    if (!loadLayer(*viewer, sampleDataPath(QStringLiteral("shapefile/cities_4326.shp")), &window))
-        return 1;
-
-    const GisExtent extent(-2003750.8342789242, 3118485.5329647982, 5944423.6090070391, 7928353.6196106179);
-    viewer->setViewExtent(extent);
-
     window.show();
-        
+
+    QMetaObject::invokeMethod(&window, [&window, viewer]
+    {
+        if (loadSampleLayers(*viewer, &window))
+            viewer->fullExtent();
+    });
+
     return app.exec();
 }

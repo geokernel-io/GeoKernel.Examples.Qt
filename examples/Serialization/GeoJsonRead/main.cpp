@@ -338,7 +338,6 @@ int main(int argc, char* argv[])
     jsonEdit->setPlainText(QString::fromLatin1(PointJson));
 
     auto* viewer = new GisViewer(leftPanel);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     leftLayout->addWidget(jsonEdit);

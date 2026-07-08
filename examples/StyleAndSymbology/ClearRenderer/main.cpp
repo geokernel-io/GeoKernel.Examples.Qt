@@ -1,8 +1,5 @@
 #include <QApplication>
 #include <QColor>
-#include <QCoreApplication>
-#include <QDir>
-#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMainWindow>
@@ -18,37 +15,19 @@
 #include "Symbology/GisColorRampRegistry.h"
 #include "Symbology/GisSymbolRendererFactory.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Symbology;
 
-QString sampleDataPath(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(fileName)));
-}
-
-GisLayerStyle defaultStateStyle()
-{
-    GisLayerStyle style;
-    style.setFillColor(QStringLiteral("#D8E5E1"));
-    style.setFillOpacity(220);
-    style.setLineColor(QStringLiteral("#536B68"));
-    style.setLineWidth(0.9f);
-    return style;
-}
-
-bool applyCategorizedRenderer(GisLayerVector& layer)
+bool applyCategorizedRenderer(GisLayerVector& layer, const GisLayerStyle& defaultStyle)
 {
     auto renderer = GisSymbolRendererFactory::createCategorizedRenderer(
         layer,
         QStringLiteral("STATE"),
         GisColorRampRegistry::ramp(QStringLiteral("Unique")),
-        defaultStateStyle(),
+        defaultStyle,
         64);
 
     if (!renderer)
@@ -79,85 +58,111 @@ int main(int argc, char* argv[])
 
     auto* applyButton = new QPushButton(QStringLiteral("Apply Categorized Renderer"), toolbar);
     auto* clearButton = new QPushButton(QStringLiteral("Clear Renderer"), toolbar);
-    auto* stateLabel = new QLabel(QStringLiteral("Renderer: categorized by STATE"), toolbar);
+    auto* stateLabel = new QLabel(QStringLiteral("Preparing sample data..."), toolbar);
+    applyButton->setEnabled(false);
+    clearButton->setEnabled(false);
     toolbarLayout->addWidget(applyButton);
     toolbarLayout->addWidget(clearButton);
     toolbarLayout->addWidget(stateLabel);
     toolbarLayout->addStretch(1);
 
     auto* viewer = new GisViewer(central);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(toolbar);
     layout->addWidget(viewer, 1);
     window.setCentralWidget(central);
 
-    const QString path = sampleDataPath(QStringLiteral("shapefile/usa_states_3857.shp"));
-    if (!QFileInfo::exists(path))
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("ClearRenderer"),
-            QStringLiteral("Sample shapefile was not found:\n%1").arg(path));
-        return 1;
-    }
-
-    QString errorMessage;
-    if (!viewer->addLayerFromPath(path, &errorMessage))
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("ClearRenderer"),
-            QStringLiteral("Layer could not be loaded:\n%1")
-                .arg(errorMessage.isEmpty() ? path : errorMessage));
-        return 1;
-    }
-
-    auto* statesLayer = dynamic_cast<GisLayerVector*>(viewer->mapLayerAt(0));
-    if (statesLayer == nullptr)
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("ClearRenderer"),
-            QStringLiteral("Loaded layer is not a vector layer."));
-        return 1;
-    }
-
-    statesLayer->setName(QStringLiteral("USA States"));
-    statesLayer->style() = defaultStateStyle();
-
-    if (!applyCategorizedRenderer(*statesLayer))
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("ClearRenderer"),
-            QStringLiteral("Could not create categorized renderer from STATE field."));
-        return 1;
-    }    
-
-    QObject::connect(applyButton, &QPushButton::clicked, [&]() {
-        if (applyCategorizedRenderer(*statesLayer))
-        {
-            stateLabel->setText(QStringLiteral("Renderer: categorized by STATE"));
-            viewer->invalidateRenderCache(true, true);
-            viewer->update();
-            window.statusBar()->showMessage(QStringLiteral("Categorized renderer applied."));
-        }
-    });
-
-    QObject::connect(clearButton, &QPushButton::clicked, [&]() {
-        statesLayer->clearSymbolRenderer();
-        stateLabel->setText(QStringLiteral("Renderer: none, default layer style"));
-        viewer->invalidateRenderCache(true, true);
-        viewer->update();
-        window.statusBar()->showMessage(QStringLiteral("Symbol renderer cleared. Layer is back to default style."));
-    });
-
-    window.statusBar()->showMessage(QStringLiteral("Categorized renderer applied. Use Clear Renderer to return to default style."));
     window.show();
 
-    viewer->setViewExtent(GisExtent(-16831516.0, 1856556.0, -4631023.0, 7472472.0));
+    QMetaObject::invokeMethod(&window, [&window, viewer, applyButton, clearButton, stateLabel]
+    {
+        const QString path = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/usa_states_3857.zip")),
+            QStringLiteral("usa_states_3857.zip"),
+            QStringLiteral("usa_states_3857"),
+            QStringLiteral("usa_states_3857.shp"),
+            &window);
+        if (path.isEmpty())
+        {
+            stateLabel->setText(QStringLiteral("Sample data could not be prepared."));
+            window.statusBar()->showMessage(QStringLiteral("Sample data could not be prepared."));
+            return;
+        }
+
+        viewer->addOpenStreetMapLayer();
+
+        QString errorMessage;
+        if (!viewer->addLayerFromPath(path, &errorMessage))
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("ClearRenderer"),
+                QStringLiteral("Layer could not be loaded:\n%1")
+                    .arg(errorMessage.isEmpty() ? path : errorMessage));
+            stateLabel->setText(QStringLiteral("Layer could not be loaded."));
+            window.statusBar()->showMessage(QStringLiteral("Layer could not be loaded."));
+            return;
+        }
+
+        auto* statesLayer = dynamic_cast<GisLayerVector*>(viewer->mapLayerAt(0));
+        if (statesLayer == nullptr)
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("ClearRenderer"),
+                QStringLiteral("Loaded layer is not a vector layer."));
+            stateLabel->setText(QStringLiteral("Loaded layer is not a vector layer."));
+            window.statusBar()->showMessage(QStringLiteral("Loaded layer is not a vector layer."));
+            return;
+        }
+
+        GisLayerStyle stateStyle;
+        stateStyle.setFillColor(QStringLiteral("#D8E5E1"));
+        stateStyle.setFillOpacity(220);
+        stateStyle.setLineColor(QStringLiteral("#536B68"));
+        stateStyle.setLineWidth(0.9f);
+
+        statesLayer->setName(QStringLiteral("USA States"));
+        statesLayer->style() = stateStyle;
+
+        if (!applyCategorizedRenderer(*statesLayer, stateStyle))
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("ClearRenderer"),
+                QStringLiteral("Could not create categorized renderer from STATE field."));
+            stateLabel->setText(QStringLiteral("Categorized renderer could not be created."));
+            window.statusBar()->showMessage(QStringLiteral("Categorized renderer could not be created."));
+            return;
+        }
+
+        QObject::connect(applyButton, &QPushButton::clicked, &window, [viewer, statesLayer, stateLabel, stateStyle, &window]
+        {
+            if (applyCategorizedRenderer(*statesLayer, stateStyle))
+            {
+                stateLabel->setText(QStringLiteral("Renderer: categorized by STATE"));
+                viewer->invalidateRenderCache(true, true);
+                viewer->update();
+                window.statusBar()->showMessage(QStringLiteral("Categorized renderer applied."));
+            }
+        });
+
+        QObject::connect(clearButton, &QPushButton::clicked, &window, [viewer, statesLayer, stateLabel, &window]
+        {
+            statesLayer->clearSymbolRenderer();
+            stateLabel->setText(QStringLiteral("Renderer: none, default layer style"));
+            viewer->invalidateRenderCache(true, true);
+            viewer->update();
+            window.statusBar()->showMessage(QStringLiteral("Symbol renderer cleared. Layer is back to default style."));
+        });
+
+        applyButton->setEnabled(true);
+        clearButton->setEnabled(true);
+        stateLabel->setText(QStringLiteral("Renderer: categorized by STATE"));
+        window.statusBar()->showMessage(QStringLiteral("Categorized renderer applied. Use Clear Renderer to return to default style."));
+        viewer->setViewExtent(GisExtent(-16831516.0, 1856556.0, -4631023.0, 7472472.0));
+    });
 
     return app.exec();
 }

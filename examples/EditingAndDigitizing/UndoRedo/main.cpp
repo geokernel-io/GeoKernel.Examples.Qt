@@ -167,7 +167,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Click the map 5 times, then use Undo/Redo."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::AddPoint);
     window.setCentralWidget(viewer);
 

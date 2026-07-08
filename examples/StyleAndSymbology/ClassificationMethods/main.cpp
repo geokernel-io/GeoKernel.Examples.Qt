@@ -1,10 +1,7 @@
 #include <QApplication>
 #include <QColor>
 #include <QComboBox>
-#include <QCoreApplication>
-#include <QDir>
 #include <QDockWidget>
-#include <QFileInfo>
 #include <QIcon>
 #include <QLabel>
 #include <QListWidget>
@@ -23,29 +20,11 @@
 #include "Symbology/GisColorRampRegistry.h"
 #include "Symbology/GisSymbolRendererFactory.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Symbology;
-
-QString sampleDataPath(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(fileName)));
-}
-
-GisLayerStyle baseCountyStyle()
-{
-    GisLayerStyle style;
-    style.setFillColor(QStringLiteral("#DCE8E4"));
-    style.setFillOpacity(225);
-    style.setLineColor(QStringLiteral("#536B68"));
-    style.setLineWidth(0.8f);
-    return style;
-}
 
 GisClassificationMethod methodFromText(const QString& text)
 {
@@ -101,7 +80,6 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("ClassificationMethods"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(228, 228, 228));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 
@@ -118,6 +96,7 @@ int main(int argc, char* argv[])
     window.addToolBar(toolbar);
 
     methodCombo->setCurrentIndex(1);
+    methodCombo->setEnabled(false);
 
     auto* legendList = new QListWidget(&window);
     auto* legendDock = new QDockWidget(QStringLiteral("POPULATION - Equal Interval"), &window);
@@ -125,87 +104,116 @@ int main(int argc, char* argv[])
     legendDock->setMinimumWidth(245);
     window.addDockWidget(Qt::LeftDockWidgetArea, legendDock);
 
-    const QString path = sampleDataPath(QStringLiteral("shapefile/california.shp"));
-    if (!QFileInfo::exists(path))
+    window.show();
+
+    QMetaObject::invokeMethod(&window, [&window, viewer, methodCombo, legendList, legendDock]
     {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("ClassificationMethods"),
-            QStringLiteral("Sample shapefile was not found:\n%1").arg(path));
-        return 1;
-    }
+        legendList->clear();
+        legendList->addItem(QStringLiteral("Preparing California sample data..."));
 
-    QString errorMessage;
-    if (!viewer->addLayerFromPath(path, &errorMessage))
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("ClassificationMethods"),
-            QStringLiteral("Layer could not be loaded:\n%1")
-                .arg(errorMessage.isEmpty() ? path : errorMessage));
-        return 1;
-    }
+        const QString path = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/california.zip")),
+            QStringLiteral("california.zip"),
+            QStringLiteral("california"),
+            QStringLiteral("california.shp"),
+            &window);
+        if (path.isEmpty())
+        {
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Sample data could not be prepared."));
+            window.statusBar()->showMessage(QStringLiteral("Sample data could not be prepared."));
+            return;
+        }
 
-    auto* countiesLayer = dynamic_cast<GisLayerVector*>(viewer->mapLayerAt(0));
-    if (countiesLayer == nullptr)
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("ClassificationMethods"),
-            QStringLiteral("Loaded layer is not a vector layer."));
-        return 1;
-    }
+        viewer->addOpenStreetMapLayer();
 
-    countiesLayer->setName(QStringLiteral("California counties - classification methods"));
-    countiesLayer->style() = baseCountyStyle();
+        QString errorMessage;
+        if (!viewer->addLayerFromPath(path, &errorMessage))
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("ClassificationMethods"),
+                QStringLiteral("Layer could not be loaded:\n%1")
+                    .arg(errorMessage.isEmpty() ? path : errorMessage));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Layer could not be loaded."));
+            window.statusBar()->showMessage(QStringLiteral("Layer could not be loaded."));
+            return;
+        }
 
-    auto applyRenderer = [&]() -> bool
-    {
-        const QString methodText = methodCombo->currentText();
-        auto renderer = GisSymbolRendererFactory::createGraduatedRenderer(
-            *countiesLayer,
-            QStringLiteral("POPULATION"),
-            methodFromText(methodText),
-            5,
-            GisColorRampRegistry::ramp(QStringLiteral("GreenBlue")),
-            baseCountyStyle(),
-            1.0);
+        auto* countiesLayer = dynamic_cast<GisLayerVector*>(viewer->mapLayerAt(0));
+        if (countiesLayer == nullptr)
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("ClassificationMethods"),
+                QStringLiteral("Loaded layer is not a vector layer."));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Loaded layer is not a vector layer."));
+            window.statusBar()->showMessage(QStringLiteral("Loaded layer is not a vector layer."));
+            return;
+        }
 
-        if (!renderer)
-            return false;
+        GisLayerStyle countyStyle;
+        countyStyle.setFillColor(QStringLiteral("#DCE8E4"));
+        countyStyle.setFillOpacity(225);
+        countyStyle.setLineColor(QStringLiteral("#536B68"));
+        countyStyle.setLineWidth(0.8f);
 
-        countiesLayer->setSymbolRenderer(std::move(renderer));
-        updateLegend(*legendList, *countiesLayer);
-        legendDock->setWindowTitle(QStringLiteral("POPULATION - %1").arg(methodText));
-        viewer->invalidateRenderCache(true, true);
-        viewer->update();
-        window.statusBar()->showMessage(
-            QStringLiteral("Classification method applied: POPULATION / %1").arg(methodText));
-        return true;
-    };
+        countiesLayer->setName(QStringLiteral("California counties - classification methods"));
+        countiesLayer->style() = countyStyle;
 
-    if (!applyRenderer())
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("ClassificationMethods"),
-            QStringLiteral("Could not create graduated renderer from POPULATION field."));
-        return 1;
-    }
+        auto applyRenderer = [methodCombo, legendList, legendDock, viewer, countiesLayer, countyStyle, &window]() -> bool
+        {
+            const QString methodText = methodCombo->currentText();
+            auto renderer = GisSymbolRendererFactory::createGraduatedRenderer(
+                *countiesLayer,
+                QStringLiteral("POPULATION"),
+                methodFromText(methodText),
+                5,
+                GisColorRampRegistry::ramp(QStringLiteral("GreenBlue")),
+                countyStyle,
+                1.0);
 
-    QObject::connect(methodCombo, &QComboBox::currentTextChanged, &window, [&]
-    {
+            if (!renderer)
+                return false;
+
+            countiesLayer->setSymbolRenderer(std::move(renderer));
+            updateLegend(*legendList, *countiesLayer);
+            legendDock->setWindowTitle(QStringLiteral("POPULATION - %1").arg(methodText));
+            viewer->invalidateRenderCache(true, true);
+            viewer->update();
+            window.statusBar()->showMessage(
+                QStringLiteral("Classification method applied: POPULATION / %1").arg(methodText));
+            return true;
+        };
+
         if (!applyRenderer())
         {
             QMessageBox::critical(
                 &window,
                 QStringLiteral("ClassificationMethods"),
                 QStringLiteral("Could not create graduated renderer from POPULATION field."));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Graduated renderer could not be created."));
+            window.statusBar()->showMessage(QStringLiteral("Graduated renderer could not be created."));
+            return;
         }
-    });
 
-    window.show();
-    viewer->fullExtent();
+        QObject::connect(methodCombo, &QComboBox::currentTextChanged, &window, [applyRenderer]
+        {
+            if (!applyRenderer())
+            {
+                QMessageBox::critical(
+                    nullptr,
+                    QStringLiteral("ClassificationMethods"),
+                    QStringLiteral("Could not create graduated renderer from POPULATION field."));
+            }
+        });
+
+        methodCombo->setEnabled(true);
+        viewer->zoomToLayer(0);
+    });
 
     return app.exec();
 }

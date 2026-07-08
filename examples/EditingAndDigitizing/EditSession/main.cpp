@@ -1,8 +1,5 @@
 #include <QAction>
 #include <QApplication>
-#include <QColor>
-#include <QCoreApplication>
-#include <QDir>
 #include <QLabel>
 #include <QMainWindow>
 #include <QMessageBox>
@@ -17,9 +14,7 @@
 #include "Shapes/GisShapePoint.h"
 #include "Layers/GisLayerVector.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
@@ -27,13 +22,7 @@ using namespace GeoKernel::Core::Shapes;
 
 constexpr int WorldLayerIndex = 0;
 
-QString sampleDataPath(const QString& relativePath)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(relativePath)));
-}
-
-bool loadLayer(GisViewer& viewer, const QString& path)
+bool loadWorldLayer(GisViewer& viewer, const QString& path)
 {
     QString errorMessage;
     if (viewer.addLayerFromPath(path, &errorMessage))
@@ -46,31 +35,10 @@ bool loadLayer(GisViewer& viewer, const QString& path)
     return false;
 }
 
-GisLayerStyle worldStyle()
-{
-    GisLayerStyle style;
-    style.setFillColor(QStringLiteral("#D8E5E1"));
-    style.setFillOpacity(210);
-    style.setLineColor(QStringLiteral("#6F8883"));
-    style.setLineWidth(0.7f);
-    return style;
-}
-
-GisLayerStyle editPointStyle()
-{
-    GisLayerStyle style;
-    style.setPointColor(QStringLiteral("#D85B35"));
-    style.setLineColor(QStringLiteral("#8C321D"));
-    style.setPointSize(9.0f);
-    style.setLineWidth(1.2f);
-    return style;
-}
-
 std::unique_ptr<GisLayerVector> createEditLayer()
 {
     auto layer = std::make_unique<GisLayerVector>();
     layer->setName(QStringLiteral("Editable Cities"));
-    layer->style() = editPointStyle();
     layer->addPoint(GisShapePoint(-122.4194, 37.7749));
     layer->addPoint(GisShapePoint(-118.2437, 34.0522));
     layer->addPoint(GisShapePoint(-112.0740, 33.4484));
@@ -120,7 +88,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Ready."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 
@@ -135,35 +102,31 @@ int main(int argc, char* argv[])
     QAction* rollbackEditAction = toolbar->addAction(QStringLiteral("Rollback Edit"));
     toolbar->addSeparator();
     QAction* fullExtentAction = toolbar->addAction(QStringLiteral("Full Extent"));
+    beginEditAction->setEnabled(false);
+    addFeatureAction->setEnabled(false);
+    commitEditAction->setEnabled(false);
+    rollbackEditAction->setEnabled(false);
+    fullExtentAction->setEnabled(false);
 
     auto* stateLabel = new QLabel(&window);
     stateLabel->setContentsMargins(12, 0, 12, 0);
     toolbar->addWidget(stateLabel);
 
-    if (!loadLayer(*viewer, sampleDataPath(QStringLiteral("shapefile/world_4326.shp"))))
-        return 1;
-
-    if (auto* worldLayer = viewer->mapLayerAt(WorldLayerIndex))
-    {
-        worldLayer->setName(QStringLiteral("World"));
-        worldLayer->style() = worldStyle();
-    }
-
-    auto editLayer = createEditLayer();
-    auto* editLayerPtr = editLayer.get();
-    viewer->addLayer(editLayer);
-
+    std::unique_ptr<GisLayerVector> editLayer;
+    GisLayerVector* editLayerPtr = nullptr;
     int editPointCursor = 0;
 
     auto updateUi = [&]() {
-        const bool editing = editLayerPtr != nullptr && editLayerPtr->isEditing();
-        beginEditAction->setEnabled(!editing);
+        const bool hasEditLayer = editLayerPtr != nullptr;
+        const bool editing = hasEditLayer && editLayerPtr->isEditing();
+        beginEditAction->setEnabled(hasEditLayer && !editing);
         addFeatureAction->setEnabled(editing);
         commitEditAction->setEnabled(editing);
         rollbackEditAction->setEnabled(editing);
+        fullExtentAction->setEnabled(viewer->layerCount() > 0);
         stateLabel->setText(QStringLiteral("Editing: %1 | Feature count: %2")
             .arg(editing ? QStringLiteral("ON") : QStringLiteral("OFF"))
-            .arg(editLayerPtr != nullptr ? editLayerPtr->count() : 0));
+            .arg(hasEditLayer ? editLayerPtr->count() : 0));
     };
 
     QObject::connect(beginEditAction, &QAction::triggered, viewer, [&] {
@@ -215,7 +178,50 @@ int main(int argc, char* argv[])
     updateUi();
     window.show();
 
-    viewer->setViewExtent(GisExtent(-130.0, 20.0, -65.0, 52.0));
+    QMetaObject::invokeMethod(&window, [&window, viewer, &editLayer, &editLayerPtr, &updateUi]
+    {
+        window.statusBar()->showMessage(QStringLiteral("Preparing world sample data..."));
+
+        const QString worldPath = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_4326.zip")),
+            QStringLiteral("world_4326.zip"),
+            QStringLiteral("world_4326"),
+            QStringLiteral("world_4326.shp"),
+            &window);
+
+        if (worldPath.isEmpty())
+        {
+            window.statusBar()->showMessage(QStringLiteral("World sample data could not be prepared."));
+            updateUi();
+            return;
+        }
+
+        if (!loadWorldLayer(*viewer, worldPath))
+        {
+            updateUi();
+            return;
+        }
+
+        if (auto* worldLayer = viewer->mapLayerAt(WorldLayerIndex))
+        {
+            worldLayer->setName(QStringLiteral("World"));
+            worldLayer->style().setFillColor(QStringLiteral("#D8E5E1"));
+            worldLayer->style().setFillOpacity(210);
+            worldLayer->style().setLineColor(QStringLiteral("#6F8883"));
+            worldLayer->style().setLineWidth(0.7f);
+        }
+
+        editLayer = createEditLayer();
+        editLayerPtr = editLayer.get();
+        editLayerPtr->style().setPointColor(QStringLiteral("#D85B35"));
+        editLayerPtr->style().setLineColor(QStringLiteral("#8C321D"));
+        editLayerPtr->style().setPointSize(9.0f);
+        editLayerPtr->style().setLineWidth(1.2f);
+        viewer->addLayer(editLayer);
+        viewer->setViewExtent(GisExtent(-130.0, 20.0, -65.0, 52.0));
+        window.statusBar()->showMessage(QStringLiteral("Ready. Start an edit session to add temporary features."));
+        updateUi();
+    });
 
     return app.exec();
 }

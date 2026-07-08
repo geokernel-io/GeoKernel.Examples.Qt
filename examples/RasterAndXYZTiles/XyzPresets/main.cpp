@@ -118,7 +118,6 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("XyzPresets"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

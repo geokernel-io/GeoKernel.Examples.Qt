@@ -211,7 +211,6 @@ int main(int argc, char* argv[])
 
     auto* viewer = new GisViewer(splitter);
     viewer->setMouseTracking(true);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     viewer->setCoordinateSystem(std::make_shared<GeographicCoordinateSystem>(wgs84));
     splitter->addWidget(viewer);

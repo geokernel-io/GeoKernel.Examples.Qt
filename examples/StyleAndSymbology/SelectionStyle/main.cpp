@@ -15,9 +15,7 @@
 #include "Shapes/GisExtent.h"
 #include "Layers/GisLayerVector.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
@@ -142,7 +140,6 @@ int main(int argc, char* argv[])
     sideLayout->addStretch(1);
 
     auto* viewer = new GisViewer(centralWidget);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Select);
 
     mainLayout->addWidget(sidePanel);

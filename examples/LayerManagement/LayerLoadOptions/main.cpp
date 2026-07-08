@@ -1,6 +1,4 @@
 #include <QApplication>
-#include <QCoreApplication>
-#include <QDir>
 #include <QElapsedTimer>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -20,9 +18,7 @@
 #include "Loading/LayerLoadOptions.h"
 #include "FeatureSources/SpatialIndexPreparationState.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Viewer::FeatureSources;
@@ -43,12 +39,6 @@ enum class LoadedIndexMode
     NoIndex,
     RTree
 };
-
-QString sampleDataPath(const QString& relativePath)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(relativePath)));
-}
 
 QString spatialIndexStateText(SpatialIndexPreparationState state)
 {
@@ -106,7 +96,17 @@ LayerLoadOptions createLoadOptions(bool useSpatialIndex, QProgressBar& progressB
     return options;
 }
 
-bool loadVectorLayer(GisViewer& viewer, bool useSpatialIndex, QProgressBar& progressBar, QLabel& statusLabel)
+QString prepareStatesLayerPath(QWidget* parent)
+{
+    return ensureSampleFile(
+        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/usa_states_3857.zip")),
+        QStringLiteral("usa_states_3857.zip"),
+        QStringLiteral("usa_states_3857"),
+        QStringLiteral("usa_states_3857.shp"),
+        parent);
+}
+
+bool loadVectorLayer(GisViewer& viewer, const QString& path, bool useSpatialIndex, QProgressBar& progressBar, QLabel& statusLabel)
 {
     progressBar.setValue(0);
     statusLabel.setText(useSpatialIndex
@@ -120,7 +120,6 @@ bool loadVectorLayer(GisViewer& viewer, bool useSpatialIndex, QProgressBar& prog
 
     viewer.clearLayers();
 
-    const QString path = sampleDataPath(QStringLiteral("shapefile/usa_states_3857.shp"));
     QString errorMessage;
     if (!viewer.addLayerFromPath(path, options, &errorMessage))
     {
@@ -272,7 +271,6 @@ int main(int argc, char* argv[])
     resultLayout->addWidget(rtreeResult);
 
     auto* viewer = new GisViewer(root);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* statusBar = new QWidget(root);
@@ -294,18 +292,20 @@ int main(int argc, char* argv[])
 
     LoadedIndexMode currentMode = LoadedIndexMode::None;
 
-    QObject::connect(loadWithoutIndex, &QPushButton::clicked, viewer, [=, &currentMode]
+    QObject::connect(loadWithoutIndex, &QPushButton::clicked, viewer, [viewer, progressBar, statusLabel, &window, &currentMode]
     {
         QApplication::setOverrideCursor(Qt::WaitCursor);
-        if (loadVectorLayer(*viewer, false, *progressBar, *statusLabel))
+        const QString path = prepareStatesLayerPath(&window);
+        if (!path.isEmpty() && loadVectorLayer(*viewer, path, false, *progressBar, *statusLabel))
             currentMode = LoadedIndexMode::NoIndex;
         QApplication::restoreOverrideCursor();
     });
 
-    QObject::connect(loadWithRTree, &QPushButton::clicked, viewer, [=, &currentMode]
+    QObject::connect(loadWithRTree, &QPushButton::clicked, viewer, [viewer, progressBar, statusLabel, &window, &currentMode]
     {
         QApplication::setOverrideCursor(Qt::WaitCursor);
-        if (loadVectorLayer(*viewer, true, *progressBar, *statusLabel))
+        const QString path = prepareStatesLayerPath(&window);
+        if (!path.isEmpty() && loadVectorLayer(*viewer, path, true, *progressBar, *statusLabel))
             currentMode = LoadedIndexMode::RTree;
         QApplication::restoreOverrideCursor();
     });

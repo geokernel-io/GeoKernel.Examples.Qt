@@ -182,7 +182,6 @@ int main(int argc, char* argv[])
     toolbar->addWidget(new QLabel(QStringLiteral("Operations: expand / inflate / intersects / contains"), toolbar));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
 
     auto* detailsDock = new QTextEdit(&window);
     detailsDock->setReadOnly(true);

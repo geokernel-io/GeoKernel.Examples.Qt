@@ -150,7 +150,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Switch active edit layer, then add points to the active layer."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

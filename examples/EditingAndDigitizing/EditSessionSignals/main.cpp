@@ -122,8 +122,7 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("EditSessionSignals"));
     window.statusBar()->showMessage(QStringLiteral("Begin an edit session, add a feature, then commit or rollback to see session signals."));
 
-    auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
+    auto* viewer = new GisViewer(&window);    
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

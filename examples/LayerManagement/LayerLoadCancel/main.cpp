@@ -1,6 +1,4 @@
 #include <QApplication>
-#include <QCoreApplication>
-#include <QDir>
 #include <QElapsedTimer>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -21,9 +19,7 @@
 #include "Loading/LayerLoadOptions.h"
 #include "FeatureSources/SpatialIndexPreparationState.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Viewer::FeatureSources;
@@ -31,12 +27,6 @@ using namespace GeoKernel::Viewer::Loading;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Spatial;
 using namespace GeoKernel::Core::Shapes;
-
-QString sampleDataPath(const QString& relativePath)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(relativePath)));
-}
 
 QString spatialIndexStateText(SpatialIndexPreparationState state)
 {
@@ -100,7 +90,17 @@ LayerLoadOptions createLoadOptions(std::atomic_bool& cancelRequested, QProgressB
     return options;
 }
 
-void loadLargeLayer(GisViewer& viewer, std::atomic_bool& cancelRequested, QPushButton& loadButton, QPushButton& cancelButton, QProgressBar& progressBar, QLabel& statusLabel)
+QString prepareLargeLayerPath(QWidget* parent)
+{
+    return ensureSampleFile(
+        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/output_1m_points.zip")),
+        QStringLiteral("output_1m_points.zip"),
+        QStringLiteral("output_1m_points"),
+        QStringLiteral("output_1m_points.shp"),
+        parent);
+}
+
+void loadLargeLayer(GisViewer& viewer, const QString& path, std::atomic_bool& cancelRequested, QPushButton& loadButton, QPushButton& cancelButton, QProgressBar& progressBar, QLabel& statusLabel)
 {
     cancelRequested.store(false);
     loadButton.setEnabled(false);
@@ -113,7 +113,6 @@ void loadLargeLayer(GisViewer& viewer, std::atomic_bool& cancelRequested, QPushB
     timer.start();
 
     LayerLoadOptions options = createLoadOptions(cancelRequested, progressBar, statusLabel);
-    const QString path = sampleDataPath(QStringLiteral("shapefile/output_1m_points.shp"));    
 
     viewer.clearLayers();
 
@@ -180,7 +179,6 @@ int main(int argc, char* argv[])
     toolbarLayout->addStretch();
 
     auto* viewer = new GisViewer(root);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* statusBar = new QWidget(root);
@@ -204,8 +202,23 @@ int main(int argc, char* argv[])
     QObject::connect(loadButton, &QPushButton::clicked, viewer, [&]
     {
         QApplication::setOverrideCursor(Qt::WaitCursor);
+        loadButton->setEnabled(false);
+        statusLabel->setText(QStringLiteral("Preparing sample data..."));
+        QApplication::processEvents();
+
+        const QString path = prepareLargeLayerPath(&window);
+        if (path.isEmpty())
+        {
+            loadButton->setEnabled(true);
+            progressBar->setValue(0);
+            statusLabel->setText(QStringLiteral("Sample data could not be prepared."));
+            QApplication::restoreOverrideCursor();
+            return;
+        }
+
         loadLargeLayer(
             *viewer,
+            path,
             cancelRequested,
             *loadButton,
             *cancelButton,

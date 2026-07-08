@@ -188,7 +188,6 @@ int main(int argc, char* argv[])
     QAction* runSplitAction = toolbar->addAction(QStringLiteral("Run SplitByArc"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
 
     auto* detailsDock = new QTextEdit(&window);
     detailsDock->setReadOnly(true);

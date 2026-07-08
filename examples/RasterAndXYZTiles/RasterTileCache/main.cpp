@@ -348,8 +348,7 @@ int main(int argc, char* argv[])
     contentLayout->setContentsMargins(0, 0, 0, 0);
     contentLayout->setSpacing(0);
 
-    auto* viewer = new GisViewer(content);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
+    auto* viewer = new GisViewer(content);    
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* detailsView = new QTextEdit(content);

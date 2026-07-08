@@ -3,7 +3,6 @@
 #include <QComboBox>
 #include <QDockWidget>
 #include <QDoubleSpinBox>
-#include <QFileInfo>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -32,8 +31,6 @@ using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Layers::Defs;
 using namespace GeoKernel::Core::Symbology;
 using namespace GeoKernel::Viewer;
-
-constexpr const char* AdminAreasFile = "shapefile/california.shp";
 
 enum class RendererKind
 {
@@ -84,15 +81,6 @@ GisColorRampMode currentRampMode(const QComboBox& combo)
 GisSymbolStyleTarget currentStyleTarget(const QComboBox& combo)
 {
     return static_cast<GisSymbolStyleTarget>(combo.currentData().toInt());
-}
-
-GisLayerStyle classificationBaseStyle(const GisLayerVector& layer)
-{
-    GisLayerStyle style = layer.style();
-    style.setFillOpacity(220);
-    style.setLineColor(QStringLiteral("#536B68"));
-    style.setLineWidth(0.8f);
-    return style;
 }
 
 QVector<double> parseManualBreaks(const QString& text, bool& ok)
@@ -288,6 +276,9 @@ int main(int argc, char* argv[])
     auto* applyButton = new QPushButton(QStringLiteral("Apply"), controls);
     auto* clearButton = new QPushButton(QStringLiteral("Clear"), controls);
     auto* fullExtentButton = new QPushButton(QStringLiteral("Full extent"), controls);
+    applyButton->setEnabled(false);
+    clearButton->setEnabled(false);
+    fullExtentButton->setEnabled(false);
 
     controlsLayout->addWidget(new QLabel(QStringLiteral("Renderer"), controls), 0, 0);
     controlsLayout->addWidget(rendererCombo, 0, 1);
@@ -314,7 +305,6 @@ int main(int argc, char* argv[])
     controlsLayout->setColumnStretch(3, 1);
 
     auto* viewer = new GisViewer(central);
-    viewer->setMapBackgroundColor(QColor(128, 128, 128));
 
     rootLayout->addWidget(controls);
     rootLayout->addWidget(viewer, 1);
@@ -327,38 +317,7 @@ int main(int argc, char* argv[])
     window.addDockWidget(Qt::LeftDockWidgetArea, legendDock);
 
     GisLayerVector* vectorLayer = nullptr;
-    const QString path = sampleDataPath(QString::fromLatin1(AdminAreasFile));
-    if (!QFileInfo::exists(path))
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("Classification"),
-            QStringLiteral("%1 was not found:\n%2").arg(QString::fromLatin1(AdminAreasFile), path));
-        return 1;
-    }
-
-    QString errorMessage;
-    if (!viewer->addLayerFromPath(path, &errorMessage))
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("Classification"),
-            QStringLiteral("%1 could not be loaded:\n%2").arg(QString::fromLatin1(AdminAreasFile), errorMessage));
-        return 1;
-    }
-
-    vectorLayer = dynamic_cast<GisLayerVector*>(viewer->mapLayerAt(0));
-    if (vectorLayer == nullptr)
-    {
-        QMessageBox::critical(&window, QStringLiteral("Classification"), QStringLiteral("Loaded layer is not a vector layer."));
-        return 1;
-    }
-
-    vectorLayer->setName(QStringLiteral("Andalucia admin areas"));
-    vectorLayer->style().setFillColor(QStringLiteral("#DCE8E4"));
-    vectorLayer->style().setFillOpacity(220);
-    vectorLayer->style().setLineColor(QStringLiteral("#536B68"));
-    vectorLayer->style().setLineWidth(0.8f);
+    GisLayerStyle baseStyle;
 
     auto applyClassification = [&]
     {
@@ -373,7 +332,6 @@ int main(int argc, char* argv[])
         }
 
         const GisColorRamp ramp = GisColorRampRegistry::ramp(rampCombo->currentText());
-        const GisLayerStyle baseStyle = classificationBaseStyle(*vectorLayer);
         std::unique_ptr<GisSymbolRenderer> renderer;
 
         if (currentRendererKind(*rendererCombo) == RendererKind::Categorized)
@@ -474,12 +432,73 @@ int main(int argc, char* argv[])
     });
     QObject::connect(fullExtentButton, &QPushButton::clicked, viewer, &GisViewer::fullExtent);
 
-    populateFields(*fieldCombo, vectorLayer, currentRendererKind(*rendererCombo));
     syncControls(*rendererCombo, *methodCombo, *classCountLabel, *classCountSpin, *intervalLabel, *intervalSpin, *manualBreaksLabel, *manualBreaksEdit, *rampModeCombo);
-    applyClassification();
-    
+    window.statusBar()->showMessage(QStringLiteral("Preparing California sample data..."));
+
     window.show();
-    viewer->fullExtent();
+
+    QMetaObject::invokeMethod(&window, [&window, viewer, legendList, rendererCombo, fieldCombo, methodCombo, classCountLabel, classCountSpin, intervalLabel, intervalSpin, manualBreaksLabel, manualBreaksEdit, rampModeCombo, applyButton, clearButton, fullExtentButton, &vectorLayer, &baseStyle, &applyClassification]
+    {
+        legendList->clear();
+        legendList->addItem(QStringLiteral("Preparing California sample data..."));
+
+        const QString path = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/california.zip")),
+            QStringLiteral("california.zip"),
+            QStringLiteral("california"),
+            QStringLiteral("california.shp"),
+            &window);
+        if (path.isEmpty())
+        {
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Sample data could not be prepared."));
+            window.statusBar()->showMessage(QStringLiteral("Sample data could not be prepared."));
+            return;
+        }
+
+        viewer->addOpenStreetMapLayer();
+
+        QString errorMessage;
+        if (!viewer->addLayerFromPath(path, &errorMessage))
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("Classification"),
+                QStringLiteral("Layer could not be loaded:\n%1")
+                    .arg(errorMessage.isEmpty() ? path : errorMessage));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Layer could not be loaded."));
+            window.statusBar()->showMessage(QStringLiteral("Layer could not be loaded."));
+            return;
+        }
+
+        vectorLayer = dynamic_cast<GisLayerVector*>(viewer->mapLayerAt(0));
+        if (vectorLayer == nullptr)
+        {
+            QMessageBox::critical(&window, QStringLiteral("Classification"), QStringLiteral("Loaded layer is not a vector layer."));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Loaded layer is not a vector layer."));
+            window.statusBar()->showMessage(QStringLiteral("Loaded layer is not a vector layer."));
+            return;
+        }
+
+        baseStyle.setFillColor(QStringLiteral("#DCE8E4"));
+        baseStyle.setFillOpacity(220);
+        baseStyle.setLineColor(QStringLiteral("#536B68"));
+        baseStyle.setLineWidth(0.8f);
+
+        vectorLayer->setName(QStringLiteral("California counties - classification"));
+        vectorLayer->style() = baseStyle;
+
+        populateFields(*fieldCombo, vectorLayer, currentRendererKind(*rendererCombo));
+        syncControls(*rendererCombo, *methodCombo, *classCountLabel, *classCountSpin, *intervalLabel, *intervalSpin, *manualBreaksLabel, *manualBreaksEdit, *rampModeCombo);
+        applyClassification();
+
+        applyButton->setEnabled(true);
+        clearButton->setEnabled(true);
+        fullExtentButton->setEnabled(true);
+        viewer->zoomToLayer(0);
+    });
 
     return app.exec();
 }

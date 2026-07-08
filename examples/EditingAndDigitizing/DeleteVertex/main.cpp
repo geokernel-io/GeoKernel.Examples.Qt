@@ -237,7 +237,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Use Edit Vertices for active vertex delete, or Select + index for direct API delete."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::EditVertices);
     window.setCentralWidget(viewer);
 

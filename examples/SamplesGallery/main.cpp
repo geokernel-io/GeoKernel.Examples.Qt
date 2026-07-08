@@ -428,7 +428,6 @@ QWidget* createHelloMapLivePage()
     layout->setSpacing(0);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(createMapToolbar(*viewer, page));
@@ -483,7 +482,6 @@ QWidget* createAddPointInteractiveLivePage()
     toolbar->addSeparator();
     toolbar->addWidget(countLabel);
 
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::AddPoint);
 
     layout->addWidget(toolbar);
@@ -741,8 +739,6 @@ QWidget* createDigitizingLivePage(
     QAction* clearAction = toolbar->addAction(QStringLiteral("Clear"));
     toolbar->addSeparator();
     toolbar->addWidget(countLabel);
-
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(addTool);
 
     layout->addWidget(toolbar);
@@ -869,7 +865,6 @@ QWidget* createProgrammaticAddLivePage(
     toolbar->addSeparator();
     toolbar->addWidget(statusLabel);
 
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(toolbar);
@@ -1088,7 +1083,6 @@ QWidget* createDeleteFeatureLivePage()
     auto* status = new QLabel(QStringLiteral("Select a point, then delete one feature or all selected features."), page);
     status->setStyleSheet(QStringLiteral("background: #f4f4f4; border-top: 1px solid #d0d0d0; padding-left: 4px;"));
 
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Info);
 
     layout->addWidget(toolbar);
@@ -1294,7 +1288,6 @@ QWidget* createMoveFeatureToolLivePage()
     toolGroup->addAction(selectAction);
     toolGroup->addAction(moveAction);
 
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Info);
 
     layout->addWidget(toolbar);
@@ -1460,8 +1453,7 @@ QWidget* createEditSessionLivePage()
     QAction* fullExtentAction = toolbar->addAction(sampleIcon(QStringLiteral("FullExtent.svg")), QStringLiteral("Full Extent"));
     toolbar->addSeparator();
     toolbar->addWidget(stateLabel);
-
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
+    
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(toolbar);
@@ -1617,7 +1609,6 @@ QWidget* createAddLayersLivePage()
     layout->setSpacing(0);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(createMapToolbar(*viewer, page));
@@ -1648,7 +1639,6 @@ QWidget* createProjectLivePage(std::function<void()> ready = {})
     layout->setSpacing(0);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* progressWidget = new QWidget(page);
@@ -1736,7 +1726,6 @@ QWidget* createScalebarLivePage()
     layout->setSpacing(0);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* scaleBar = new GisScaleBar(viewer);
@@ -1764,12 +1753,10 @@ QWidget* createMinimapLivePage()
     layout->setSpacing(0);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* miniMap = new GisMiniMap(viewer);
     miniMap->setViewer(viewer);
-    miniMap->setMapBackgroundColor(QColor(250, 251, 250, 220));
     miniMap->resize(220, 150);
     miniMap->setAnchor(GisMiniMapAnchor::TopRight);
     miniMap->raise();
@@ -1832,7 +1819,6 @@ QWidget* createLayerAddRemoveLivePage()
     toolbarLayout->setSpacing(4);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     const auto addButton = [toolbarLayout, toolbar](const QString& text)
@@ -1927,7 +1913,6 @@ QWidget* createLayerReorderLivePage()
     sideLayout->addWidget(moveDown);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(sidePanel);
@@ -2084,7 +2069,6 @@ QWidget* createLayerZoomToLivePage()
     topLayout->addStretch(1);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(topPanel);
@@ -2129,7 +2113,6 @@ QWidget* createLayerExtentLivePage()
     layout->setSpacing(0);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* status = new QLabel(QStringLiteral("Ready"), page);
@@ -2343,7 +2326,6 @@ QWidget* createInMemoryLayersLivePage()
     toolbarLayout->setSpacing(4);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* status = new QLabel(QStringLiteral("Ready"), page);
@@ -2485,7 +2467,6 @@ QWidget* createLayerRefreshLivePage()
     toolbarLayout->setSpacing(4);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* status = new QLabel(QStringLiteral("Ready"), page);
@@ -2663,7 +2644,6 @@ QWidget* createLayerVisibilityLivePage()
     sideLayout->addWidget(visibilityButton);
 
     auto* viewer = new GisViewer(content);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     contentLayout->addWidget(sidePanel);
@@ -2882,7 +2862,6 @@ QWidget* createLayerEventsLivePage()
     log->setLineWrapMode(QPlainTextEdit::NoWrap);
 
     auto* viewer = new GisViewer(content);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     const auto addButton = [sideLayout, sidePanel](const QString& text)
@@ -3209,7 +3188,6 @@ QWidget* createLayerLoadCancelLivePage()
     toolbarLayout->addStretch(1);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* statusBar = new QWidget(page);
@@ -3418,7 +3396,6 @@ QWidget* createLayerLoadOptionsLivePage()
     resultLayout->addWidget(rtreeResult);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* statusBar = new QWidget(page);
@@ -3748,7 +3725,6 @@ QWidget* createCategorizedRendererLivePage()
     legendList->addItem(QStringLiteral("Loading STATE categories..."));
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(legendList);
@@ -3840,7 +3816,6 @@ QWidget* createClearRendererLivePage()
     toolbarLayout->addStretch(1);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(toolbar);
@@ -4052,7 +4027,6 @@ QWidget* createStylePerFeatureLivePage()
     panelLayout->addWidget(applyButton);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(panel);
@@ -4227,7 +4201,6 @@ QWidget* createGraduatedRendererSizeLivePage()
     legendList->addItem(QStringLiteral("Loading POP_CLASS size classes..."));
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(legendList);
@@ -4305,7 +4278,6 @@ QWidget* createRuleBasedRendererLivePage()
     legendList->addItem(QStringLiteral("Loading POP_CLASS rules..."));
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(legendList);
@@ -4373,7 +4345,6 @@ QWidget* createGraduatedRendererLivePage()
     sideLayout->addWidget(legendList, 1);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(sidePanel);
@@ -4494,7 +4465,6 @@ QWidget* createClassificationMethodsLivePage()
     sideLayout->addWidget(legendList, 1);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(sidePanel);
@@ -4605,7 +4575,6 @@ QWidget* createSimpleStyleLivePage()
     sideLayout->addStretch(1);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(sidePanel);
@@ -4704,8 +4673,7 @@ QWidget* createSelectionStyleLivePage()
     sideLayout->addWidget(status);
     sideLayout->addStretch(1);
 
-    auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
+    auto* viewer = new GisViewer(page);    
     viewer->setActiveTool(GisViewerTool::Select);
 
     layout->addWidget(sidePanel);
@@ -4899,7 +4867,6 @@ QWidget* createGenericLayerLoadLivePage(SampleId sample)
     viewerLayout->setSpacing(0);
 
     auto* viewer = new GisViewer(viewerContainer);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     viewerLayout->addWidget(createMapToolbar(*viewer, viewerContainer));
     viewerLayout->addWidget(viewer, 1);
@@ -4958,7 +4925,6 @@ QWidget* createGenericXyzLivePage(SampleId sample)
     layout->setSpacing(0);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* status = new QLabel(page);
@@ -4992,7 +4958,6 @@ QWidget* createGenericSerializationLivePage(SampleId sample)
     layout->setSpacing(0);
 
     auto* viewer = new GisViewer(page);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     auto* info = new QPlainTextEdit(page);
@@ -5150,7 +5115,7 @@ QWidget* createDescriptionPage(SampleId sample)
         label->setText(QStringLiteral(
             "<h2>MiniMap</h2>"
             "<p>Displays a top-right overview map synchronized with the main view extent.</p>"
-            "<p><b>APIs:</b> GisMiniMap, setViewer, setAnchor, setMapBackgroundColor.</p>"));
+            "<p><b>APIs:</b> GisMiniMap, setViewer, setAnchor.</p>"));
     }
     else if (sample == SampleId::AddPointInteractive)
     {

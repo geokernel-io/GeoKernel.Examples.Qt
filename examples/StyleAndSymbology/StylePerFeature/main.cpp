@@ -2,11 +2,13 @@
 #include <QColor>
 #include <QComboBox>
 #include <QGroupBox>
+#include <QHash>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QMainWindow>
+#include <QMessageBox>
 #include <QPainter>
 #include <QPixmap>
 #include <QPushButton>
@@ -16,83 +18,84 @@
 #include <QVariant>
 #include <QWidget>
 
+#include <algorithm>
 #include <memory>
 
 #include "Viewer/GisViewer.h"
+#include "FeatureSources/GdalShapefileFeatureSource.h"
+#include "CoordinateSystems/Defs/GeographicCoordinateSystem.h"
+#include "CoordinateSystems/Defs/KnownCoordinateSystems.h"
 #include "Layers/GisLayerVector.h"
-#include "Shapes/GisExtent.h"
+#include "Shapes/GisShape.h"
+#include "Shapes/GisShapePoint.h"
 #include "Shapes/GisShapePolygon.h"
+#include "Shapes/GisShapePolyline.h"
 #include "Symbology/GisRuleBasedSymbolRenderer.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
+using namespace GeoKernel::Viewer::FeatureSources;
+using namespace GeoKernel::Core::CoordinateSystems::Defs;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
 using namespace GeoKernel::Core::Symbology;
 
-constexpr int ShapeIdRole = Qt::UserRole + 1;
+constexpr int ShapeRowRole = Qt::UserRole + 1;
 
-GisLayerStyle parcelStyle(const QString& fillColor, const QString& lineColor)
-{
-    GisLayerStyle style;
-    QColor fill(fillColor);
-    fill.setAlpha(170);
-    QColor line(lineColor);
-    line.setAlpha(235);
-
-    style.setFillColor(fill.name(QColor::HexArgb));
-    style.setLineColor(line.name(QColor::HexArgb));
-    style.setLineWidth(2.0f);
-    return style;
-}
-
-GisSymbolRule zoneRule(const QString& zone, const QString& fillColor, const QString& lineColor)
-{
-    GisSymbolRule rule;
-    rule.fieldName = QStringLiteral("zone");
-    rule.op = GisSymbolRuleOperator::Equals;
-    rule.value = zone;
-    rule.label = zone;
-    rule.style = parcelStyle(fillColor, lineColor);
-    return rule;
-}
-
-std::unique_ptr<GisRuleBasedSymbolRenderer> createZoneRenderer()
+std::unique_ptr<GisRuleBasedSymbolRenderer> createZoneRenderer(QHash<QString, GisLayerStyle>& zoneStyles)
 {
     auto renderer = std::make_unique<GisRuleBasedSymbolRenderer>();
-    renderer->setDefaultStyle(parcelStyle(QStringLiteral("#E5E7EB"), QStringLiteral("#6B7280")));
 
-    renderer->addRule(zoneRule(QStringLiteral("Residential"), QStringLiteral("#F5DFA1"), QStringLiteral("#A16207")));
-    renderer->addRule(zoneRule(QStringLiteral("Commercial"), QStringLiteral("#9DD7F5"), QStringLiteral("#0369A1")));
-    renderer->addRule(zoneRule(QStringLiteral("Industrial"), QStringLiteral("#C4B5FD"), QStringLiteral("#6D28D9")));
-    renderer->addRule(zoneRule(QStringLiteral("Park"), QStringLiteral("#9AD9A8"), QStringLiteral("#15803D")));
-    renderer->addRule(zoneRule(QStringLiteral("Mixed"), QStringLiteral("#FDBA9A"), QStringLiteral("#C2410C")));
+    auto makeStyle = [](const QString& fillColor, const QString& lineColor)
+    {
+        GisLayerStyle style;
+        QColor fill(fillColor);
+        fill.setAlpha(170);
+        QColor line(lineColor);
+        line.setAlpha(235);
+
+        style.setFillColor(fill.name(QColor::HexArgb));
+        style.setLineColor(line.name(QColor::HexArgb));
+        style.setLineWidth(1.2f);
+        return style;
+    };
+
+    const GisLayerStyle defaultStyle = makeStyle(QStringLiteral("#E5E7EB"), QStringLiteral("#6B7280"));
+    renderer->setDefaultStyle(defaultStyle);
+
+    struct ZoneDefinition
+    {
+        const char* name;
+        const char* fillColor;
+        const char* lineColor;
+    };
+
+    const ZoneDefinition zones[] = {
+        { "Residential", "#F5DFA1", "#A16207" },
+        { "Commercial", "#9DD7F5", "#0369A1" },
+        { "Industrial", "#C4B5FD", "#6D28D9" },
+        { "Park", "#9AD9A8", "#15803D" },
+        { "Mixed", "#FDBA9A", "#C2410C" }
+    };
+
+    zoneStyles.clear();
+    for (const ZoneDefinition& zone : zones)
+    {
+        const QString zoneName = QString::fromLatin1(zone.name);
+        const GisLayerStyle style = makeStyle(QString::fromLatin1(zone.fillColor), QString::fromLatin1(zone.lineColor));
+
+        GisSymbolRule rule;
+        rule.fieldName = QStringLiteral("zone");
+        rule.op = GisSymbolRuleOperator::Equals;
+        rule.value = zoneName;
+        rule.label = zoneName;
+        rule.style = style;
+        renderer->addRule(rule);
+        zoneStyles.insert(zoneName, style);
+    }
 
     return renderer;
-}
-
-std::unique_ptr<GisShapePolygon> makeParcel(
-    const QString& name,
-    const QString& zone,
-    double xMin,
-    double yMin,
-    double xMax,
-    double yMax)
-{
-    auto polygon = std::make_unique<GisShapePolygon>();
-    polygon->parts().append({
-        GisShapePoint(xMin, yMin),
-        GisShapePoint(xMax, yMin),
-        GisShapePoint(xMax, yMax),
-        GisShapePoint(xMin, yMax),
-        GisShapePoint(xMin, yMin)
-        });
-    polygon->attributes().insert(QStringLiteral("name"), name);
-    polygon->attributes().insert(QStringLiteral("zone"), zone);
-    return polygon;
 }
 
 QIcon styleIcon(const GisLayerStyle& style)
@@ -108,58 +111,208 @@ QIcon styleIcon(const GisLayerStyle& style)
     return QIcon(pixmap);
 }
 
-GisLayerStyle styleForZone(const QString& zone)
+QString featureName(const GisShape& shape, int fallbackIndex)
 {
-    const auto renderer = createZoneRenderer();
-    for (const GisSymbolLegendItem& item : renderer->legendItems())
+    const QStringList nameFields = {
+        QStringLiteral("name"),
+        QStringLiteral("NAME"),
+        QStringLiteral("Name"),
+        QStringLiteral("COUNTY"),
+        QStringLiteral("COUNTY_NAME"),
+        QStringLiteral("County"),
+        QStringLiteral("county")
+    };
+
+    for (const QString& field : nameFields)
     {
-        if (item.label == zone)
-            return item.style;
+        const QString value = shape.attributes().value(field).toString().trimmed();
+        if (!value.isEmpty())
+            return value;
     }
 
-    return renderer->defaultStyle();
+    return QStringLiteral("Feature %1").arg(fallbackIndex + 1);
 }
 
-void refreshFeatureList(QListWidget& list, const GisLayerVector& layer)
+QVector<GisShapePoint> featureGeometryPart(const GisFeatureGeometry& geometry, int partIndex)
 {
-    const int currentShapeId = list.currentItem() != nullptr
-        ? list.currentItem()->data(ShapeIdRole).toInt()
-        : -1;
+    QVector<GisShapePoint> part;
+    if (geometry.points.isEmpty())
+        return part;
+
+    const int pointCount = geometry.points.size();
+    const int start = geometry.partStarts.isEmpty()
+        ? 0
+        : geometry.partStarts.value(partIndex, 0);
+    const int end = geometry.partStarts.isEmpty() || partIndex >= geometry.partStarts.size() - 1
+        ? pointCount
+        : geometry.partStarts[partIndex + 1];
+
+    const int first = std::clamp(start, 0, pointCount);
+    const int last = std::clamp(end, first, pointCount);
+    for (int i = first; i < last; ++i)
+        part.append(geometry.points[i]);
+
+    return part;
+}
+
+std::unique_ptr<GisShape> shapeFromGeometry(const GisFeatureGeometry& geometry)
+{
+    if (geometry.points.isEmpty())
+        return nullptr;
+
+    if (geometry.shapeType == GisShapeType::Point || geometry.shapeType == GisShapeType::MultiPoint)
+        return std::make_unique<GisShapePoint>(geometry.points.first().x(), geometry.points.first().y());
+
+    const int partCount = geometry.partStarts.isEmpty()
+        ? 1
+        : geometry.partStarts.size();
+
+    if (geometry.shapeType == GisShapeType::Polyline || geometry.shapeType == GisShapeType::PolylineZ)
+    {
+        auto shape = std::make_unique<GisShapePolyline>();
+        for (int partIndex = 0; partIndex < partCount; ++partIndex)
+        {
+            QVector<GisShapePoint> part = featureGeometryPart(geometry, partIndex);
+            if (part.size() >= 2)
+                shape->parts().append(std::move(part));
+        }
+
+        if (shape->isEmpty())
+            return nullptr;
+
+        return shape;
+    }
+
+    if (geometry.shapeType == GisShapeType::Polygon || geometry.shapeType == GisShapeType::PolygonZ)
+    {
+        auto shape = std::make_unique<GisShapePolygon>();
+        for (int partIndex = 0; partIndex < partCount; ++partIndex)
+        {
+            QVector<GisShapePoint> part = featureGeometryPart(geometry, partIndex);
+            if (part.size() >= 3)
+                shape->parts().append(std::move(part));
+        }
+
+        if (shape->isEmpty())
+            return nullptr;
+
+        return shape;
+    }
+
+    return nullptr;
+}
+
+std::unique_ptr<GisLayerVector> loadCountiesAsMemoryLayer(const QString& path, QString* errorMessage)
+{
+    auto source = std::make_unique<GdalShapefileFeatureSource>(path);
+    if (!source->open())
+    {
+        if (errorMessage != nullptr)
+            *errorMessage = QStringLiteral("Could not open california.shp.");
+        return nullptr;
+    }
+
+    auto layer = GisLayerVector::createInMemory(
+        QStringLiteral("California counties - style from zone attribute"),
+        source->shapeType(),
+        source->extent());
+    layer->setCoordinateSystem(std::make_shared<GeographicCoordinateSystem>(KnownCoordinateSystems::wgs84()));
+
+    const QStringList zones = {
+        QStringLiteral("Residential"),
+        QStringLiteral("Commercial"),
+        QStringLiteral("Industrial"),
+        QStringLiteral("Park"),
+        QStringLiteral("Mixed")
+    };
+
+    int added = 0;
+    for (int row = 0; row < source->featureCount(); ++row)
+    {
+        GisFeatureGeometry geometry;
+        if (!source->readGeometry(row, geometry) || geometry.points.isEmpty())
+            continue;
+
+        auto shape = shapeFromGeometry(geometry);
+        if (!shape)
+            continue;
+
+        QHash<QString, QVariant> attributes = source->attributes(row);
+        for (auto it = attributes.constBegin(); it != attributes.constEnd(); ++it)
+            shape->attributes().insert(it.key(), it.value());
+
+        shape->attributes().insert(QStringLiteral("name"), featureName(*shape, row));
+        shape->attributes().insert(QStringLiteral("zone"), zones[added % zones.size()]);
+
+        if (layer->addShape(std::move(shape)))
+            ++added;
+    }
+
+    if (added == 0)
+    {
+        if (errorMessage != nullptr)
+            *errorMessage = QStringLiteral("No polygon features could be loaded.");
+        return nullptr;
+    }
+
+    layer->open();
+    return layer;
+}
+
+void refreshFeatureList(QListWidget& list, const GisLayerVector& layer, const QHash<QString, GisLayerStyle>& zoneStyles)
+{
+    const int currentRow = list.currentRow();
 
     list.clear();
 
-    int rowToSelect = -1;
     const QVector<GisShape*> shapes = layer.items();
-    for (GisShape* shape : shapes)
+    for (int row = 0; row < shapes.size(); ++row)
     {
+        GisShape* shape = shapes[row];
         if (shape == nullptr)
             continue;
 
         const QString name = shape->attributes().value(QStringLiteral("name")).toString();
         const QString zone = shape->attributes().value(QStringLiteral("zone")).toString();
         auto* item = new QListWidgetItem(
-            styleIcon(styleForZone(zone)),
+            styleIcon(zoneStyles.value(zone, layer.style())),
             QStringLiteral("%1 - %2").arg(name, zone));
-        item->setData(ShapeIdRole, shape->id());
+        item->setData(ShapeRowRole, row);
         list.addItem(item);
-
-        if (shape->id() == currentShapeId)
-            rowToSelect = list.count() - 1;
     }
 
-    if (rowToSelect >= 0)
-        list.setCurrentRow(rowToSelect);
+    if (currentRow >= 0 && currentRow < list.count())
+        list.setCurrentRow(currentRow);
     else if (list.count() > 0)
         list.setCurrentRow(0);
 }
 
-void setComboToSelectedZone(QComboBox& combo, QListWidget& list, const GisLayerVector& layer)
+GisShape* selectedListShape(const QListWidget& list, const GisLayerVector& layer)
 {
     if (list.currentItem() == nullptr)
-        return;
+        return nullptr;
 
-    const int shapeId = list.currentItem()->data(ShapeIdRole).toInt();
-    const GisShape* shape = layer.getShape(shapeId);
+    const int shapeRow = list.currentItem()->data(ShapeRowRole).toInt();
+    const QVector<GisShape*> shapes = layer.items();
+    return shapeRow >= 0 && shapeRow < shapes.size() ? shapes[shapeRow] : nullptr;
+}
+
+void selectFeatureListShape(QListWidget& list, const GisLayerVector& layer, const GisShape& selectedShape)
+{
+    const QVector<GisShape*> shapes = layer.items();
+    for (int row = 0; row < shapes.size(); ++row)
+    {
+        if (shapes[row] != nullptr && shapes[row]->id() == selectedShape.id())
+        {
+            list.setCurrentRow(row);
+            return;
+        }
+    }
+}
+
+void setComboToSelectedZone(QComboBox& combo, QListWidget& list, const GisLayerVector& layer)
+{
+    const GisShape* shape = selectedListShape(list, layer);
     if (shape == nullptr)
         return;
 
@@ -199,6 +352,9 @@ int main(int argc, char* argv[])
     });
 
     auto* applyButton = new QPushButton(QStringLiteral("Apply Feature Style"), panel);
+    zoneCombo->setEnabled(false);
+    applyButton->setEnabled(false);
+
     auto* controls = new QGroupBox(QStringLiteral("Selected Feature"), panel);
     auto* controlsLayout = new QVBoxLayout(controls);
     controlsLayout->addWidget(new QLabel(QStringLiteral("Zone attribute"), controls));
@@ -210,56 +366,107 @@ int main(int argc, char* argv[])
     panelLayout->addWidget(controls);
 
     auto* viewer = new GisViewer(central);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
 
     layout->addWidget(panel);
     layout->addWidget(viewer, 1);
     window.setCentralWidget(central);
 
-    auto parcels = std::make_unique<GisLayerVector>();
-    parcels->setName(QStringLiteral("Parcels - style from zone attribute"));
-    parcels->style() = parcelStyle(QStringLiteral("#E5E7EB"), QStringLiteral("#6B7280"));
-    parcels->addShape(makeParcel(QStringLiteral("Parcel A"), QStringLiteral("Residential"), 0.0, 3.0, 3.0, 5.7));
-    parcels->addShape(makeParcel(QStringLiteral("Parcel B"), QStringLiteral("Commercial"), 3.4, 3.3, 6.8, 5.4));
-    parcels->addShape(makeParcel(QStringLiteral("Parcel C"), QStringLiteral("Industrial"), 7.1, 3.1, 10.4, 5.7));
-    parcels->addShape(makeParcel(QStringLiteral("Parcel D"), QStringLiteral("Park"), 1.0, 0.5, 4.8, 2.7));
-    parcels->addShape(makeParcel(QStringLiteral("Parcel E"), QStringLiteral("Mixed"), 5.2, 0.7, 9.8, 2.8));
-    parcels->open();
-    parcels->setSymbolRenderer(createZoneRenderer());
-
-    auto* parcelsLayer = parcels.get();
-    viewer->addLayer(parcels);    
-
-    refreshFeatureList(*featureList, *parcelsLayer);
-    setComboToSelectedZone(*zoneCombo, *featureList, *parcelsLayer);
-
-    QObject::connect(featureList, &QListWidget::currentItemChanged, [&]() {
-        setComboToSelectedZone(*zoneCombo, *featureList, *parcelsLayer);
-    });
-
-    QObject::connect(applyButton, &QPushButton::clicked, [&]() {
-        if (featureList->currentItem() == nullptr)
-            return;
-
-        const int shapeId = featureList->currentItem()->data(ShapeIdRole).toInt();
-        GisShape* shape = parcelsLayer->getShape(shapeId);
-        if (shape == nullptr)
-            return;
-
-        shape->attributes().insert(QStringLiteral("zone"), zoneCombo->currentText());
-        refreshFeatureList(*featureList, *parcelsLayer);
-        viewer->invalidateRenderCache(true, true);
-        viewer->update();
-        window.statusBar()->showMessage(
-            QStringLiteral("Feature %1 style updated from zone=%2")
-                .arg(shape->attributes().value(QStringLiteral("name")).toString(), zoneCombo->currentText()));
-    });
-
-    window.statusBar()->showMessage(QStringLiteral("Per-feature style is driven by each shape's zone attribute"));
     window.show();
 
-    viewer->setViewExtent(GisExtent(-0.8, -0.2, 11.2, 6.4));
+    QMetaObject::invokeMethod(&window, [&window, viewer, featureList, zoneCombo, applyButton]
+    {
+        featureList->clear();
+        featureList->addItem(QStringLiteral("Preparing California sample data..."));
+
+        const QString path = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/california.zip")),
+            QStringLiteral("california.zip"),
+            QStringLiteral("california"),
+            QStringLiteral("california.shp"),
+            &window);
+        if (path.isEmpty())
+        {
+            featureList->clear();
+            featureList->addItem(QStringLiteral("Sample data could not be prepared."));
+            window.statusBar()->showMessage(QStringLiteral("Sample data could not be prepared."));
+            return;
+        }
+
+        QString errorMessage;
+        auto countiesLayerOwner = loadCountiesAsMemoryLayer(path, &errorMessage);
+        if (!countiesLayerOwner)
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("StylePerFeature"),
+                errorMessage.isEmpty() ? QStringLiteral("california.shp could not be loaded.") : errorMessage);
+            featureList->clear();
+            featureList->addItem(QStringLiteral("Layer could not be loaded."));
+            window.statusBar()->showMessage(QStringLiteral("Layer could not be loaded."));
+            return;
+        }
+
+        viewer->addOpenStreetMapLayer();
+        auto* countiesLayer = countiesLayerOwner.get();
+
+        GisLayerStyle defaultStyle;
+        QColor fill(QStringLiteral("#E5E7EB"));
+        fill.setAlpha(170);
+        QColor line(QStringLiteral("#6B7280"));
+        line.setAlpha(235);
+        defaultStyle.setFillColor(fill.name(QColor::HexArgb));
+        defaultStyle.setLineColor(line.name(QColor::HexArgb));
+        defaultStyle.setLineWidth(1.2f);
+
+        QHash<QString, GisLayerStyle> zoneStyles;
+        countiesLayer->style() = defaultStyle;
+        countiesLayer->setSymbolRenderer(createZoneRenderer(zoneStyles));
+        viewer->addLayer(countiesLayerOwner);
+
+        refreshFeatureList(*featureList, *countiesLayer, zoneStyles);
+        setComboToSelectedZone(*zoneCombo, *featureList, *countiesLayer);
+        zoneCombo->setEnabled(true);
+        applyButton->setEnabled(true);
+
+        QObject::connect(featureList, &QListWidget::currentItemChanged, &window, [zoneCombo, featureList, countiesLayer]
+        {
+            setComboToSelectedZone(*zoneCombo, *featureList, *countiesLayer);
+        });
+
+        QObject::connect(viewer, &GisViewer::mapClicked, &window, [viewer, featureList, countiesLayer](
+            GisViewerTool,
+            const QPointF& screenPoint,
+            const GisShapePoint&,
+            Qt::KeyboardModifiers)
+        {
+            const FeatureHitTestResult hit = viewer->hitTestTopFeatureAt(screenPoint, 8);
+            if (!hit.isValid() || hit.layer != countiesLayer || hit.shape == nullptr)
+                return;
+
+            viewer->setSelectedFeature(hit);
+            selectFeatureListShape(*featureList, *countiesLayer, *hit.shape);
+        });
+
+        QObject::connect(applyButton, &QPushButton::clicked, &window, [viewer, featureList, zoneCombo, countiesLayer, zoneStyles, &window]
+        {
+            GisShape* shape = selectedListShape(*featureList, *countiesLayer);
+            if (shape == nullptr)
+                return;
+
+            shape->attributes().insert(QStringLiteral("zone"), zoneCombo->currentText());
+            refreshFeatureList(*featureList, *countiesLayer, zoneStyles);
+            viewer->invalidateRenderCache(true, true);
+            viewer->update();
+            window.statusBar()->showMessage(
+                QStringLiteral("Feature %1 style updated from zone=%2")
+                    .arg(shape->attributes().value(QStringLiteral("name")).toString(), zoneCombo->currentText()));
+        });
+
+        viewer->refreshLayers();
+        viewer->zoomToLayer(0);
+        window.statusBar()->showMessage(QStringLiteral("Per-feature style is driven by each shape's zone attribute"));
+    });
 
     return app.exec();
 }

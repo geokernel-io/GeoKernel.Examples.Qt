@@ -200,7 +200,6 @@ int main(int argc, char* argv[])
     QAction* runDifferenceAction = toolbar->addAction(QStringLiteral("Run Difference"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
 
     auto* detailsDock = new QTextEdit(&window);
     detailsDock->setReadOnly(true);

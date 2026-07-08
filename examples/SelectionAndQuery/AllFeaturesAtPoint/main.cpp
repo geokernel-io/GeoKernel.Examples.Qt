@@ -220,7 +220,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Click the map to run hitTestFeaturesAt and list all features under the pointer."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Info);
     window.setCentralWidget(viewer);
 

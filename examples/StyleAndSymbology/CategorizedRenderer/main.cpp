@@ -1,9 +1,6 @@
 #include <QApplication>
 #include <QColor>
-#include <QCoreApplication>
-#include <QDir>
 #include <QDockWidget>
-#include <QFileInfo>
 #include <QIcon>
 #include <QListWidget>
 #include <QMainWindow>
@@ -20,29 +17,11 @@
 #include "Symbology/GisColorRampRegistry.h"
 #include "Symbology/GisSymbolRendererFactory.h"
 
-#define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
-#undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Symbology;
-
-QString sampleDataPath(const QString& fileName)
-{
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/data/%1").arg(fileName)));
-}
-
-GisLayerStyle baseStateStyle()
-{
-    GisLayerStyle style;
-    style.setFillColor(QStringLiteral("#D8E5E1"));
-    style.setFillOpacity(220);
-    style.setLineColor(QStringLiteral("#536B68"));
-    style.setLineWidth(0.9f);
-    return style;
-}
 
 QIcon legendIcon(const GisLayerStyle& style)
 {
@@ -88,7 +67,6 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("CategorizedRenderer"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 
@@ -98,65 +76,90 @@ int main(int argc, char* argv[])
     legendDock->setMinimumWidth(180);
     window.addDockWidget(Qt::LeftDockWidgetArea, legendDock);
 
-    viewer->addOpenStreetMapLayer();
-
-    const QString path = sampleDataPath(QStringLiteral("shapefile/usa_states_3857.shp"));
-    if (!QFileInfo::exists(path))
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("CategorizedRenderer"),
-            QStringLiteral("Sample shapefile was not found:\n%1").arg(path));
-        return 1;
-    }
-
-    QString errorMessage;
-    if (!viewer->addLayerFromPath(path, &errorMessage))
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("CategorizedRenderer"),
-            QStringLiteral("Layer could not be loaded:\n%1")
-                .arg(errorMessage.isEmpty() ? path : errorMessage));
-        return 1;
-    }
-
-    auto* statesLayer = dynamic_cast<GisLayerVector*>(viewer->mapLayerAt(0));
-    if (statesLayer == nullptr)
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("CategorizedRenderer"),
-            QStringLiteral("Loaded layer is not a vector layer."));
-        return 1;
-    }
-
-    statesLayer->setName(QStringLiteral("USA States - categorized by STATE"));
-    statesLayer->style() = baseStateStyle();
-
-    auto renderer = GisSymbolRendererFactory::createCategorizedRenderer(
-        *statesLayer,
-        QStringLiteral("STATE"),
-        GisColorRampRegistry::ramp(QStringLiteral("Unique")),
-        baseStateStyle(),
-        64);
-
-    if (!renderer)
-    {
-        QMessageBox::critical(
-            &window,
-            QStringLiteral("CategorizedRenderer"),
-            QStringLiteral("Could not create categorized renderer from STATE field."));
-        return 1;
-    }
-
-    statesLayer->setSymbolRenderer(std::move(renderer));
-    updateLegend(*legendList, *statesLayer);        
-
-    window.statusBar()->showMessage(QStringLiteral("Categorized renderer applied: STATE"));    
     window.show();
 
-    viewer->setViewExtent(GisExtent(-16831516.0, 1856556.0, -4631023.0, 7472472.0));
+    QMetaObject::invokeMethod(&window, [&window, viewer, legendList]
+    {
+        legendList->clear();
+        legendList->addItem(QStringLiteral("Preparing USA states sample data..."));
+
+        const QString path = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/usa_states_3857.zip")),
+            QStringLiteral("usa_states_3857.zip"),
+            QStringLiteral("usa_states_3857"),
+            QStringLiteral("usa_states_3857.shp"),
+            &window);
+        if (path.isEmpty())
+        {
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Sample data could not be prepared."));
+            window.statusBar()->showMessage(QStringLiteral("Sample data could not be prepared."));
+            return;
+        }
+
+        viewer->addOpenStreetMapLayer();
+
+        QString errorMessage;
+        if (!viewer->addLayerFromPath(path, &errorMessage))
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("CategorizedRenderer"),
+                QStringLiteral("Layer could not be loaded:\n%1")
+                    .arg(errorMessage.isEmpty() ? path : errorMessage));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Layer could not be loaded."));
+            window.statusBar()->showMessage(QStringLiteral("Layer could not be loaded."));
+            return;
+        }
+
+        auto* statesLayer = dynamic_cast<GisLayerVector*>(viewer->mapLayerAt(0));
+        if (statesLayer == nullptr)
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("CategorizedRenderer"),
+                QStringLiteral("Loaded layer is not a vector layer."));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Loaded layer is not a vector layer."));
+            window.statusBar()->showMessage(QStringLiteral("Loaded layer is not a vector layer."));
+            return;
+        }
+
+        GisLayerStyle stateStyle;
+        stateStyle.setFillColor(QStringLiteral("#D8E5E1"));
+        stateStyle.setFillOpacity(220);
+        stateStyle.setLineColor(QStringLiteral("#536B68"));
+        stateStyle.setLineWidth(0.9f);
+
+        statesLayer->setName(QStringLiteral("USA States - categorized by STATE"));
+        statesLayer->style() = stateStyle;
+
+        auto renderer = GisSymbolRendererFactory::createCategorizedRenderer(
+            *statesLayer,
+            QStringLiteral("STATE"),
+            GisColorRampRegistry::ramp(QStringLiteral("Unique")),
+            stateStyle,
+            64);
+
+        if (!renderer)
+        {
+            QMessageBox::critical(
+                &window,
+                QStringLiteral("CategorizedRenderer"),
+                QStringLiteral("Could not create categorized renderer from STATE field."));
+            legendList->clear();
+            legendList->addItem(QStringLiteral("Categorized renderer could not be created."));
+            window.statusBar()->showMessage(QStringLiteral("Categorized renderer could not be created."));
+            return;
+        }
+
+        statesLayer->setSymbolRenderer(std::move(renderer));
+        updateLegend(*legendList, *statesLayer);
+
+        window.statusBar()->showMessage(QStringLiteral("Categorized renderer applied: STATE"));
+        viewer->setViewExtent(GisExtent(-16831516.0, 1856556.0, -4631023.0, 7472472.0));
+    });
 
     return app.exec();
 }

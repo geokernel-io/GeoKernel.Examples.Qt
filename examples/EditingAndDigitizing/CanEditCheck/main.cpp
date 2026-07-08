@@ -213,7 +213,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Use Begin Edit and Select to see canEdit* capability checks change."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 

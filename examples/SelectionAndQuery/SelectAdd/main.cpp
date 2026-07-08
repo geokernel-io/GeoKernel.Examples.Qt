@@ -185,7 +185,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Click a feature to add it to the selection. Ctrl+Click toggles it."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Info);
     window.setCentralWidget(viewer);
 

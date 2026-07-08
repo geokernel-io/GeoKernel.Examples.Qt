@@ -15,7 +15,6 @@ int main(int argc, char* argv[])
     window.setWindowTitle(QStringLiteral("Scalebar"));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Pan);
     window.setCentralWidget(viewer);
 
@@ -26,17 +25,20 @@ int main(int argc, char* argv[])
     scaleBar->raise();
     scaleBar->show();
 
-    const QString worldLayerPath = ensureSampleFile(
-        QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_4326.zip")),
-        QStringLiteral("world_4326.zip"),
-        QStringLiteral("world_4326"),
-        QStringLiteral("world_4326.shp"),
-        &window);
-    if (worldLayerPath.isEmpty() || !loadLayer(*viewer, worldLayerPath, &window))
-        return 1;
-
     window.show();
-    viewer->fullExtent();
+    
+    QMetaObject::invokeMethod(&window, [&window, viewer]
+    {
+        const QString worldLayerPath = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/world_4326.zip")),
+            QStringLiteral("world_4326.zip"),
+            QStringLiteral("world_4326"),
+            QStringLiteral("world_4326.shp"),
+            &window);
+
+        if (!worldLayerPath.isEmpty() && loadLayer(*viewer, worldLayerPath, &window))
+            viewer->fullExtent();
+    });
 
     return app.exec();
 }

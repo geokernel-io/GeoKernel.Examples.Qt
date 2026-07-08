@@ -198,7 +198,6 @@ int main(int argc, char* argv[])
     window.statusBar()->showMessage(QStringLiteral("Click features to select them, then zoom to the selected extent."));
 
     auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(244, 246, 245));
     viewer->setActiveTool(GisViewerTool::Info);
     window.setCentralWidget(viewer);
 

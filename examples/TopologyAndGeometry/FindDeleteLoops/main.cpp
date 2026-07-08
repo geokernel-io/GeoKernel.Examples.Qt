@@ -201,8 +201,7 @@ int main(int argc, char* argv[])
     toolbar->addSeparator();
     QAction* runAction = toolbar->addAction(QStringLiteral("Run FindAndDeleteLoops"));
 
-    auto* viewer = new GisViewer(&window);
-    viewer->setMapBackgroundColor(QColor(247, 248, 250));
+    auto* viewer = new GisViewer(&window);    
 
     auto* detailsDock = new QTextEdit(&window);
     detailsDock->setReadOnly(true);
