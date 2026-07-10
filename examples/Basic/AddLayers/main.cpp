@@ -5,25 +5,6 @@
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 
-GisLayer* loadNamedLayer(GisViewer& viewer, const QString& path, const QString& name, QWidget* parent)
-{
-    if (!loadLayer(viewer, path, parent))
-        return nullptr;
-
-    GisLayer* layer = viewer.mapLayerAt(0);
-    if (layer == nullptr)
-    {
-        QMessageBox::critical(
-            parent,
-            QStringLiteral("AddLayers"),
-            QStringLiteral("Layer was loaded but could not be resolved:\n%1").arg(path));
-        return nullptr;
-    }
-
-    layer->setName(name);
-    return layer;
-}
-
 bool loadSampleLayers(GisViewer& viewer, QWidget* parent)
 {
     const QString rasterPath = ensureSampleFile(
@@ -55,13 +36,34 @@ bool loadSampleLayers(GisViewer& viewer, QWidget* parent)
 
     viewer.clearLayers();
 
-    if (loadNamedLayer(viewer, rasterPath, QStringLiteral("World raster"), parent) == nullptr)
+    if (!loadLayer(viewer, rasterPath, parent))
         return false;
 
-    GisLayer* countryLayer = loadNamedLayer(viewer, worldPath, QStringLiteral("Countries"), parent);
+    GisLayer* rasterLayer = viewer.mapLayerAt(0);
+    if (rasterLayer == nullptr)
+    {
+        QMessageBox::critical(
+            parent,
+            QStringLiteral("AddLayers"),
+            QStringLiteral("Layer was loaded but could not be resolved:\n%1").arg(rasterPath));
+        return false;
+    }
+    rasterLayer->setName(QStringLiteral("World raster"));
+
+    if (!loadLayer(viewer, worldPath, parent))
+        return false;
+
+    GisLayer* countryLayer = viewer.mapLayerAt(0);
     if (countryLayer == nullptr)
+    {
+        QMessageBox::critical(
+            parent,
+            QStringLiteral("AddLayers"),
+            QStringLiteral("Layer was loaded but could not be resolved:\n%1").arg(worldPath));
         return false;
+    }
 
+    countryLayer->setName(QStringLiteral("Countries"));
     countryLayer->style().setFillColor(QStringLiteral("#35475B"));
     countryLayer->style().setFillOpacity(172);
     countryLayer->style().setLineColor(QStringLiteral("#B7E8FF"));
@@ -69,10 +71,20 @@ bool loadSampleLayers(GisViewer& viewer, QWidget* parent)
     countryLayer->style().setLabelColor(QStringLiteral("#FFFFFF"));
     countryLayer->style().setLabelHaloColor(QStringLiteral("#10263A"));
 
-    GisLayer* cityLayer = loadNamedLayer(viewer, citiesPath, QStringLiteral("Cities"), parent);
-    if (cityLayer == nullptr)
+    if (!loadLayer(viewer, citiesPath, parent))
         return false;
 
+    GisLayer* cityLayer = viewer.mapLayerAt(0);
+    if (cityLayer == nullptr)
+    {
+        QMessageBox::critical(
+            parent,
+            QStringLiteral("AddLayers"),
+            QStringLiteral("Layer was loaded but could not be resolved:\n%1").arg(citiesPath));
+        return false;
+    }
+
+    cityLayer->setName(QStringLiteral("Cities"));
     cityLayer->style().setPointColor(QStringLiteral("#1D8FC7"));
     cityLayer->style().setLineColor(QStringLiteral("#74C3E8"));
     cityLayer->style().setLineWidth(0.9f);
