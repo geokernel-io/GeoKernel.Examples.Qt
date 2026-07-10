@@ -29,6 +29,15 @@ endif()
 file(MAKE_DIRECTORY "${DESTINATION}")
 
 if(WIN32)
+    file(GLOB _stale_runtime_files
+        "${DESTINATION}/GeoKernel*.dll"
+        "${DESTINATION}/Qt6*.dll")
+    if(_stale_runtime_files)
+        file(REMOVE ${_stale_runtime_files})
+    endif()
+endif()
+
+if(WIN32)
     file(GLOB _geokernel_runtime_files
         "${_geokernel_runtime_dir}/*.dll")
 else()
@@ -88,6 +97,7 @@ unset(_geokernel_runtime_files)
 unset(_geokernel_runtime_folder)
 unset(_geokernel_runtime_dir)
 unset(_geokernel_sdk_config)
+unset(_stale_runtime_files)
 unset(_qt_plugin_folder)
 unset(_qt_plugin_dir)
 unset(_qt_root_dir)

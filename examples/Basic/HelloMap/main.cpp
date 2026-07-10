@@ -1,6 +1,5 @@
-#include "Helpers.h"
 #include "Viewer/GisViewer.h"
-#include "Symbology/GisDefaultSymbolStyles.h"
+#include "Helpers.h"
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Symbology;

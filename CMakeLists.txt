@@ -54,6 +54,23 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets Network Sql Svg)
 
+set(_geokernel_qt_targets
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::OpenGL
+    Qt6::OpenGLWidgets
+    Qt6::Network
+    Qt6::Sql
+    Qt6::Svg)
+
+if(WIN32 AND NOT GEOKERNEL_USE_DEBUG_SDK_FOR_DEBUG)
+    foreach(_geokernel_qt_target IN LISTS _geokernel_qt_targets)
+        set_target_properties(${_geokernel_qt_target} PROPERTIES
+            MAP_IMPORTED_CONFIG_DEBUG Release)
+    endforeach()
+endif()
+
 set(_geokernel_include_dirs
     "${GEOKERNEL_ROOT}/src/GeoKernel.Core"
     "${GEOKERNEL_ROOT}/src/GeoKernel.Formats"

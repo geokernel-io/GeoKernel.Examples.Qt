@@ -17,7 +17,7 @@
         "rhs": "Windows"
       },
       "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo",
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
         "GEOKERNEL_ROOT": "${sourceDir}/../GeoKernel"
       }
     },
