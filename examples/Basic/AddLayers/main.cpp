@@ -68,8 +68,6 @@ bool loadSampleLayers(GisViewer& viewer, QWidget* parent)
     countryLayer->style().setFillOpacity(172);
     countryLayer->style().setLineColor(QStringLiteral("#B7E8FF"));
     countryLayer->style().setLineWidth(0.85f);
-    countryLayer->style().setLabelColor(QStringLiteral("#FFFFFF"));
-    countryLayer->style().setLabelHaloColor(QStringLiteral("#10263A"));
 
     if (!loadLayer(viewer, citiesPath, parent))
         return false;
