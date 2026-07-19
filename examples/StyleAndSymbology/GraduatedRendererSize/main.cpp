@@ -16,15 +16,15 @@
 
 #include "Viewer/GisViewer.h"
 #include "Layers/GisLayerVector.h"
-#include "CoordinateSystems/Defs/ProjectedCoordinateSystem.h"
-#include "CoordinateSystems/Transform/CoordinateTransformer.h"
+
+#include "CoordinateSystems/CoordinateTransformer.h"
 #include "Shapes/GisExtent.h"
 #include "Shapes/GisShapePoint.h"
 #include "Symbology/GisColorRampRegistry.h"
 #include "Symbology/GisSymbolRendererFactory.h"
 #include "FeatureSources/GdalShapefileFeatureSource.h"
-#include "CoordinateSystems/Defs/GeographicCoordinateSystem.h"
-#include "CoordinateSystems/Defs/KnownCoordinateSystems.h"
+#include "CoordinateSystems/CoordinateSystemFactory.h"
+
 
 #include "Helpers.h"
 
@@ -33,8 +33,7 @@ using namespace GeoKernel::Viewer::FeatureSources;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
 using namespace GeoKernel::Core::Symbology;
-using namespace GeoKernel::Core::CoordinateSystems::Defs;
-using namespace GeoKernel::Core::CoordinateSystems::Transform;
+using namespace GeoKernel::Core::CoordinateSystems;
 
 constexpr const char* SizeField = "POP_CLASS_SIZE";
 constexpr double MinimumPointSize = 3.0;
@@ -85,9 +84,9 @@ void makePointRangesReadable(GisGraduatedSymbolRenderer& renderer, const GisLaye
 
 GisShapePoint toWebMercator(const GisShapePoint& lonLat)
 {
-    const GeographicCoordinateSystem wgs84 = KnownCoordinateSystems::wgs84();
-    const ProjectedCoordinateSystem webMercator = KnownCoordinateSystems::webMercator();
-    return CoordinateTransformer(wgs84, webMercator).transform(lonLat);
+    const auto wgs84 = CoordinateSystemFactory::fromEpsg(4326);
+    const auto webMercator = CoordinateSystemFactory::fromEpsg(3857);
+    return CoordinateTransformer(*wgs84, *webMercator).transform(lonLat);
 }
 
 GisExtent projectedLayerExtent(const GisLayerVector& layer)
@@ -161,7 +160,7 @@ std::unique_ptr<GisLayerVector> loadCitiesAsMemoryLayer(const QString& path, con
 
     auto layer = std::make_unique<GisLayerVector>();
     layer->setName(QStringLiteral("Cities - graduated size by POP_CLASS"));
-    layer->setCoordinateSystem(std::make_shared<GeographicCoordinateSystem>(KnownCoordinateSystems::wgs84()));
+    layer->setCoordinateSystem(CoordinateSystemFactory::fromEpsg(4326));
     layer->style() = defaultStyle;
 
     int added = 0;

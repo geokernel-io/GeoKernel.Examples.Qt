@@ -18,10 +18,10 @@
 #include <functional>
 #include <memory>
 
-#include "CoordinateSystems/Defs/GeographicCoordinateSystem.h"
-#include "CoordinateSystems/Defs/KnownCoordinateSystems.h"
-#include "CoordinateSystems/Defs/ProjectedCoordinateSystem.h"
-#include "CoordinateSystems/Transform/CoordinateTransformer.h"
+#include "CoordinateSystems/CoordinateSystemFactory.h"
+
+
+#include "CoordinateSystems/CoordinateTransformer.h"
 #include "Layers/GisLayerStyle.h"
 #include "Layers/GisLayerVector.h"
 #include "Raster/Xyz/PredefinedXyzLayers.h"
@@ -33,8 +33,7 @@
 #include "Shapes/GisShapePolyline.h"
 #include "Viewer/GisViewer.h"
 
-using namespace GeoKernel::Core::CoordinateSystems::Defs;
-using namespace GeoKernel::Core::CoordinateSystems::Transform;
+using namespace GeoKernel::Core::CoordinateSystems;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Serialization::Wkb;
 using namespace GeoKernel::Core::Shapes;
@@ -114,7 +113,7 @@ std::unique_ptr<GisLayerVector> createMemoryLayer(
         name,
         shapeType,
         GisExtent(-180.0, -90.0, 180.0, 90.0));
-    layer->setCoordinateSystem(std::make_shared<GeographicCoordinateSystem>(KnownCoordinateSystems::wgs84()));
+    layer->setCoordinateSystem(CoordinateSystemFactory::fromEpsg(4326));
     layer->style() = style;
     layer->open();
     return layer;
@@ -209,9 +208,9 @@ void keepOnlyLastShape(GisLayerVector& layer)
 
 GisShapePoint toWebMercator(const GisShapePoint& lonLat)
 {
-    const GeographicCoordinateSystem wgs84 = KnownCoordinateSystems::wgs84();
-    const ProjectedCoordinateSystem webMercator = KnownCoordinateSystems::webMercator();
-    return CoordinateTransformer(wgs84, webMercator).transform(lonLat);
+    const auto wgs84 = CoordinateSystemFactory::fromEpsg(4326);
+    const auto webMercator = CoordinateSystemFactory::fromEpsg(3857);
+    return CoordinateTransformer(*wgs84, *webMercator).transform(lonLat);
 }
 
 GisExtent initialViewExtent()

@@ -4,13 +4,13 @@
 #include "Layers/GisLayerStyle.h"
 #include "Shapes/GisExtent.h"
 #include "Shapes/GisShapePoint.h"
-#include "CoordinateSystems/Defs/GeographicCoordinateSystem.h"
-#include "CoordinateSystems/Defs/KnownCoordinateSystems.h"
+#include "CoordinateSystems/CoordinateSystemFactory.h"
+
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
-using namespace GeoKernel::Core::CoordinateSystems::Defs;
+using namespace GeoKernel::Core::CoordinateSystems;
 
 bool addLayerExtentRectangle(GisViewer& viewer, int layerIndex)
 {
@@ -41,7 +41,7 @@ bool addLayerExtentRectangle(GisViewer& viewer, int layerIndex)
         QStringLiteral("Layer Extent"),
         QVector<QVector<GisShapePoint>> { rectangle },
         style,
-        std::make_shared<GeographicCoordinateSystem>(KnownCoordinateSystems::wgs84())) >= 0;
+        CoordinateSystemFactory::fromEpsg(4326)) >= 0;
 }
 
 int main(int argc, char* argv[])

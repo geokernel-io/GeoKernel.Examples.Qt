@@ -16,10 +16,10 @@
 
 #include "Viewer/GisViewer.h"
 #include "Layers/GisLayerVector.h"
-#include "CoordinateSystems/Defs/GeographicCoordinateSystem.h"
-#include "CoordinateSystems/Defs/KnownCoordinateSystems.h"
-#include "CoordinateSystems/Defs/ProjectedCoordinateSystem.h"
-#include "CoordinateSystems/Transform/CoordinateTransformer.h"
+#include "CoordinateSystems/CoordinateSystemFactory.h"
+
+
+#include "CoordinateSystems/CoordinateTransformer.h"
 #include "Shapes/GisExtent.h"
 #include "Shapes/GisShapePoint.h"
 #include "Symbology/GisRuleBasedSymbolRenderer.h"
@@ -28,8 +28,7 @@
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
-using namespace GeoKernel::Core::CoordinateSystems::Defs;
-using namespace GeoKernel::Core::CoordinateSystems::Transform;
+using namespace GeoKernel::Core::CoordinateSystems;
 using namespace GeoKernel::Core::Shapes;
 using namespace GeoKernel::Core::Symbology;
 
@@ -38,9 +37,9 @@ constexpr float MaximumPointSize = 22.0f;
 
 GisShapePoint toWebMercator(const GisShapePoint& lonLat)
 {
-    const GeographicCoordinateSystem wgs84 = KnownCoordinateSystems::wgs84();
-    const ProjectedCoordinateSystem webMercator = KnownCoordinateSystems::webMercator();
-    return CoordinateTransformer(wgs84, webMercator).transform(lonLat);
+    const auto wgs84 = CoordinateSystemFactory::fromEpsg(4326);
+    const auto webMercator = CoordinateSystemFactory::fromEpsg(3857);
+    return CoordinateTransformer(*wgs84, *webMercator).transform(lonLat);
 }
 
 GisExtent projectedLayerExtent(const GisLayerVector& layer)

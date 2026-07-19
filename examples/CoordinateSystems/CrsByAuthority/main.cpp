@@ -1,105 +1,35 @@
 #include <QApplication>
 #include <QComboBox>
-#include <QCoreApplication>
-#include <QDir>
-#include <QFileInfo>
 #include <QFont>
-#include <QGroupBox>
 #include <QHBoxLayout>
-#include <QIcon>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
-#include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QPushButton>
-#include <QSize>
 #include <QSpinBox>
 #include <QStatusBar>
-#include <QString>
 #include <QVBoxLayout>
 
-#include "CoordinateSystems/Database/CrsDatabase.h"
-#include "CoordinateSystems/Database/CrsDatabaseOptions.h"
-#include "CoordinateSystems/Database/CrsDatabaseRecord.h"
+#include "CoordinateSystems/CoordinateSystemFactory.h"
 
 #define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
 #undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
-using namespace GeoKernel::Core::CoordinateSystems::Database;
+using namespace GeoKernel::Core::CoordinateSystems;
 
-QString assetPath(const QString& relativePath)
+QString detailsFor(const CoordinateSystem& crs, const QString& authorityCode)
 {
-    const QDir appDir(QCoreApplication::applicationDirPath());
-    return QDir::cleanPath(appDir.absoluteFilePath(QStringLiteral("../../../assets/%1").arg(relativePath)));
-}
-
-QString previewText(const QString& text, int maxCharacters = 2200)
-{
-    const QString trimmed = text.trimmed();
-    if (trimmed.size() <= maxCharacters)
-        return trimmed;
-
-    return trimmed.left(maxCharacters) + QStringLiteral("\n...");
-}
-
-QString recordDetails(const CrsDatabaseRecord& record, const QString& databasePath, const QString& authority, int authoritySrid)
-{
-    QStringList lines;
-    lines << QStringLiteral("CrsDatabase::findByAuthority(\"%1\", %2)").arg(authority).arg(authoritySrid);
-    lines << QString();
-    lines << QStringLiteral("Database");
-    lines << databasePath;
-    lines << QString();
-    lines << QStringLiteral("Record");
-    lines << QStringLiteral("Internal SRID: %1").arg(record.srid());
-    lines << QStringLiteral("Authority: %1").arg(record.authName());
-    lines << QStringLiteral("Authority SRID: %1").arg(record.authSrid());
-    lines << QString();
-    lines << QStringLiteral("Usage");
-    lines << QStringLiteral("CrsDatabase database(CrsDatabaseOptions(databasePath));");
-    lines << QStringLiteral("auto record = database.findByAuthority(QStringLiteral(\"%1\"), %2);").arg(authority).arg(authoritySrid);
-    lines << QString();
-    lines << QStringLiteral("WKT / srtext");
-    lines << previewText(record.srText());
-    lines << QString();
-    lines << QStringLiteral("PROJ.4 / proj4text");
-    lines << (record.proj4Text().trimmed().isEmpty() ? QStringLiteral("(empty)") : record.proj4Text().trimmed());
-
-    return lines.join(QStringLiteral("\n"));
-}
-
-void lookupAuthority(
-    const CrsDatabase& database,
-    const QString& authority,
-    int authoritySrid,
-    const QString& databasePath,
-    QLineEdit& summary,
-    QPlainTextEdit& details,
-    QStatusBar& statusBar)
-{
-    try
-    {
-        const auto record = database.findByAuthority(authority, authoritySrid);
-        if (!record.has_value())
-        {
-            summary.setText(QStringLiteral("%1:%2 not found").arg(authority).arg(authoritySrid));
-            details.setPlainText(QStringLiteral("No CRS record found for authority %1:%2.").arg(authority).arg(authoritySrid));
-            statusBar.showMessage(QStringLiteral("No CRS record found."), 3000);
-            return;
-        }
-
-        summary.setText(record->toString());
-        details.setPlainText(recordDetails(*record, databasePath, authority, authoritySrid));
-        statusBar.showMessage(QStringLiteral("Loaded CRS record %1:%2").arg(record->authName()).arg(record->authSrid()), 3000);
-    }
-    catch (const std::exception& ex)
-    {
-        summary.setText(QStringLiteral("Lookup failed"));
-        details.setPlainText(QString::fromUtf8(ex.what()));
-        statusBar.showMessage(QStringLiteral("CRS lookup failed."), 3000);
-    }
+    return QStringLiteral(
+        "CoordinateSystemFactory::fromUserInput(\"%1\")\n\n"
+        "EPSG code: %2\nName: %3\nKind: %4\nMeters per unit: %5\n\nDefinition\n%6")
+        .arg(authorityCode)
+        .arg(crs.epsgCode())
+        .arg(crs.name())
+        .arg(crs.isGeographic() ? QStringLiteral("Geographic") : QStringLiteral("Projected"))
+        .arg(crs.metersPerUnit().has_value() ? QString::number(*crs.metersPerUnit(), 'g', 12) : QStringLiteral("n/a"))
+        .arg(crs.definition());
 }
 
 int main(int argc, char* argv[])
@@ -107,82 +37,56 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     app.setWindowIcon(sampleIcon());
 
-    const QString databasePath = assetPath(QStringLiteral("spatial_ref_sys.sqlite"));
-    if (!QFileInfo::exists(databasePath))
-    {
-        QMessageBox::critical(
-            nullptr,
-            QStringLiteral("CrsByAuthority"),
-            QStringLiteral("CRS database could not be found:\n%1").arg(databasePath));
-        return 1;
-    }
-
-    CrsDatabase database{ CrsDatabaseOptions(databasePath) };
-
     QMainWindow window;
     window.resize(1040, 720);
-    window.setWindowTitle(QStringLiteral("CrsByAuthority"));
+    window.setWindowTitle(QStringLiteral("CRS by Authority (GDAL/PROJ)"));
 
     auto* central = new QWidget(&window);
-    auto* rootLayout = new QVBoxLayout(central);
-    rootLayout->setContentsMargins(10, 10, 10, 10);
-    rootLayout->setSpacing(8);
-    window.setCentralWidget(central);
-
-    auto* controls = new QGroupBox(QStringLiteral("Authority code lookup"), central);
-    auto* controlsLayout = new QHBoxLayout(controls);
-    auto* authorityLabel = new QLabel(QStringLiteral("Authority:"), controls);
-    auto* authorityCombo = new QComboBox(controls);
-    authorityCombo->setEditable(true);
-    authorityCombo->addItems({ QStringLiteral("EPSG"), QStringLiteral("ESRI"), QStringLiteral("IGNF") });
-    authorityCombo->setCurrentText(QStringLiteral("EPSG"));
-    authorityCombo->setMinimumWidth(120);
-
-    auto* codeLabel = new QLabel(QStringLiteral("Code:"), controls);
-    auto* authoritySridSpin = new QSpinBox(controls);
-    authoritySridSpin->setRange(1, 999999);
-    authoritySridSpin->setValue(32635);
-    authoritySridSpin->setSingleStep(1);
-    authoritySridSpin->setMinimumWidth(110);
-
-    auto* lookupButton = new QPushButton(QStringLiteral("Find by Authority"), controls);
-    auto* summary = new QLineEdit(controls);
+    auto* layout = new QVBoxLayout(central);
+    auto* controls = new QHBoxLayout;
+    auto* authority = new QComboBox(central);
+    authority->setEditable(true);
+    authority->addItems({ QStringLiteral("EPSG"), QStringLiteral("ESRI"), QStringLiteral("IGNF") });
+    auto* code = new QSpinBox(central);
+    code->setRange(1, 999999);
+    code->setValue(32635);
+    auto* lookup = new QPushButton(QStringLiteral("Resolve"), central);
+    auto* summary = new QLineEdit(central);
     summary->setReadOnly(true);
-    summary->setPlaceholderText(QStringLiteral("Lookup result"));
-
-    controlsLayout->addWidget(authorityLabel);
-    controlsLayout->addWidget(authorityCombo);
-    controlsLayout->addWidget(codeLabel);
-    controlsLayout->addWidget(authoritySridSpin);
-    controlsLayout->addWidget(lookupButton);
-    controlsLayout->addWidget(summary, 1);
-    rootLayout->addWidget(controls);
-
+    controls->addWidget(new QLabel(QStringLiteral("Authority:"), central));
+    controls->addWidget(authority);
+    controls->addWidget(new QLabel(QStringLiteral("Code:"), central));
+    controls->addWidget(code);
+    controls->addWidget(lookup);
+    controls->addWidget(summary, 1);
+    layout->addLayout(controls);
     auto* details = new QPlainTextEdit(central);
     details->setReadOnly(true);
-    details->setLineWrapMode(QPlainTextEdit::NoWrap);
     details->setFont(QFont(QStringLiteral("Consolas"), 10));
-    rootLayout->addWidget(details, 1);
+    layout->addWidget(details, 1);
+    window.setCentralWidget(central);
 
-    auto doLookup = [&database, databasePath, authorityCombo, authoritySridSpin, summary, details, &window]
+    auto resolve = [&]
     {
-        lookupAuthority(
-            database,
-            authorityCombo->currentText().trimmed().toUpper(),
-            authoritySridSpin->value(),
-            databasePath,
-            *summary,
-            *details,
-            *window.statusBar());
+        const QString authorityCode = QStringLiteral("%1:%2")
+            .arg(authority->currentText().trimmed().toUpper())
+            .arg(code->value());
+        try
+        {
+            const auto crs = CoordinateSystemFactory::fromUserInput(authorityCode);
+            summary->setText(QStringLiteral("%1 — %2").arg(authorityCode, crs->name()));
+            details->setPlainText(detailsFor(*crs, authorityCode));
+            window.statusBar()->showMessage(QStringLiteral("Resolved with GDAL/PROJ."), 3000);
+        }
+        catch (const std::exception& ex)
+        {
+            summary->setText(QStringLiteral("Lookup failed"));
+            details->setPlainText(QString::fromUtf8(ex.what()));
+        }
     };
-
-    QObject::connect(lookupButton, &QPushButton::clicked, &window, doLookup);
-    QObject::connect(authorityCombo, &QComboBox::currentTextChanged, &window, doLookup);
-    QObject::connect(authoritySridSpin, &QSpinBox::editingFinished, &window, doLookup);
-
-    window.statusBar()->showMessage(QStringLiteral("CrsDatabase::findByAuthority(\"EPSG\", 32635)"));
-    lookupAuthority(database, QStringLiteral("EPSG"), 32635, databasePath, *summary, *details, *window.statusBar());
-
+    QObject::connect(lookup, &QPushButton::clicked, &window, resolve);
+    QObject::connect(code, &QSpinBox::editingFinished, &window, resolve);
+    resolve();
     window.show();
     return app.exec();
 }

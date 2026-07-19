@@ -15,10 +15,10 @@
 
 #include <memory>
 
-#include "CoordinateSystems/Defs/GeographicCoordinateSystem.h"
-#include "CoordinateSystems/Defs/KnownCoordinateSystems.h"
-#include "CoordinateSystems/Defs/ProjectedCoordinateSystem.h"
-#include "CoordinateSystems/Transform/CoordinateTransformer.h"
+#include "CoordinateSystems/CoordinateSystemFactory.h"
+
+
+#include "CoordinateSystems/CoordinateTransformer.h"
 #include "Layers/GisLayerStyle.h"
 #include "Layers/GisLayerVector.h"
 #include "Raster/Xyz/PredefinedXyzLayers.h"
@@ -29,8 +29,7 @@
 #include "Shapes/GisShapePolygon.h"
 #include "Viewer/GisViewer.h"
 
-using namespace GeoKernel::Core::CoordinateSystems::Defs;
-using namespace GeoKernel::Core::CoordinateSystems::Transform;
+using namespace GeoKernel::Core::CoordinateSystems;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Serialization::Wkt;
 using namespace GeoKernel::Core::Shapes;
@@ -65,7 +64,7 @@ std::unique_ptr<GisLayerVector> createPolygonLayer()
         QStringLiteral("WKT Polygon"),
         GisShapeType::Polygon,
         GisExtent(-180.0, -90.0, 180.0, 90.0));
-    layer->setCoordinateSystem(std::make_shared<GeographicCoordinateSystem>(KnownCoordinateSystems::wgs84()));
+    layer->setCoordinateSystem(CoordinateSystemFactory::fromEpsg(4326));
     layer->style() = polygonStyle();
     layer->open();
     return layer;
@@ -105,9 +104,9 @@ void replacePolygon(GisLayerVector& layer, const GisShapePolygon& polygon, const
 
 GisShapePoint toWebMercator(const GisShapePoint& lonLat)
 {
-    const GeographicCoordinateSystem wgs84 = KnownCoordinateSystems::wgs84();
-    const ProjectedCoordinateSystem webMercator = KnownCoordinateSystems::webMercator();
-    return CoordinateTransformer(wgs84, webMercator).transform(lonLat);
+    const auto wgs84 = CoordinateSystemFactory::fromEpsg(4326);
+    const auto webMercator = CoordinateSystemFactory::fromEpsg(3857);
+    return CoordinateTransformer(*wgs84, *webMercator).transform(lonLat);
 }
 
 GisExtent projectedExtent(const GisShapePolygon& polygon)

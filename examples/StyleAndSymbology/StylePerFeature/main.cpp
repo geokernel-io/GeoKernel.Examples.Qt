@@ -23,8 +23,8 @@
 
 #include "Viewer/GisViewer.h"
 #include "FeatureSources/GdalShapefileFeatureSource.h"
-#include "CoordinateSystems/Defs/GeographicCoordinateSystem.h"
-#include "CoordinateSystems/Defs/KnownCoordinateSystems.h"
+#include "CoordinateSystems/CoordinateSystemFactory.h"
+
 #include "Layers/GisLayerVector.h"
 #include "Shapes/GisShape.h"
 #include "Shapes/GisShapePoint.h"
@@ -36,7 +36,7 @@
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Viewer::FeatureSources;
-using namespace GeoKernel::Core::CoordinateSystems::Defs;
+using namespace GeoKernel::Core::CoordinateSystems;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
 using namespace GeoKernel::Core::Symbology;
@@ -216,7 +216,7 @@ std::unique_ptr<GisLayerVector> loadCountiesAsMemoryLayer(const QString& path, Q
         QStringLiteral("California counties - style from zone attribute"),
         source->shapeType(),
         source->extent());
-    layer->setCoordinateSystem(std::make_shared<GeographicCoordinateSystem>(KnownCoordinateSystems::wgs84()));
+    layer->setCoordinateSystem(CoordinateSystemFactory::fromEpsg(4326));
 
     const QStringList zones = {
         QStringLiteral("Residential"),

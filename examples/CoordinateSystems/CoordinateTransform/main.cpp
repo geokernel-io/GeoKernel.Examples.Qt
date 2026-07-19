@@ -22,18 +22,15 @@
 #include "Layers/GisLayerStyle.h"
 #include "Shapes/GisExtent.h"
 #include "Shapes/GisShapePoint.h"
-#include "CoordinateSystems/Defs/GeographicCoordinateSystem.h"
-#include "CoordinateSystems/Defs/KnownCoordinateSystems.h"
-#include "CoordinateSystems/Defs/ProjectedCoordinateSystem.h"
-#include "CoordinateSystems/Transform/CoordinateTransformer.h"
+#include "CoordinateSystems/CoordinateSystemFactory.h"
+#include "CoordinateSystems/CoordinateTransformer.h"
 
 #define GEOKERNEL_SAMPLE_ICONS_ONLY
 #include "Helpers.h"
 #undef GEOKERNEL_SAMPLE_ICONS_ONLY
 
 using namespace GeoKernel::Viewer;
-using namespace GeoKernel::Core::CoordinateSystems::Defs;
-using namespace GeoKernel::Core::CoordinateSystems::Transform;
+using namespace GeoKernel::Core::CoordinateSystems;
 using namespace GeoKernel::Core::Layers;
 using namespace GeoKernel::Core::Shapes;
 
@@ -69,7 +66,7 @@ bool loadWorldLayer(GisViewer& viewer)
     if (GisLayer* layer = viewer.mapLayerAt(0))
     {
         layer->setName(QStringLiteral("World countries"));
-        layer->setCoordinateSystem(std::make_shared<GeographicCoordinateSystem>(KnownCoordinateSystems::wgs84()));
+        layer->setCoordinateSystem(CoordinateSystemFactory::fromEpsg(4326));
         layer->style() = worldStyle();
     }
 
@@ -113,7 +110,7 @@ int main(int argc, char* argv[])
     auto* viewer = new GisViewer(centralWidget);
     viewer->setMouseTracking(true);
     viewer->setActiveTool(GisViewerTool::Pan);
-    viewer->setCoordinateSystem(std::make_shared<GeographicCoordinateSystem>(KnownCoordinateSystems::wgs84()));
+    viewer->setCoordinateSystem(CoordinateSystemFactory::fromEpsg(4326));
     layout->addWidget(viewer, 1);
 
     auto* toolbar = new QToolBar(&window);
@@ -139,9 +136,9 @@ int main(int argc, char* argv[])
     QObject::connect(viewer, &GisViewer::mouseCoordinatesChanged, coordinateStatus, [coordinateStatus](const QPointF&, const QPointF& world)
     {
         const GisShapePoint lonLat(world.x(), world.y());
-        const GeographicCoordinateSystem wgs84 = KnownCoordinateSystems::wgs84();
-        const ProjectedCoordinateSystem webMercator = KnownCoordinateSystems::webMercator();
-        const CoordinateTransformer wgs84ToWebMercator(wgs84, webMercator);
+        const auto wgs84 = CoordinateSystemFactory::fromEpsg(4326);
+        const auto webMercator = CoordinateSystemFactory::fromEpsg(3857);
+        const CoordinateTransformer wgs84ToWebMercator(*wgs84, *webMercator);
         const GisShapePoint webMercatorPoint = wgs84ToWebMercator.transform(lonLat);
         coordinateStatus->setText(coordinateText(lonLat, webMercatorPoint));
     });
