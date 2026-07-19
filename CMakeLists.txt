@@ -26,10 +26,16 @@ endif()
 set(GEOKERNEL_SAMPLES_PLATFORM_OUTPUT_DIR "${GEOKERNEL_SAMPLES_OUTPUT_DIR}/${GEOKERNEL_SAMPLES_PLATFORM_NAME}")
 set(GEOKERNEL_SAMPLES_BIN_DIR "${GEOKERNEL_SAMPLES_PLATFORM_OUTPUT_DIR}/$<CONFIG>/bin")
 option(GEOKERNEL_USE_DEBUG_SDK_FOR_DEBUG "Link Debug samples against GeoKernel Debug binaries" OFF)
+set(GEOKERNEL_ROOT "" CACHE PATH "Optional local GeoKernel source tree or extracted SDK root")
+set(GEOKERNEL_SDK_VERSION "1.1.1" CACHE STRING "GeoKernel SDK registry version")
+set(GEOKERNEL_SDK_SHA256 "1ee9f97ca6356d5a45f216d9be1e3b19992b6a2893ab965ad50fc336ad7ad843"
+    CACHE STRING "Expected SHA256 of the GeoKernel SDK archive")
 
-get_filename_component(_geokernel_default_root "${GEOKERNEL_SAMPLES_ROOT_DIR}/../GeoKernel" ABSOLUTE)
-set(GEOKERNEL_ROOT "${_geokernel_default_root}" CACHE PATH "GeoKernel native SDK repository or package root")
-unset(_geokernel_default_root)
+if(NOT GEOKERNEL_ROOT)
+    include("${GEOKERNEL_SAMPLES_ROOT_DIR}/cmake/AcquireGeoKernelSdk.cmake")
+    geokernel_acquire_sdk(GEOKERNEL_ROOT)
+endif()
+get_filename_component(GEOKERNEL_ROOT "${GEOKERNEL_ROOT}" ABSOLUTE)
 
 if(WIN32)
     enable_language(RC)
@@ -71,50 +77,65 @@ if(WIN32 AND NOT GEOKERNEL_USE_DEBUG_SDK_FOR_DEBUG)
     endforeach()
 endif()
 
-set(_geokernel_include_dirs
-    "${GEOKERNEL_ROOT}/src/GeoKernel.Core"
-    "${GEOKERNEL_ROOT}/src/GeoKernel.Formats"
-    "${GEOKERNEL_ROOT}/src/GeoKernel.Viewer")
-
-foreach(_geokernel_include_dir IN LISTS _geokernel_include_dirs)
-    if(NOT EXISTS "${_geokernel_include_dir}")
-        message(FATAL_ERROR "GeoKernel include directory was not found: ${_geokernel_include_dir}")
+if(EXISTS "${GEOKERNEL_ROOT}/lib/cmake/GeoKernel/GeoKernelConfig.cmake")
+    list(PREPEND CMAKE_PREFIX_PATH "${GEOKERNEL_ROOT}")
+    if(POLICY CMP0144)
+        cmake_policy(SET CMP0144 NEW)
     endif()
-endforeach()
+    find_package(GeoKernel CONFIG REQUIRED)
+    set(GEOKERNEL_RUNTIME_DIR "${GEOKERNEL_ROOT}/bin")
+    message(STATUS "Using packaged GeoKernel SDK ${GEOKERNEL_SDK_VERSION}: ${GEOKERNEL_ROOT}")
+else()
+    set(_geokernel_include_dirs
+        "${GEOKERNEL_ROOT}/src/GeoKernel.Core"
+        "${GEOKERNEL_ROOT}/src/GeoKernel.Formats"
+        "${GEOKERNEL_ROOT}/src/GeoKernel.Viewer")
 
-function(geokernel_import_library target_name library_base_name)
-    add_library(${target_name} SHARED IMPORTED GLOBAL)
-    set_target_properties(${target_name} PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${_geokernel_include_dirs}")
+    foreach(_geokernel_include_dir IN LISTS _geokernel_include_dirs)
+        if(NOT EXISTS "${_geokernel_include_dir}")
+            message(FATAL_ERROR "GeoKernel include directory was not found: ${_geokernel_include_dir}")
+        endif()
+    endforeach()
 
-    if(WIN32)
-        foreach(_config IN ITEMS DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
-            if(_config STREQUAL "DEBUG" AND GEOKERNEL_USE_DEBUG_SDK_FOR_DEBUG)
-                set(_sdk_config "Debug")
-            else()
-                set(_sdk_config "Release")
-            endif()
+    function(geokernel_import_library target_name library_base_name)
+        add_library(${target_name} SHARED IMPORTED GLOBAL)
+        set_target_properties(${target_name} PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${_geokernel_include_dirs}")
 
+        if(WIN32)
+            foreach(_config IN ITEMS DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
+                if(_config STREQUAL "DEBUG" AND GEOKERNEL_USE_DEBUG_SDK_FOR_DEBUG)
+                    set(_sdk_config "Debug")
+                else()
+                    set(_sdk_config "Release")
+                endif()
+
+                set_target_properties(${target_name} PROPERTIES
+                    "IMPORTED_IMPLIB_${_config}" "${GEOKERNEL_ROOT}/outputs/build/${_sdk_config}/${library_base_name}.lib"
+                    "IMPORTED_LOCATION_${_config}" "${GEOKERNEL_ROOT}/outputs/build/${_sdk_config}/${library_base_name}.dll")
+            endforeach()
+        elseif(APPLE)
             set_target_properties(${target_name} PROPERTIES
-                "IMPORTED_IMPLIB_${_config}" "${GEOKERNEL_ROOT}/outputs/build/${_sdk_config}/${library_base_name}.lib"
-                "IMPORTED_LOCATION_${_config}" "${GEOKERNEL_ROOT}/outputs/build/${_sdk_config}/${library_base_name}.dll")
-        endforeach()
-    elseif(APPLE)
-        set_target_properties(${target_name} PROPERTIES
-            IMPORTED_LOCATION "${GEOKERNEL_ROOT}/outputs/build/Release/lib${library_base_name}.dylib")
-    else()
-        set_target_properties(${target_name} PROPERTIES
-            IMPORTED_LOCATION "${GEOKERNEL_ROOT}/outputs/build/Release/lib${library_base_name}.so")
-    endif()
-endfunction()
+                IMPORTED_LOCATION "${GEOKERNEL_ROOT}/outputs/build/Release/lib${library_base_name}.dylib")
+        else()
+            set_target_properties(${target_name} PROPERTIES
+                IMPORTED_LOCATION "${GEOKERNEL_ROOT}/outputs/build/Release/lib${library_base_name}.so")
+        endif()
+    endfunction()
 
-geokernel_import_library(GeoKernel::Core GeoKernel.Core)
-geokernel_import_library(GeoKernel::Formats GeoKernel.Formats)
-geokernel_import_library(GeoKernel::Viewer GeoKernel.Viewer)
+    geokernel_import_library(GeoKernel::Core GeoKernel.Core)
+    geokernel_import_library(GeoKernel::Formats GeoKernel.Formats)
+    geokernel_import_library(GeoKernel::Viewer GeoKernel.Viewer)
+    # Leave this empty so CopyGeoKernelRuntime.cmake can select the legacy
+    # Debug/Release output directory using the active build configuration.
+    set(GEOKERNEL_RUNTIME_DIR "")
+    message(STATUS "Using local GeoKernel build tree: ${GEOKERNEL_ROOT}")
+endif()
 
 add_custom_target(GeoKernelSampleRuntime ALL
     COMMAND ${CMAKE_COMMAND}
         -D "GEOKERNEL_ROOT=${GEOKERNEL_ROOT}"
+        -D "GEOKERNEL_RUNTIME_DIR=${GEOKERNEL_RUNTIME_DIR}"
         -D "QT_BIN_DIR=$<TARGET_FILE_DIR:Qt6::Core>"
         -D "QT_RUNTIME_FILES=$<TARGET_FILE:Qt6::Core>;$<TARGET_FILE:Qt6::Gui>;$<TARGET_FILE:Qt6::Widgets>;$<TARGET_FILE:Qt6::OpenGL>;$<TARGET_FILE:Qt6::OpenGLWidgets>;$<TARGET_FILE:Qt6::Network>;$<TARGET_FILE:Qt6::Sql>;$<TARGET_FILE:Qt6::Svg>"
         -D "CONFIG=$<CONFIG>"

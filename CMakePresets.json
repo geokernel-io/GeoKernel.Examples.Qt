@@ -17,8 +17,7 @@
         "rhs": "Windows"
       },
       "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
-        "GEOKERNEL_ROOT": "${sourceDir}/../GeoKernel"
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release"
       }
     },
     {
@@ -32,8 +31,7 @@
         "rhs": "Linux"
       },
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "GEOKERNEL_ROOT": "${sourceDir}/../GeoKernel"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
@@ -47,8 +45,7 @@
         "rhs": "Darwin"
       },
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "GEOKERNEL_ROOT": "${sourceDir}/../GeoKernel"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ],

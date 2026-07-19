@@ -12,3 +12,4 @@ CMakeUserPresets.json
 *.log
 *.pgidx
 data/
+.geokernel-sdk/

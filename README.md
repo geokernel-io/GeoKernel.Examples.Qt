@@ -4,20 +4,32 @@ This repository contains Qt/C++ example applications for the GeoKernel native SD
 
 ## Configure
 
-The default presets expect the GeoKernel SDK repository next to this repository:
+On Windows x64, the default preset downloads the pinned GeoKernel C++ SDK from
+the GitLab Generic Package Registry, verifies its SHA256 checksum, and caches it
+under `.geokernel-sdk/`. No sibling GeoKernel source checkout is required.
 
-```text
-D:/projects/GeoKernel
-D:/projects/GeoKernel.Examples.Qt
-```
-
-If GeoKernel is somewhere else, pass `GEOKERNEL_ROOT` when configuring.
+For the first download, provide a GitLab token that can read the package
+registry. Keep the token in the process environment; do not add it to a preset,
+CMake cache, or source file.
 
 ## Windows
 
-```bat
+```powershell
+$env:GEOKERNEL_GITLAB_TOKEN = "<read-package token>"
+$env:GEOKERNEL_GITLAB_TOKEN_TYPE = "PRIVATE-TOKEN"
 cmake --preset windows-msvc
 cmake --build --preset windows-msvc-release --target HelloMap
+```
+
+`GEOKERNEL_GITLAB_TOKEN_TYPE` may be `PRIVATE-TOKEN`, `DEPLOY-TOKEN`, or
+`JOB-TOKEN`. It defaults to `PRIVATE-TOKEN`. After the verified SDK is cached,
+subsequent configure and build operations do not require the token.
+
+GeoKernel developers can bypass the registry and use a local source build or
+an already extracted SDK:
+
+```powershell
+cmake --preset windows-msvc -DGEOKERNEL_ROOT=D:/projects/GeoKernel
 ```
 
 ### Visual Studio
@@ -29,6 +41,9 @@ In Solution Explorer, switch to **Targets View**, right-click `HelloMap`, then c
 If the build/run targets do not appear, close Visual Studio and delete the local `.vs` folder. It is only a Visual Studio cache and can keep stale solution state after moving from MSBuild projects to CMake.
 
 ## Linux
+
+Automatic registry acquisition is currently Windows x64 only. Set
+`GEOKERNEL_ROOT` to a compatible local SDK before configuring Linux or macOS.
 
 ```sh
 cmake --preset linux
