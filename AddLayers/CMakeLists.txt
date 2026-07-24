@@ -6,6 +6,10 @@ endif()
 
 project(GeoKernelAddLayers VERSION 1.0.0 LANGUAGES CXX)
 
+if(WIN32)
+    enable_language(RC)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -39,6 +43,9 @@ foreach(_target IN LISTS _qt_targets)
 endforeach()
 
 add_executable(AddLayers WIN32 main.cpp SampleSupport.h resources/icons.qrc)
+if(WIN32)
+    target_sources(AddLayers PRIVATE resources/AddLayers.rc)
+endif()
 target_compile_definitions(AddLayers PRIVATE QT_NO_DEPRECATED_WARNINGS QT_SQL_LIB)
 target_include_directories(AddLayers SYSTEM PRIVATE
     "${GEOKERNEL_ROOT}/include/GeoKernel.Core"

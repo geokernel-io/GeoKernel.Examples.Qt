@@ -3,6 +3,7 @@
 #include "Viewer/GisViewer.h"
 
 #include <QApplication>
+#include <QIcon>
 
 using namespace GeoKernel::Viewer;
 using namespace GeoKernel::Core::Layers;
@@ -89,10 +90,11 @@ bool loadSampleLayers(GisViewer& viewer, QWidget* parent)
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
+    QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/geokernel.ico")));
 
     QMainWindow window;
     window.resize(1200, 800);
-    window.setWindowTitle(QStringLiteral("GeoKernel AddLayers"));
+    window.setWindowTitle(QStringLiteral("AddLayers"));
 
     auto* viewer = new GisViewer(&window);
     viewer->setActiveTool(GisViewerTool::Pan);
