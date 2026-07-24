@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>zoom-in.svg</file>
+        <file>zoom-out.svg</file>
+        <file>full-extent.svg</file>
+        <file>zoom-box.svg</file>
+        <file>pan.svg</file>
+        <file>geokernel.ico</file>
+    </qresource>
+</RCC>
