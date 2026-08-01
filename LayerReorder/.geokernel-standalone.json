@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "name": "LayerReorder",
+  "source": "examples/LayerManagement/LayerReorder",
+  "sdk_version": "latest",
+  "platforms": [
+    "windows-x64-msvc",
+    "linux-x64"
+  ]
+}
