@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>point.svg</file>
+        <file>add.svg</file>
+        <file>save.svg</file>
+        <file>rollback.svg</file>
+        <file>refresh.svg</file>
+        <file>full-extent.svg</file>
+        <file>geokernel.ico</file>
+    </qresource>
+</RCC>
