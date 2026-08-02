@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>identify.svg</file>
+        <file>pan.svg</file>
+        <file>full-extent.svg</file>
+        <file>geokernel.ico</file>
+    </qresource>
+</RCC>
