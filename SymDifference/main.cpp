@@ -38,11 +38,11 @@ GisShapePolygon polygonFromRing(std::initializer_list<GisShapePoint> points)
 GisShapePolygon polygonA()
 {
     return polygonFromRing({
-        GisShapePoint(-4.2, -1.7),
-        GisShapePoint(1.0, -1.7),
-        GisShapePoint(1.0, 2.1),
-        GisShapePoint(-4.2, 2.1),
-        GisShapePoint(-4.2, -1.7)
+        GisShapePoint(-4.4, -1.8),
+        GisShapePoint(1.2, -1.8),
+        GisShapePoint(1.2, 2.2),
+        GisShapePoint(-4.4, 2.2),
+        GisShapePoint(-4.4, -1.8)
     });
 }
 
@@ -67,7 +67,7 @@ GisLayerStyle sourceAStyle()
 {
     GisLayerStyle style;
     style.setFillColor(QStringLiteral("#BFD7EA"));
-    style.setFillOpacity(120);
+    style.setFillOpacity(115);
     style.setLineColor(QStringLiteral("#2F80C2"));
     style.setLineWidth(2.0f);
     return style;
@@ -77,7 +77,7 @@ GisLayerStyle sourceBStyle()
 {
     GisLayerStyle style;
     style.setFillColor(QStringLiteral("#CDE7D8"));
-    style.setFillOpacity(120);
+    style.setFillOpacity(115);
     style.setLineColor(QStringLiteral("#2D6A4F"));
     style.setLineWidth(2.0f);
     return style;
@@ -87,7 +87,7 @@ GisLayerStyle resultStyle()
 {
     GisLayerStyle style;
     style.setFillColor(QStringLiteral("#F9C74F"));
-    style.setFillOpacity(165);
+    style.setFillOpacity(155);
     style.setLineColor(QStringLiteral("#D95D39"));
     style.setLineWidth(3.0f);
     return style;
@@ -150,31 +150,32 @@ void renderScene(
     viewer.addOwnedShape(right.clone(), sourceBStyle());
 
     QStringList details;
-    details << QStringLiteral("Intersection(left, right)");
+    details << QStringLiteral("SymmetricalDifference(left, right)");
+    details << QStringLiteral("This keeps areas that belong to only one source polygon.");
     details << QStringLiteral("Left extent: %1").arg(extentText(left.extent()));
     details << QStringLiteral("Right extent: %1").arg(extentText(right.extent()));
 
     if (!showResult)
     {
-        details << QStringLiteral("Result: click Run Intersection to calculate");
-        statusBar.showMessage(QStringLiteral("Source polygons are ready. Click Run Intersection."));
+        details << QStringLiteral("Result: click Run Sym Difference to calculate");
+        statusBar.showMessage(QStringLiteral("Source polygons are ready. Click Run Sym Difference."));
     }
     else
     {
         GisTopology topology;
-        std::unique_ptr<GisShape> result = topology.Intersection(left, right);
+        std::unique_ptr<GisShape> result = topology.SymmetricalDifference(left, right);
         if (result && !result->isEmpty())
         {
             details << QStringLiteral("Result type: %1").arg(shapeTypeText(*result));
             details << QStringLiteral("Result parts: %1").arg(partCount(*result));
             details << QStringLiteral("Result extent: %1").arg(extentText(result->extent()));
             viewer.addOwnedShape(std::move(result), resultStyle());
-            statusBar.showMessage(QStringLiteral("Intersection result created."));
+            statusBar.showMessage(QStringLiteral("Symmetrical difference result created."));
         }
         else
         {
             details << QStringLiteral("Result: empty");
-            statusBar.showMessage(QStringLiteral("Intersection returned an empty result."));
+            statusBar.showMessage(QStringLiteral("Symmetrical difference returned an empty result."));
         }
     }
 
@@ -186,12 +187,12 @@ void renderScene(
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
-    QApplication::setApplicationName(QStringLiteral("Intersection"));
+    QApplication::setApplicationName(QStringLiteral("SymDifference"));
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/geokernel.ico")));
 
     QMainWindow window;
     window.resize(980, 680);
-    window.setWindowTitle(QStringLiteral("Intersection"));
+    window.setWindowTitle(QStringLiteral("SymDifference"));
 
     auto* toolbar = new QToolBar(&window);
     toolbar->setMovable(false);
@@ -199,9 +200,9 @@ int main(int argc, char* argv[])
 
     QAction* fullExtentAction = toolbar->addAction(QStringLiteral("Full Extent"));
     toolbar->addSeparator();
-    toolbar->addWidget(new QLabel(QStringLiteral("Operation: Intersection(left, right)"), toolbar));
+    toolbar->addWidget(new QLabel(QStringLiteral("Operation: SymmetricalDifference(left, right)"), toolbar));
     toolbar->addSeparator();
-    QAction* runIntersectionAction = toolbar->addAction(QStringLiteral("Run Intersection"));
+    QAction* runSymDifferenceAction = toolbar->addAction(QStringLiteral("Run Sym Difference"));
 
     auto* viewer = new GisViewer(&window);
 
@@ -222,7 +223,7 @@ int main(int argc, char* argv[])
         viewer->setViewExtent(GisExtent(-5.2, -3.2, 5.0, 4.0));
     });
 
-    QObject::connect(runIntersectionAction, &QAction::triggered, &window, [viewer, detailsDock, &window]
+    QObject::connect(runSymDifferenceAction, &QAction::triggered, &window, [viewer, detailsDock, &window]
     {
         renderScene(*viewer, *detailsDock, *window.statusBar(), true);
     });
