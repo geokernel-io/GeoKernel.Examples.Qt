@@ -42,13 +42,10 @@ foreach(_target IN LISTS _qt_targets)
     set_target_properties(${_target} PROPERTIES MAP_IMPORTED_CONFIG_DEBUG Release)
 endforeach()
 
-add_executable(
-    Scalebar
-    WIN32
+add_executable(Scalebar WIN32
     main.cpp
     SampleSupport.h
-    resources/icons.qrc
-)
+    resources/icons.qrc)
 
 if(WIN32)
     target_sources(Scalebar PRIVATE resources/Scalebar.rc)

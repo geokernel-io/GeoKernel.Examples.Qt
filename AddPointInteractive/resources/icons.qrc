@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="delete.svg">delete.svg</file>
+        <file alias="full-extent.svg">full-extent.svg</file>
+        <file alias="pan.svg">pan.svg</file>
+        <file alias="point.svg">point.svg</file>
+        <file>geokernel.ico</file>
+    </qresource>
+</RCC>

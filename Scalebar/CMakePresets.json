@@ -11,9 +11,10 @@
       "displayName": "Windows x64 (MSVC)",
       "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/build/windows-msvc",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       },
       "cacheVariables": {
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release"
@@ -24,36 +25,36 @@
       "displayName": "Linux x64",
       "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/build/linux-x64",
-      "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": "Debug;Release"
-      },
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release"
       }
     }
   ],
   "buildPresets": [
-    {
-      "name": "windows-msvc-release",
-      "configurePreset": "windows-msvc",
-      "configuration": "Release"
-    },
     {
       "name": "windows-msvc-debug",
       "configurePreset": "windows-msvc",
       "configuration": "Debug"
     },
     {
-      "name": "linux-x64-release",
-      "configurePreset": "linux-x64",
+      "name": "windows-msvc-release",
+      "configurePreset": "windows-msvc",
       "configuration": "Release"
     },
     {
       "name": "linux-x64-debug",
       "configurePreset": "linux-x64",
       "configuration": "Debug"
+    },
+    {
+      "name": "linux-x64-release",
+      "configurePreset": "linux-x64",
+      "configuration": "Release"
     }
   ]
 }

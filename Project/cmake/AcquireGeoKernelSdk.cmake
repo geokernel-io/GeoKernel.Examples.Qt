@@ -5,7 +5,7 @@ function(_geokernel_resolve_latest_release output_version output_json cache_root
         "https://api.github.com/repos/geokernel-io/GeoKernel/releases/latest"
         "${_release_json}"
         HTTPHEADER "Accept: application/vnd.github+json"
-        HTTPHEADER "User-Agent: GeoKernel-Project-CMake"
+        HTTPHEADER "User-Agent: GeoKernel-Examples-CMake"
         TLS_VERIFY ON
         STATUS _release_status)
     list(GET _release_status 0 _release_code)
