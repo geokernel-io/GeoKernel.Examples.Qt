@@ -1,9 +1,9 @@
-#include "SampleSupport.h"
-
 #include <QApplication>
 #include <QIcon>
 #include <QMainWindow>
 #include <QMetaObject>
+
+#include "SampleSupport.h"
 
 using namespace GeoKernel::Viewer;
 
