@@ -1,5 +1,5 @@
-#ifndef GEOKERNEL_XYZ_MIN_MAX_ZOOM_SAMPLE_SUPPORT_H
-#define GEOKERNEL_XYZ_MIN_MAX_ZOOM_SAMPLE_SUPPORT_H
+#ifndef GEOKERNEL_ECW_LOAD_SAMPLE_SUPPORT_H
+#define GEOKERNEL_ECW_LOAD_SAMPLE_SUPPORT_H
 
 #include "Viewer/GisViewer.h"
 
@@ -35,7 +35,7 @@ inline bool downloadFile(const QUrl& url, const QString& targetPath, QWidget* pa
     QNetworkAccessManager manager;
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::UserAgentHeader,
-        QStringLiteral("GeoKernel LayerLoadCancel"));
+        QStringLiteral("GeoKernel EcwLoad"));
     QNetworkReply* reply = manager.get(request);
 
     QProgressDialog progress(QStringLiteral("Downloading sample data..."),
@@ -72,7 +72,7 @@ inline bool downloadFile(const QUrl& url, const QString& targetPath, QWidget* pa
     if (!succeeded)
     {
         QFile::remove(partialPath);
-        QMessageBox::critical(parent, QStringLiteral("LayerLoadCancel"),
+        QMessageBox::critical(parent, QStringLiteral("EcwLoad"),
             QStringLiteral("Sample data download failed:\n%1").arg(error));
         return false;
     }
@@ -122,7 +122,7 @@ inline QString ensureSampleFile(
 
     if (extractorProgram.isEmpty())
     {
-        QMessageBox::critical(parent, QStringLiteral("LayerLoadCancel"),
+        QMessageBox::critical(parent, QStringLiteral("EcwLoad"),
             QStringLiteral("Sample ZIP extractor was not found."));
         return {};
     }
@@ -136,7 +136,7 @@ inline QString ensureSampleFile(
     {
         const QString details =
             QString::fromLocal8Bit(extractor.readAllStandardError()).trimmed();
-        QMessageBox::critical(parent, QStringLiteral("LayerLoadCancel"),
+        QMessageBox::critical(parent, QStringLiteral("EcwLoad"),
             details.isEmpty()
                 ? QStringLiteral("Sample ZIP could not be extracted.")
                 : QStringLiteral("Sample ZIP could not be extracted:\n%1").arg(details));
@@ -154,7 +154,7 @@ inline bool loadLayer(GeoKernel::Viewer::GisViewer& viewer,
     if (viewer.addLayerFromPath(path, &error))
         return true;
 
-    QMessageBox::critical(parent, QStringLiteral("LayerLoadCancel"),
+    QMessageBox::critical(parent, QStringLiteral("EcwLoad"),
         QStringLiteral("Layer could not be loaded:\n%1").arg(error));
     return false;
 }
