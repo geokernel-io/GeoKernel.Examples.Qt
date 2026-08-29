@@ -165,10 +165,10 @@ int main(int argc, char* argv[])
     form->addRow("Execution provider", provider);
     auto* predictionOpacity = new QSlider(Qt::Horizontal, panel);
     predictionOpacity->setRange(0, 100);
-    predictionOpacity->setValue(100);
+    predictionOpacity->setValue(50);
     predictionOpacity->setEnabled(false);
     predictionOpacity->setToolTip("Transparency of the land-cover prediction layer");
-    auto* opacityValue = new QLabel("100%", panel);
+    auto* opacityValue = new QLabel("50%", panel);
     auto* opacityEditor = new QWidget(panel);
     auto* opacityLayout = new QHBoxLayout(opacityEditor);
     opacityLayout->setContentsMargins(0, 0, 0, 0);

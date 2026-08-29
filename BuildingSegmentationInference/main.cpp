@@ -26,6 +26,7 @@
 #include "GeoKernelAI.h"
 #include "GeoKernelAnalysis.h"
 #include "Raster/Tiff/GisLayerTIFF.h"
+#include "SampleSupport.h"
 #include "Viewer/GisViewer.h"
 
 using namespace GeoKernel::AI;
@@ -110,15 +111,6 @@ int main(int argc, char* argv[]) {
     form->addRow("Execution provider", provider);
     panelLayout->addLayout(form);
 
-    modelPath->setText(existingPath(
-        "D:/projects/GeoKernel Datasets/BuildingSegmentation/Models/DinoV3sBuildings"));
-    rasterPath->setText(existingPath(
-        "D:/projects/GeoKernel Datasets/BuildingSegmentation/naip_rgb_train_tile1.tif"));
-    if (!rasterPath->text().isEmpty()) {
-        const QFileInfo input(rasterPath->text());
-        outputPath->setText(input.dir().filePath(input.completeBaseName() + "_building_mask.tif"));
-    }
-
     auto* run = new QPushButton("Run building segmentation inference", panel);
     panelLayout->addWidget(run);
     auto* progress = new QProgressBar(panel);
@@ -172,16 +164,27 @@ int main(int argc, char* argv[]) {
             progress->setFormat(QStringLiteral("%1% — %2").arg(std::clamp(value, 0, 100)).arg(text));
         });
 
+    auto openBaseRaster = [viewer](const QString& path) {
+        if (path.trimmed().isEmpty()) return;
+        viewer->clearLayers();
+        auto layer = std::make_unique<GisLayerTIFF>(path);
+        layer->setName("Buildings RGB source");
+        layer->open();
+        viewer->addLayer(layer);
+        viewer->fullExtent();
+    };
+
     QObject::connect(browseModel, &QPushButton::clicked, &window, [&window, modelPath] {
         const QString path = QFileDialog::getExistingDirectory(&window, "Select GeoKernel model package", modelPath->text());
         if (!path.isEmpty()) modelPath->setText(QDir::toNativeSeparators(path));
     });
-    QObject::connect(browseRaster, &QPushButton::clicked, &window, [&window, rasterPath, outputPath] {
+    QObject::connect(browseRaster, &QPushButton::clicked, &window, [&window, rasterPath, outputPath, openBaseRaster] {
         const QString path = QFileDialog::getOpenFileName(&window, "Select input raster", rasterPath->text(), "GeoTIFF (*.tif *.tiff)");
         if (path.isEmpty()) return;
         rasterPath->setText(QDir::toNativeSeparators(path));
         const QFileInfo input(path);
         outputPath->setText(QDir::toNativeSeparators(input.dir().filePath(input.completeBaseName() + "_building_mask.tif")));
+        openBaseRaster(path);
     });
     QObject::connect(browseOutput, &QPushButton::clicked, &window, [&window, outputPath] {
         const QString path = QFileDialog::getSaveFileName(&window, "Save instance labels", outputPath->text(), "GeoTIFF (*.tif)");
@@ -289,5 +292,48 @@ int main(int argc, char* argv[]) {
     });
 
     window.show();
+    QMetaObject::invokeMethod(&window, [&window, modelPath, rasterPath, outputPath, details, openBaseRaster] {
+        details->setPlainText("Preparing the buildings raster and GeoKernel ONNX model package...");
+        const QString raster = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/buildings.zip")),
+            QStringLiteral("buildings.zip"),
+            QStringLiteral("buildings"),
+            QStringLiteral("buildings.tif"), &window);
+        if (raster.isEmpty()) {
+            details->setPlainText("The buildings input raster could not be prepared.");
+            return;
+        }
+
+        const QString manifest = ensureSampleFile(
+            QUrl(QStringLiteral("https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/buildings-model.zip")),
+            QStringLiteral("buildings-model.zip"),
+            QStringLiteral("buildings-model"),
+            QStringLiteral("geokernel-model.json"), &window);
+        if (manifest.isEmpty()) {
+            rasterPath->setText(QDir::toNativeSeparators(raster));
+            const QFileInfo input(raster);
+            outputPath->setText(QDir::toNativeSeparators(
+                input.dir().filePath(input.completeBaseName() + "_building_mask.tif")));
+            details->setPlainText(
+                "The buildings raster is ready, but the ONNX model package is not published yet. "
+                "Select a local GeoKernel model package or upload buildings-model.zip to release v1.");
+            openBaseRaster(raster);
+            return;
+        }
+
+        rasterPath->setText(QDir::toNativeSeparators(raster));
+        modelPath->setText(QDir::toNativeSeparators(QFileInfo(manifest).absolutePath()));
+        const QFileInfo input(raster);
+        outputPath->setText(QDir::toNativeSeparators(
+            input.dir().filePath(input.completeBaseName() + "_building_mask.tif")));
+        try {
+            openBaseRaster(raster);
+            details->setPlainText(
+                "The buildings raster and ONNX model package are ready. Run inference to add building polygons.");
+        } catch (const std::exception& exception) {
+            details->setPlainText("The sample files are ready, but the input raster could not be opened:\n" +
+                QString::fromUtf8(exception.what()));
+        }
+    }, Qt::QueuedConnection);
     return app.exec();
 }
