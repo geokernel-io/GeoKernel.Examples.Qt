@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>geokernel.ico</file>
+        <file>pan.svg</file>
+        <file>measure-distance.svg</file>
+        <file>measure-area.svg</file>
+        <file>delete.svg</file>
+        <file>full-extent.svg</file>
+    </qresource>
+</RCC>

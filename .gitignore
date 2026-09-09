@@ -1,0 +1,10 @@
+build/
+build-*/
+outputs/
+.geokernel-sdk/
+
+.vs/
+.inspection/
+.idea/
+.vscode/
+CMakeUserPresets.json
