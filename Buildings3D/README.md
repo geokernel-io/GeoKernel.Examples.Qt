@@ -68,17 +68,6 @@ placement, ignoring source Z. Road loading is disabled. loadPreparedScene runs
 on a worker; setScene commits on the GUI thread. Appearance uses
 setLayerAppearance and setLayerColor; exaggeration uses setHeightScale.
 
-## Validation
-
-`--smoke-report C:/temp/buildings.json --smoke-height 18` runs without activating
-the window on the last monitor and writes JSON plus a PNG. It checks building
-geometry, assigned heights, absence of road geometry, changed rendering when
-buildings are hidden, appearance settings and exaggeration.
-
-Windows tests passed with 9 m and 18 m heights, 4,715 building feature records
-and 627,294 building vertices. Cold download and warm cache loading both passed.
-These checks do not establish survey-grade height or positional accuracy.
-
 ## Automatic SDK and data setup
 
 Use the standard presets without GEOKERNEL_ROOT to download the latest public

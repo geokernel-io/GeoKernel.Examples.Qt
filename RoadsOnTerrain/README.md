@@ -73,14 +73,6 @@ source Z and building discovery. CPU scene preparation runs on a worker.
 GUI-thread setScene commits the result. Road styling uses setLayerAppearance
 and setLayerColor. Pending load failure/cancellation preserves the previous scene.
 
-## Validation
-
-`--smoke-report C:/temp/roads.json` runs without activating the window on the
-last monitor. It checks nonempty road geometry, absence of buildings, a changed
-frame when roads are hidden, appearance changes and exaggeration.
-PNG/JSON results are written beside the report. These checks do not establish
-survey-grade alignment.
-
 ## Automatic SDK and data setup
 
 Use the standard presets without GEOKERNEL_ROOT to download the latest public

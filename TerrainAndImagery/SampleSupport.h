@@ -19,7 +19,7 @@
 #include <QTimer>
 #include <QUrl>
 
-inline void sampleError(QWidget *parent, const QString &, const QString &message)
+inline void sampleError(QWidget* parent, const QString&, const QString& message)
 {
     QMessageBox::critical(parent, "TerrainAndImagery", message);
 }
@@ -29,7 +29,7 @@ inline QString sampleDataPath()
     return QDir(QCoreApplication::applicationDirPath()).absoluteFilePath(QStringLiteral("data"));
 }
 
-inline bool downloadFile(const QUrl &url, const QString &targetPath, QWidget *parent)
+inline bool downloadFile(const QUrl& url, const QString& targetPath, QWidget* parent)
 {
     QDir().mkpath(QFileInfo(targetPath).absolutePath());
     const QString partialPath = targetPath + QStringLiteral(".part");
@@ -47,7 +47,7 @@ inline bool downloadFile(const QUrl &url, const QString &targetPath, QWidget *pa
                       QStringLiteral("GeoKernel TerrainAndImagery"));
     request.setTransferTimeout(60000);
     request.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
-    QNetworkReply *reply = manager.get(request);
+    QNetworkReply* reply = manager.get(request);
     bool writeFailed = false;
     QTimer idleTimer;
     idleTimer.setSingleShot(true);
@@ -106,21 +106,21 @@ inline bool downloadFile(const QUrl &url, const QString &targetPath, QWidget *pa
     return false;
 }
 
-inline QString findFile(const QString &folder, const QString &fileName)
+inline QString findFile(const QString& folder, const QString& fileName)
 {
     QDirIterator iterator(folder, QStringList() << fileName, QDir::Files,
                           QDirIterator::Subdirectories);
     return iterator.hasNext() ? iterator.next() : QString();
 }
 
-inline bool completeSample(const QString &path)
+inline bool completeSample(const QString& path)
 {
     if (path.isEmpty() || QFileInfo(path).size() == 0)
         return false;
     if (QFileInfo(path).suffix().compare("gltf", Qt::CaseInsensitive) == 0)
     {
         const QDir folder(QFileInfo(path).absolutePath());
-        for (const auto *name : {"model.bin", "basecolor.png", "license.txt"})
+        for (const auto* name : {"model.bin", "basecolor.png", "license.txt"})
             if (QFileInfo(folder.filePath(name)).size() == 0)
                 return false;
         return true;
@@ -128,15 +128,15 @@ inline bool completeSample(const QString &path)
     if (QFileInfo(path).suffix().compare("shp", Qt::CaseInsensitive) != 0)
         return true;
     const auto base = QFileInfo(path).absolutePath() + "/" + QFileInfo(path).completeBaseName();
-    for (const auto *suffix : {".dbf", ".shx", ".prj"})
+    for (const auto* suffix : {".dbf", ".shx", ".prj"})
         if (!QFileInfo(base + suffix).isFile() || QFileInfo(base + suffix).size() == 0)
             return false;
     return true;
 }
 
-inline QString ensureSampleFile(const QUrl &url, const QString &archiveName,
-                                const QString &folderName, const QString &requiredFileName,
-                                QWidget *parent)
+inline QString ensureSampleFile(const QUrl& url, const QString& archiveName,
+                                const QString& folderName, const QString& requiredFileName,
+                                QWidget* parent)
 {
     const QString dataRoot = sampleDataPath();
     const QString targetDir = QDir(dataRoot).absoluteFilePath(folderName);

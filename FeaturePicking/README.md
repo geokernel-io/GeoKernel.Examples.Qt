@@ -57,10 +57,3 @@ vectorSelection retains the selected scene snapshot; layerId and featureId resol
 source attributes. Scene-local range indices are only kept in the current selected
 list and are replaced after scene changes. activateSelection, focusSelection,
 clearSelection and setMultipleSelectionEnabled implement the selection controls.
-
-## Validation status
-
-Source/API and configuration review completed. No build or application was run.
-An optional `--smoke-report C:/temp/picking.json` checks programmatic selection,
-attribute table population, clearing and nonempty road/building geometry.
-It does not replace a manual mouse-picking test.

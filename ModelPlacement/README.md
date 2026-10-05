@@ -66,14 +66,6 @@ downloads the latest SDK. Output: `outputs/windows/Release/bin/ModelPlacement.ex
 The executable folder must be writable. ZIP extraction uses tar on Windows or
 unzip on Linux. Windows Release is tested; Linux has not been validated.
 
-## Validation
-
-`--smoke-report C:/temp/model.json` opens without activation on the last monitor.
-It loads the published packages, captures the default textured model, checks
-hide/show rendering, changes height by 10 m plus heading and scale through the
-controls, applies placement again and checks rendered geometry and exaggeration.
-JSON and before/after PNG files are written beside the report.
-
 ## Automatic SDK and data setup
 
 Use the standard presets without GEOKERNEL_ROOT to download the latest public

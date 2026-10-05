@@ -72,13 +72,6 @@ Cancellation or preparation failure retains the previous scene. Closing cancels
 and joins the worker before the viewer is destroyed; a native raster read may
 need to finish before cancellation is observed.
 
-## Rendering check
-
-Add `--smoke-report C:/temp/palettes.json` to load without activating the window
-on the last monitor, capture all five palettes, check distinct frame hashes and
-invalid-ramp rejection, and exit. PNG captures are stored beside the JSON.
-These checks do not certify geographic or height accuracy.
-
 ## Automatic SDK and data setup
 
 Use the standard presets without GEOKERNEL_ROOT to download the latest public

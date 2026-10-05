@@ -1,8 +1,6 @@
 #ifndef _SAMPLESUPPORT_H_
 #define _SAMPLESUPPORT_H_
 
-
-
 #include <QAction>
 #include <QActionGroup>
 #include <QCoreApplication>
@@ -13,29 +11,27 @@
 #include <QFileInfo>
 #include <QIcon>
 #include <QMainWindow>
-#include <QSize>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QProcess>
 #include <QProgressDialog>
+#include <QSize>
 #include <QStandardPaths>
+#include <QTimer>
 #include <QToolBar>
 #include <QUrl>
-#include <QTimer>
 
 inline void sampleError(QWidget* parent, const QString&, const QString& message)
 {
     parent->setProperty("sampleError", message);
-    if (!parent->property("smoke").toBool())
-        QMessageBox::critical(parent, "LayerStylingAndFiltering", message);
+    QMessageBox::critical(parent, "LayerStylingAndFiltering", message);
 }
 
 inline QString sampleDataPath()
 {
-    return QDir(QCoreApplication::applicationDirPath())
-        .absoluteFilePath(QStringLiteral("data"));
+    return QDir(QCoreApplication::applicationDirPath()).absoluteFilePath(QStringLiteral("data"));
 }
 
 inline bool downloadFile(const QUrl& url, const QString& targetPath, QWidget* parent)
@@ -43,36 +39,43 @@ inline bool downloadFile(const QUrl& url, const QString& targetPath, QWidget* pa
     QDir().mkpath(QFileInfo(targetPath).absolutePath());
     const QString partialPath = targetPath + QStringLiteral(".part");
     QFile partialFile(partialPath);
-    if (!partialFile.open(QIODevice::WriteOnly)) {
-        sampleError(parent, "LayerStylingAndFiltering", "Cannot write the sample data folder next to the application.");
+    if (!partialFile.open(QIODevice::WriteOnly))
+    {
+        sampleError(parent, "LayerStylingAndFiltering",
+                    "Cannot write the sample data folder next to the application.");
         return false;
     }
 
     QNetworkAccessManager manager;
     QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("GeoKernel LayerStylingAndFiltering"));
+    request.setHeader(QNetworkRequest::UserAgentHeader,
+                      QStringLiteral("GeoKernel LayerStylingAndFiltering"));
     request.setTransferTimeout(60000);
     request.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
     QNetworkReply* reply = manager.get(request);
     bool writeFailed = false;
-    QTimer idleTimer; idleTimer.setSingleShot(true); idleTimer.setInterval(60000);
+    QTimer idleTimer;
+    idleTimer.setSingleShot(true);
+    idleTimer.setInterval(60000);
     QObject::connect(&idleTimer, &QTimer::timeout, reply, &QNetworkReply::abort);
     idleTimer.start();
 
-    QProgressDialog progress(QStringLiteral("Downloading sample data..."),
-        QStringLiteral("Cancel"), 0, 0, parent);
+    QProgressDialog progress(QStringLiteral("Downloading sample data..."), QStringLiteral("Cancel"),
+                             0, 0, parent);
     progress.setWindowModality(Qt::ApplicationModal);
-    progress.setMinimumDuration(parent->property("smoke").toBool() ? 2147483647 : 0);
+    progress.setMinimumDuration(0);
 
     QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::readyRead, [&]
-    {
+    QObject::connect(reply, &QNetworkReply::readyRead, [&] {
         idleTimer.start();
         const auto bytes = reply->readAll();
-        if (partialFile.write(bytes) != bytes.size()) { writeFailed = true; reply->abort(); }
+        if (partialFile.write(bytes) != bytes.size())
+        {
+            writeFailed = true;
+            reply->abort();
+        }
     });
-    QObject::connect(reply, &QNetworkReply::downloadProgress, [&](qint64 received, qint64 total)
-    {
+    QObject::connect(reply, &QNetworkReply::downloadProgress, [&](qint64 received, qint64 total) {
         if (total > 0)
         {
             progress.setRange(0, 100);
@@ -85,22 +88,25 @@ inline bool downloadFile(const QUrl& url, const QString& targetPath, QWidget* pa
     idleTimer.stop();
 
     const auto remaining = reply->readAll();
-    if (partialFile.write(remaining) != remaining.size()) writeFailed = true;
+    if (partialFile.write(remaining) != remaining.size())
+        writeFailed = true;
     partialFile.close();
     const bool succeeded = reply->error() == QNetworkReply::NoError && !writeFailed;
-    const QString error = writeFailed ? "Could not write sample data to disk." : reply->errorString();
+    const QString error =
+        writeFailed ? "Could not write sample data to disk." : reply->errorString();
     reply->deleteLater();
 
     if (!succeeded)
     {
         QFile::remove(partialPath);
         sampleError(parent, QStringLiteral("LayerStylingAndFiltering"),
-            QStringLiteral("Sample data download failed:\n%1").arg(error));
+                    QStringLiteral("Sample data download failed:\n%1").arg(error));
         return false;
     }
 
     QFile::remove(targetPath);
-    if (QFile::rename(partialPath, targetPath)) return true;
+    if (QFile::rename(partialPath, targetPath))
+        return true;
     sampleError(parent, "LayerStylingAndFiltering", "Could not save the downloaded sample ZIP.");
     return false;
 }
@@ -108,38 +114,42 @@ inline bool downloadFile(const QUrl& url, const QString& targetPath, QWidget* pa
 inline QString findFile(const QString& folder, const QString& fileName)
 {
     QDirIterator iterator(folder, QStringList() << fileName, QDir::Files,
-        QDirIterator::Subdirectories);
+                          QDirIterator::Subdirectories);
     return iterator.hasNext() ? iterator.next() : QString();
 }
 
-inline bool completeSample(const QString& path) {
-    if(path.isEmpty()||QFileInfo(path).size()==0)return false;
-    if(QFileInfo(path).suffix().compare("gltf",Qt::CaseInsensitive)==0){
+inline bool completeSample(const QString& path)
+{
+    if (path.isEmpty() || QFileInfo(path).size() == 0)
+        return false;
+    if (QFileInfo(path).suffix().compare("gltf", Qt::CaseInsensitive) == 0)
+    {
         const QDir folder(QFileInfo(path).absolutePath());
-        for(const auto* name:{"model.bin","basecolor.png","license.txt"})
-            if(QFileInfo(folder.filePath(name)).size()==0)return false;
+        for (const auto* name : {"model.bin", "basecolor.png", "license.txt"})
+            if (QFileInfo(folder.filePath(name)).size() == 0)
+                return false;
         return true;
     }
-    if(QFileInfo(path).suffix().compare("shp",Qt::CaseInsensitive)!=0)return true;
-    const auto base=QFileInfo(path).absolutePath()+"/"+QFileInfo(path).completeBaseName();
-    for(const auto* suffix:{".dbf",".shx",".prj"})
-        if(!QFileInfo(base+suffix).isFile()||QFileInfo(base+suffix).size()==0)return false;
+    if (QFileInfo(path).suffix().compare("shp", Qt::CaseInsensitive) != 0)
+        return true;
+    const auto base = QFileInfo(path).absolutePath() + "/" + QFileInfo(path).completeBaseName();
+    for (const auto* suffix : {".dbf", ".shx", ".prj"})
+        if (!QFileInfo(base + suffix).isFile() || QFileInfo(base + suffix).size() == 0)
+            return false;
     return true;
 }
 
-inline QString ensureSampleFile(
-    const QUrl& url,
-    const QString& archiveName,
-    const QString& folderName,
-    const QString& requiredFileName,
-    QWidget* parent)
+inline QString ensureSampleFile(const QUrl& url, const QString& archiveName,
+                                const QString& folderName, const QString& requiredFileName,
+                                QWidget* parent)
 {
-    parent->setProperty("sampleCacheHit", false);
     const QString dataRoot = sampleDataPath();
     const QString targetDir = QDir(dataRoot).absoluteFilePath(folderName);
     const QString existing = findFile(targetDir, requiredFileName);
     if (completeSample(existing) && QFileInfo::exists(QDir(targetDir).filePath(".ready")))
-    { parent->setProperty("sampleCacheHit", true); return existing; }
+    {
+        return existing;
+    }
 
     QDir().mkpath(targetDir);
     const QString archivePath = QDir(dataRoot).absoluteFilePath(archiveName);
@@ -148,21 +158,21 @@ inline QString ensureSampleFile(
 
 #ifdef Q_OS_WIN
     const QString extractorProgram = QStandardPaths::findExecutable(QStringLiteral("tar"));
-    const QStringList extractorArguments = {
-        QStringLiteral("-xf"), QDir::toNativeSeparators(archivePath)
-    };
+    const QStringList extractorArguments = {QStringLiteral("-xf"),
+                                            QDir::toNativeSeparators(archivePath)};
 #else
     const QString extractorProgram = QStandardPaths::findExecutable(QStringLiteral("unzip"));
-    const QStringList extractorArguments = {
-        QStringLiteral("-o"), archivePath, QStringLiteral("-d"), targetDir
-    };
+    const QStringList extractorArguments = {QStringLiteral("-o"), archivePath, QStringLiteral("-d"),
+                                            targetDir};
 #endif
 
     if (extractorProgram.isEmpty())
     {
-        sampleError(parent, QStringLiteral("LayerStylingAndFiltering"),
+        sampleError(
+            parent, QStringLiteral("LayerStylingAndFiltering"),
 #ifdef Q_OS_WIN
-            QStringLiteral("Sample ZIP could not be extracted because the tar command was not found."));
+            QStringLiteral(
+                "Sample ZIP could not be extracted because the tar command was not found."));
 #else
             QStringLiteral("Sample ZIP could not be extracted because unzip is not installed.\n"
                            "Install it with: sudo apt install unzip"));
@@ -178,22 +188,32 @@ inline QString ensureSampleFile(
     {
         const QString details = QString::fromLocal8Bit(extractor.readAllStandardError()).trimmed();
         sampleError(parent, QStringLiteral("LayerStylingAndFiltering"),
-            details.isEmpty()
-                ? QStringLiteral("Sample ZIP could not be extracted.")
-                : QStringLiteral("Sample ZIP could not be extracted:\n%1").arg(details));
+                    details.isEmpty()
+                        ? QStringLiteral("Sample ZIP could not be extracted.")
+                        : QStringLiteral("Sample ZIP could not be extracted:\n%1").arg(details));
         return {};
     }
 
     const auto result = findFile(targetDir, requiredFileName);
-    if(!completeSample(result)){sampleError(parent, "LayerStylingAndFiltering", "The sample ZIP is missing the expected file or its companion files.");return {};}
-    if(!result.isEmpty()){
+    if (!completeSample(result))
+    {
+        sampleError(parent, "LayerStylingAndFiltering",
+                    "The sample ZIP is missing the expected file or its companion files.");
+        return {};
+    }
+    if (!result.isEmpty())
+    {
         QFile marker(QDir(targetDir).filePath(".ready"));
-        if(!marker.open(QIODevice::WriteOnly)){sampleError(parent,"LayerStylingAndFiltering","Cannot save the sample cache marker.");return {};}
-        marker.write("v1");marker.close();
+        if (!marker.open(QIODevice::WriteOnly))
+        {
+            sampleError(parent, "LayerStylingAndFiltering", "Cannot save the sample cache marker.");
+            return {};
+        }
+        marker.write("v1");
+        marker.close();
         QFile::remove(archivePath);
     }
     return result;
 }
-
 
 #endif

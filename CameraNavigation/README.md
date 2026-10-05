@@ -71,14 +71,6 @@ Shift+left drag looks.
 camera JSON helpers and QVariantAnimation. Main loads the sample on a CPU worker
 and commits it on the GUI thread, following TerrainAndImagery.
 
-## Validation
-
-`--smoke-report C:/temp/camera.json` runs without activating the window on the
-last monitor. It checks a preset transition, saved-view restore and deletion,
-persistence through a newly constructed panel, and interruption by viewport input.
-Settings are redirected to a temporary INI directory so tests do not modify user
-bookmarks. A viewport PNG and JSON result are saved beside the report.
-
 ## Automatic SDK and data setup
 
 Use the standard presets without GEOKERNEL_ROOT to download the latest public

@@ -1,5 +1,4 @@
 #include "SampleSupport.h"
-
 #include <GeoKernel.Viewer3D/ViewerController.h>
 #include <QApplication>
 #include <QCheckBox>
@@ -29,9 +28,8 @@ struct LoadResult
     QString error;
 };
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-
     QApplication app(argc, argv);
     app.setApplicationName("TerrainAndImagery");
     app.setWindowIcon(QIcon(":/icons/geokernel.ico"));
@@ -44,74 +42,73 @@ int main(int argc, char **argv)
         QMessageBox::critical(nullptr, "TerrainAndImagery", "Vulkan could not be initialized.");
         return 1;
     }
-    
+
     QMainWindow window;
     window.setWindowTitle("TerrainAndImagery — GeoKernel");
     window.resize(1200, 800);
-    auto *viewport = createViewerWindow(&instance);
-    auto *container = QWidget::createWindowContainer(viewport, &window);
+    auto* viewport = createViewerWindow(&instance);
+    auto* container = QWidget::createWindowContainer(viewport, &window);
     container->setFocusPolicy(Qt::StrongFocus);
 
-    auto *stack = new QStackedWidget(&window);
-    auto *welcome = new QLabel("Preparing Sagrada Família terrain and orthophoto…");
+    auto* stack = new QStackedWidget(&window);
+    auto* welcome = new QLabel("Preparing Sagrada Família terrain and orthophoto…");
     welcome->setAlignment(Qt::AlignCenter);
     stack->addWidget(welcome);
     stack->addWidget(container);
     stack->setCurrentWidget(welcome);
-    
+
     window.setCentralWidget(stack);
-    
+
     ViewerController viewer(viewport);
-    auto *dock = new QDockWidget("Terrain data", &window);
+    auto* dock = new QDockWidget("Terrain data", &window);
     dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    auto *panel = new QWidget;
-    auto *form = new QFormLayout(panel);
+    auto* panel = new QWidget;
+    auto* form = new QFormLayout(panel);
 
     QString demPath, photoPath;
-    auto *dataset = new QLabel("Sagrada Família — terrain and orthophoto");
+    auto* dataset = new QLabel("Sagrada Família — terrain and orthophoto");
     dataset->setWordWrap(true);
     form->addRow(dataset);
-    auto *note = new QLabel("Sample DEM heights are an unverified preview. No vertical datum conversion is applied.");
+    auto* note = new QLabel(
+        "Sample DEM heights are an unverified preview. No vertical datum conversion is applied.");
     note->setWordWrap(true);
     form->addRow(note);
-    auto *load = new QPushButton("Reload sample");
-    auto *cancel = new QPushButton("Cancel loading");
+    auto* load = new QPushButton("Reload sample");
+    auto* cancel = new QPushButton("Cancel loading");
     cancel->setEnabled(false);
     form->addRow(load);
     form->addRow(cancel);
-    auto *progress = new QProgressBar;
+    auto* progress = new QProgressBar;
     progress->setRange(0, 0);
     progress->hide();
     form->addRow(progress);
-    auto *imagery = new QCheckBox("Show orthophoto");
+    auto* imagery = new QCheckBox("Show orthophoto");
     imagery->setChecked(true);
     imagery->setEnabled(false);
     form->addRow(imagery);
-    auto *exaggeration = new QDoubleSpinBox;
+    auto* exaggeration = new QDoubleSpinBox;
     exaggeration->setRange(0.25, 10.0);
     exaggeration->setSingleStep(0.25);
     exaggeration->setDecimals(2);
     exaggeration->setValue(1.0);
     exaggeration->setSuffix(" ×");
-    exaggeration->setToolTip("Scales displayed terrain height only. Source elevations are unchanged.");
+    exaggeration->setToolTip(
+        "Scales displayed terrain height only. Source elevations are unchanged.");
     form->addRow("Vertical exaggeration", exaggeration);
-    
+
     QObject::connect(exaggeration, qOverload<double>(&QDoubleSpinBox::valueChanged), &window,
-                     [&](double value) {
-                         viewer.setHeightScale(static_cast<float>(value));
-                     });
-    
-    auto *info = new QLabel("No terrain loaded.");
+                     [&](double value) { viewer.setHeightScale(static_cast<float>(value)); });
+
+    auto* info = new QLabel("No terrain loaded.");
     info->setWordWrap(true);
     form->addRow(info);
     dock->setWidget(panel);
     window.addDockWidget(Qt::LeftDockWidgetArea, dock);
-    auto *toolbar = window.addToolBar("Navigation");
+    auto* toolbar = window.addToolBar("Navigation");
     toolbar->setMovable(false);
 
-    QObject::connect(toolbar->addAction("Reset view"), &QAction::triggered, &window, [&] {
-        viewer.resetCamera();
-    });
+    QObject::connect(toolbar->addAction("Reset view"), &QAction::triggered, &window,
+                     [&] { viewer.resetCamera(); });
 
     QObject::connect(toolbar->addAction("Controls"), &QAction::triggered, &window, [&] {
         QMessageBox::information(&window, "Camera controls",
@@ -135,7 +132,7 @@ int main(int argc, char **argv)
         progress->setVisible(on);
     };
 
-    auto fail = [&](const QString &error) {
+    auto fail = [&](const QString& error) {
         window.statusBar()->showMessage(error);
         QMessageBox::warning(&window, "Unable to load terrain", error);
     };
@@ -186,7 +183,7 @@ int main(int argc, char **argv)
         options.imageFile = photoPath.isEmpty()
                                 ? QString()
                                 : dir.relativeFilePath(QFileInfo(photoPath).absoluteFilePath());
-        
+
         options.roadFile.clear();
         options.buildingFile.clear();
         options.overrideHeightReference = true;
@@ -197,19 +194,17 @@ int main(int argc, char **argv)
         cancelled = false;
         busy(true);
         window.statusBar()->showMessage("Loading terrain…");
-        
+
         pending = std::async(std::launch::async, [&, folder, options] {
             LoadResult r;
             try
             {
                 LoadControl c;
                 c.cancellationFlag = &cancelled;
-                c.cancelled = [&] {
-                    return cancelled.load();
-                };
+                c.cancelled = [&] { return cancelled.load(); };
                 r.scene = loadPreparedScene(folder, options, r.error, c);
             }
-            catch (const std::exception &e)
+            catch (const std::exception& e)
             {
                 r.error = QString::fromUtf8(e.what());
             }
@@ -262,7 +257,7 @@ int main(int argc, char **argv)
     const int result = app.exec();
     poll.stop();
     cancelled = true;
-    
+
     if (pending.valid())
         pending.get();
 
