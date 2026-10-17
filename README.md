@@ -67,3 +67,19 @@ after the new SDK has been published.
 ## Local demos
 
 - [Terrain3D_Demo](Terrain3D_Demo/README.md): Anitkabir DEM terrain with ECW imagery.
+
+## Globe examples
+
+- [GlobeHello](GlobeHello/README.md): Interactive globe with atmosphere, Esri imagery, streamed DEM and lighting controls. Layers start disabled and can be enabled from the toolbar.
+- [GlobeTerrainNavigation](GlobeTerrainNavigation/README.md): Barcelona globe with terrain, Esri imagery, atmosphere, lighting and camera navigation.
+- [GlobeVectorStyling](GlobeVectorStyling/README.md): Sagrada Familia building footprints with fill, categorical colors, opacity, labels and identification.
+- [GlobeBuildings](GlobeBuildings/README.md): Sagrada Familia footprints. Use Extrude to enable extrusion and adjust building height and colors.
+- [GlobeModelPlacement](GlobeModelPlacement/README.md): Textured Sagrada Familia model with position, rotation, scale and height controls.
+- [GlobeRasterServices](GlobeRasterServices/README.md): Sagrada Familia orthophoto and DEM enabled at startup, with Esri background and atmosphere.
+- [GlobeTerrainAnalysis](GlobeTerrainAnalysis/README.md): Barcelona terrain analysis: select Line of sight, Viewshed, Slope / aspect or Measure, then click the globe to choose analysis points. Results appear in a fixed-height bottom panel.
+
+These standalone examples use the HelloMap SDK download/checksum workflow and
+the `windows-msvc` / `windows-msvc-release` presets. Required sample archives are
+downloaded and verified automatically. Binaries and data are placed in
+`outputs/windows/Release/bin`. Qt 6.11.0, Vulkan and a Windows SDK exporting
+`GeoKernel::Globe` are required. Published SDK 1.5.34 includes Globe; configure selects the latest release automatically.

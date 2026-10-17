@@ -1,0 +1,6 @@
+build/
+outputs/
+.geokernel-sdk/
+.sample-data/
+data/
+CMakeUserPresets.json

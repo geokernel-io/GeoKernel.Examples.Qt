@@ -1,0 +1,32 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows-msvc",
+      "displayName": "Windows x64 (MSVC, Release)",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/build/windows-msvc",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Release",
+        "GEOKERNEL_ROOT": ""
+      }
+    },
+    {
+      "name": "windows-msvc-release",
+      "displayName": "Alias for windows-msvc",
+      "inherits": "windows-msvc"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-msvc-release",
+      "configurePreset": "windows-msvc",
+      "configuration": "Release"
+    }
+  ]
+}

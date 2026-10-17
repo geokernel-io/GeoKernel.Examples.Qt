@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.23)
+project(GlobeTerrainNavigation LANGUAGES CXX)
+include(GlobeSample.cmake)
+find_package(Qt6 6.11.0 EXACT REQUIRED COMPONENTS Widgets Network)
+geokernel_add_globe_sample(GlobeTerrainNavigation main.cpp resources/icons.qrc)
+set_target_properties(GlobeTerrainNavigation PROPERTIES AUTORCC ON)
+if(WIN32)
+    enable_language(RC)
+    target_sources(GlobeTerrainNavigation PRIVATE resources/GlobeTerrainNavigation.rc)
+endif()
+set_target_properties(GlobeTerrainNavigation PROPERTIES WIN32_EXECUTABLE TRUE)
+target_link_libraries(GlobeTerrainNavigation PRIVATE Qt6::Widgets Qt6::Network)
+
+
+
+
+
