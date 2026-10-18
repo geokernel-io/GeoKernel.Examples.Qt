@@ -43,7 +43,6 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    // Lifetime: controller, container/window, then Vulkan instance.
     QMainWindow window;
     window.setWindowTitle("TerrainLoading — GeoKernel");
     window.resize(1200, 800);
@@ -192,8 +191,7 @@ int main(int argc, char** argv)
         SceneOptions options;
         options.demFile = dir.relativeFilePath(QFileInfo(demPath).absoluteFilePath());
         options.imageFile.clear();
-        options.terrainResolution = 256 << quality->currentIndex();
-        // Explicitly disable vector discovery: this example teaches raster layers only.
+        options.terrainResolution = 256 << quality->currentIndex();        
         options.roadFile.clear();
         options.buildingFile.clear();
         options.overrideHeightReference = true;
