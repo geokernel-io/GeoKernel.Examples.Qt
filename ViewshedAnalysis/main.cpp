@@ -262,5 +262,6 @@ int main(int argc, char** argv)
     // Native raster reads may finish before cancellation is observed; join before SDK teardown.
     if (pending.valid())
         pending.get();
+
     return result;
 }
