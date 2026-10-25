@@ -83,3 +83,29 @@ the `windows-msvc` / `windows-msvc-release` presets. Required sample archives ar
 downloaded and verified automatically. Binaries and data are placed in
 `outputs/windows/Release/bin`. Qt 6.11.0, Vulkan and a Windows SDK exporting
 `GeoKernel::Globe` are required. Published SDK 1.5.34 includes Globe; configure selects the latest release automatically.
+
+## SAM3 AI example
+
+- [Sam3SegmentationInference](Sam3SegmentationInference/README.md): automatically prepare pinned SAM3 text/point/box models, generate a draft overlay in GisViewer, accept/discard and export source-aligned GeoTIFF/GeoPackage outputs. Requires a SDK release containing the new native SAM3 APIs and model assets in the SampleData v1 release.
+
+- [HotosmBuildingFootprints](HotosmBuildingFootprints/README.md): HOTOSM DINOv3-S building footprints on Barafu, Dallu and Stone Town imagery; automatic SDK/model/data downloads, Left/Right dataset navigation, cancellable inference and georeferenced label/GeoJSON outputs.
+
+- [GeoAI USA Mask R-CNN building footprints](GeoAiUsaBuildingFootprints/README.md): automatic SDK/model/sample acquisition, native RGB inference, session-only overlays and explicit Shapefile export.
+
+- [DynamicWorldInference](DynamicWorldInference/README.md): nine-class Sentinel-2 L1C land-cover classification with automatic SDK/model/data preparation, session-only colored overlays and explicit Shapefile export.
+
+## PrithviFloodAnalysis
+
+[Prithvi flood analysis](PrithviFloodAnalysis/README.md): automatic SDK/model/sample acquisition, native six-band Sentinel-2 water/flood segmentation with explicit geographic location, session-only overlay, transparency control and Shapefile export.
+
+## PrueFieldBoundaries
+
+[PRUE field boundaries](PrueFieldBoundaries/README.md): automatic SDK/R2-model/upstream-raster acquisition, eight-band two-period Sentinel-2 field segmentation, session-only overlay, transparency slider, cancellation and Shapefile export.
+
+## Sen2srSuperResolution
+
+[SEN2SRLite super-resolution](Sen2srSuperResolution/README.md): automatic SDK/model/raster acquisition, full RGBN x4 model with Fourier constraint, synchronized before/after swipe, Cancel and explicit AI-tagged Float32 GeoTIFF export.
+
+## GeoAI SDK baseline —1.5.37
+
+Sam3SegmentationInference, HotosmBuildingFootprints, GeoAiUsaBuildingFootprints, DynamicWorldInference, PrithviFloodAnalysis, PrueFieldBoundaries and Sen2srSuperResolution require the public SDK1.5.37 or newer. Their default acquisition remains latest; source builds from a local SAM3 SDK are no longer necessary. See each README for commands to replace a stale local SDK cache. CUDA remains an optional GPU runtime deployment, independent of the model ZIPs and the standard CPU SDK runtime.

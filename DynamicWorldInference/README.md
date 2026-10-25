@@ -69,3 +69,5 @@ cmake --build --preset windows-msvc-release
 The explicit version above reproduces the validated release; omit GEOKERNEL_SDK_VERSION on a fresh build to follow latest. SDK downloads and model downloads are separate caches.
 
 License key: define licenseKey immediately after the interactive GisViewer is constructed in main.cpp; setLicenseKey is called before map tools and layers are initialized. The example no longer contains command-line verification or smoke-test execution branches.
+
+Model and imagery provenance, download hashes and license notes: [DATA-SOURCES.md](DATA-SOURCES.md).

@@ -1,0 +1,141 @@
+{
+  "schema": "geokernel.sam3-download/1",
+  "repository": "geokernel-io/GeoKernel.SampleData",
+  "release": "v1",
+  "revision": "3c879f39826c281e95690f02c7821c4de09afae7",
+  "profiles": {
+    "text": {
+      "manifest": "sam3-package.json",
+      "files": [
+        {
+          "path": "decoder.onnx",
+          "sha256": "2fa4e4982f8d2f9024818a0dd44bfd8e97ce416a04e1dc408d4e08b191b8cfd9",
+          "bytes": 96546974
+        },
+        {
+          "path": "processor/processor_config.json",
+          "sha256": "13a9f4183ee01007d717384560c259d80e78a253057f3bb7e4a49fd226aed47f",
+          "bytes": 646
+        },
+        {
+          "path": "processor/tokenizer.json",
+          "sha256": "aa52e1ac1aa5e6669a42d9515f19c6598b9038ce20d5488c2c334145d97d44a2",
+          "bytes": 3642251
+        },
+        {
+          "path": "processor/tokenizer_config.json",
+          "sha256": "165e29078beda030e5591e520c0052779a1fa1caf0457675a31eead0b55cb9c6",
+          "bytes": 466
+        },
+        {
+          "path": "text_encoder.onnx",
+          "sha256": "7dad354abf5c6671d0036a16a63d01937549178ac80dd7a419e32e7be7fe3eaf",
+          "bytes": 1413086391
+        },
+        {
+          "path": "vision_encoder.onnx",
+          "sha256": "028599b7f2d4f5a9308ca62711b955fbe80d1aaa5e5a8bf2e6b40c83627b889c",
+          "bytes": 1852221498
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "bec48f70bd37bf8280a9d1ebf01642d26086f6122ba735baa08fe03c5a6e7448",
+          "bytes": 7352
+        },
+        {
+          "path": "sam3-package.json",
+          "bytes": 1904,
+          "sha256": "1c31a6391525023098d100b018b994f563cf5ce3140c1ecd5d095c07022d61b0"
+        }
+      ],
+      "assets": [
+        {
+          "name": "meta-sam3-text-fp32-geokernel-onnx-v1.zip",
+          "bytes": 3087973902,
+          "sha256": "95d9bc3ebdec6a6147a9bfa97325712bfbb77fccbd6bb3f20be453c381820931",
+          "files": [
+            "decoder.onnx",
+            "LICENSE",
+            "processor/processor_config.json",
+            "processor/tokenizer.json",
+            "processor/tokenizer_config.json",
+            "sam3-package.json",
+            "text_encoder.onnx",
+            "vision_encoder.onnx",
+            "ATTRIBUTION.txt",
+            "PACKAGE-README.md"
+          ]
+        }
+      ],
+      "base_url": "https://pub-00d214f25f754884b22349c19ac37bbf.r2.dev/geokernel-models/"
+    },
+    "tracker": {
+      "manifest": "sam3-package.json",
+      "files": [
+        {
+          "path": "tracker_encoder.onnx",
+          "sha256": "9b3181f877ea9efebda47f940e079d81ad48c1b5d873c73d5b8d18ccbb1fa5d1",
+          "bytes": 1852515557
+        },
+        {
+          "path": "tracker_decoder.onnx",
+          "sha256": "ae0cb40b2c51cf2c74568245e788aebed1957579db507721c417caedef31f3c9",
+          "bytes": 17023716
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "bec48f70bd37bf8280a9d1ebf01642d26086f6122ba735baa08fe03c5a6e7448",
+          "bytes": 7352
+        },
+        {
+          "path": "processor/processor_config.json",
+          "sha256": "1f2410966a6685c7b7d864a4f0331deac00c62a48d60407fcd68f784e82666d9",
+          "bytes": 653
+        },
+        {
+          "path": "sam3-package.json",
+          "bytes": 1298,
+          "sha256": "5098173b48665972e5a43176428a9e209d6061c72dc23b0f55529d2648704c20"
+        }
+      ],
+      "assets": [
+        {
+          "name": "meta-sam3-tracker-fp32-geokernel-onnx-v1.zip",
+          "bytes": 1701342048,
+          "sha256": "c4309ed67b2292f64641d740f2558c2d4253476ca1ec40c17d49c4800c050896",
+          "files": [
+            "LICENSE",
+            "processor/processor_config.json",
+            "sam3-package.json",
+            "tracker_decoder.onnx",
+            "tracker_encoder.onnx",
+            "ATTRIBUTION.txt",
+            "PACKAGE-README.md"
+          ]
+        }
+      ],
+      "base_url": "https://pub-00d214f25f754884b22349c19ac37bbf.r2.dev/geokernel-models/"
+    },
+    "sample": {
+      "manifest": "buildings.tif",
+      "base_url": "https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/",
+      "files": [
+        {
+          "path": "buildings.tif",
+          "bytes": 9306440,
+          "sha256": "a44d4c26ab51aa69daf0d648ed02ee8846ddd724e8b42f32f6199e0bc8943bb1"
+        }
+      ],
+      "assets": [
+        {
+          "name": "buildings.zip",
+          "bytes": 9300861,
+          "sha256": "f7cb0554b54c8e8bf31d576c38f988a8902382ad2ec3db3de6de05f5dbfb6f2b",
+          "files": [
+            "buildings.tif"
+          ]
+        }
+      ]
+    }
+  }
+}
