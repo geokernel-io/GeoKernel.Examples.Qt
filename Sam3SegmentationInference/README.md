@@ -1,6 +1,6 @@
 # SAM 3 segmentation inference
 
-Interactive native Qt example using GeoKernel SDK 1.5.37 or newer. Models and
+Interactive native Qt example using GeoKernel SDK 1.5.38 or newer. Models and
 sample data are prepared automatically. Inference runs only after Generate draft.
 
 ## Build
@@ -8,7 +8,7 @@ sample data are prepared automatically. Inference runs only after Generate draft
 From a Visual Studio x64 developer terminal:
 
 ```bat
-cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.37
+cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.38
 cmake --build --preset windows-msvc-release
 ```
 
@@ -63,7 +63,7 @@ standard SDK runtime, preserving the override on later builds. CUDA 12 runtime,
 cuBLAS, cuFFT and cuDNN 9 DLLs must also be available to the process. Keep the
 runtime redistribution licenses with a deployment. Python is not used at runtime.
 
-GEOS-enabled GDAL is required for polygon topology; the published SDK 1.5.37
+GEOS-enabled GDAL is required for polygon topology; the published SDK 1.5.38
 includes gdal.dll, geos_c.dll and geos.dll. Sam3Overlay reads the actual GeoPackage
 CRS and creates an in-memory preview layer.
 
