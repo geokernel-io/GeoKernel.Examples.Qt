@@ -52,14 +52,14 @@ Model MIT declaration and PyTorch/torchvision notices remain in the downloaded p
 
 Verified CPU result on the sample: 21 native-resolution tiles, 746 retained instances, 857 valid polygon parts, about 41 seconds on the local test machine. Overlay rendering and reopened Shapefile CRS/count passed. A uniform 512px raster returned zero instances/polygons without error. These are functional checks, not accuracy metrics or guaranteed timings.
 
-## Published SDK1.5.37
+## Published SDK1.5.38
 
-Requires GeoKernel1.5.37 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
+Requires GeoKernel1.5.38 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
 
 To replace an older local SDK cached in CMake, configure with:
 
 ```bat
-cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.37
+cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.38
 cmake --build --preset windows-msvc-release
 ```
 

@@ -80,19 +80,25 @@ QString prepareDataset(const DemoDataset &item, QWidget *parent = nullptr)
     if (!item.localSource)
         return ensureSampleFile(QUrl(QString(DatasetRelease) + item.archive), item.archive,
                                 QString("datasets/%1").arg(item.id), item.raster, parent, item.sha256);
-    const QString destination =
-        QDir(sampleDataPath()).filePath(QString("datasets/%1/%2").arg(item.id, item.raster));
+
+    const QString destination = QDir(sampleDataPath()).filePath(QString("datasets/%1/%2").arg(item.id, item.raster));
+    
     if (QFileInfo::exists(destination))
         return destination;
+    
     const QString source = qEnvironmentVariable(item.localEnvironment, item.localSource);
+    
     if (!QFileInfo::exists(source))
         return {};
+    
     QDir().mkpath(QFileInfo(destination).absolutePath());
+    
     if (!QFile::copy(source, destination))
     {
         sampleError(parent, "Local sample", "Could not cache the local raster.");
         return {};
     }
+
     return destination;
 }
 
