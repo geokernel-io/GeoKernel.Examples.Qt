@@ -89,9 +89,7 @@ struct Result
     std::shared_ptr<QTemporaryDir> workspace;
 };
 
-std::shared_ptr<Result> classify(const Assets &assets, AiExecutionProvider provider,
-                                 const std::shared_ptr<std::atomic_bool> &cancellation,
-                                 AiRasterInferenceProgressCallback progress = {})
+std::shared_ptr<Result> classify(const Assets &assets, AiExecutionProvider provider, const std::shared_ptr<std::atomic_bool> &cancellation, AiRasterInferenceProgressCallback progress = {})
 {
 
     auto result = std::make_shared<Result>();
@@ -405,12 +403,9 @@ int main(int argc, char **argv)
     toolbar->setIconSize(QSize(32, 32));
     window.addToolBar(toolbar);
 
-    QObject::connect(toolbar->addAction(QIcon(":/icons/zoom-in.svg"), "Zoom In"), &QAction::triggered, viewer,
-                     &GisViewer::zoomIn);
-    QObject::connect(toolbar->addAction(QIcon(":/icons/zoom-out.svg"), "Zoom Out"), &QAction::triggered,
-                     viewer, &GisViewer::zoomOut);
-    QObject::connect(toolbar->addAction(QIcon(":/icons/full-extent.svg"), "Full Extent"), &QAction::triggered,
-                     viewer, &GisViewer::fullExtent);
+    QObject::connect(toolbar->addAction(QIcon(":/icons/zoom-in.svg"), "Zoom In"), &QAction::triggered, viewer, &GisViewer::zoomIn);
+    QObject::connect(toolbar->addAction(QIcon(":/icons/zoom-out.svg"), "Zoom Out"), &QAction::triggered, viewer, &GisViewer::zoomOut);
+    QObject::connect(toolbar->addAction(QIcon(":/icons/full-extent.svg"), "Full Extent"), &QAction::triggered, viewer, &GisViewer::fullExtent);
     toolbar->addSeparator();
     QActionGroup tools(&window);
     tools.setExclusive(true);
