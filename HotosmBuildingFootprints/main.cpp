@@ -80,19 +80,25 @@ QString prepareDataset(const DemoDataset &item, QWidget *parent = nullptr)
     if (!item.localSource)
         return ensureSampleFile(QUrl(QString(DatasetRelease) + item.archive), item.archive,
                                 QString("datasets/%1").arg(item.id), item.raster, parent, item.sha256);
-    const QString destination =
-        QDir(sampleDataPath()).filePath(QString("datasets/%1/%2").arg(item.id, item.raster));
+    
+    const QString destination = QDir(sampleDataPath()).filePath(QString("datasets/%1/%2").arg(item.id, item.raster));
+    
     if (QFileInfo::exists(destination))
         return destination;
+    
     const QString source = qEnvironmentVariable(item.localEnvironment, item.localSource);
+    
     if (!QFileInfo::exists(source))
         return {};
+    
     QDir().mkpath(QFileInfo(destination).absolutePath());
+    
     if (!QFile::copy(source, destination))
     {
         sampleError(parent, "Local sample", "Could not cache the local raster.");
         return {};
     }
+    
     return destination;
 }
 
@@ -249,13 +255,6 @@ int main(int argc, char *argv[])
                      [viewer] { viewer->setActiveTool(GisViewerTool::ZoomBox); });
     QObject::connect(pan, &QAction::triggered, viewer,
                      [viewer] { viewer->setActiveTool(GisViewerTool::Pan); });
-    QObject::connect(viewer, &GisViewer::drawingProgressChanged, &window,
-                     [progress](int value, const QString &text)
-                     {
-                         progress->setValue(std::clamp(value, 0, 100));
-                         progress->setFormat(
-                             QStringLiteral("%1% — %2").arg(std::clamp(value, 0, 100)).arg(text));
-                     });
 
     auto openBaseRaster = [viewer](const QString &path)
     {
@@ -479,7 +478,7 @@ int main(int argc, char *argv[])
         {
             openBaseRaster(datasetPaths[index]);
             progress->setValue(0);
-            progress->setFormat("Ready");
+            progress->setFormat("Ready - click Run to detect buildings");
             details->setPlainText(
                 QString("%1\n\nRun inference to extract building footprints.\nOriginal imagery is preserved. "
                         "Inference uses the original raster resolution.\nModel: HOTOSM DINOv3-S "
@@ -538,11 +537,12 @@ int main(int argc, char *argv[])
         window.busy = false;
         run->setEnabled(true);
         selectDataset(0);
-        status->showMessage(complete ? "Model preparation finished; sample raster is ready."
+        status->showMessage(complete ? "Sample ready. Click Run building segmentation inference to detect buildings."
                                      : "Preparation interrupted. Retry to continue from cache.");
         if (!modelReady)
             details->append("\nModel preparation failed. Check your connection and click Run to retry.");
     };
+
     QDir().mkpath(sampleDataPath());
     window.show();
     QTimer::singleShot(0, &window, prepareAll);
