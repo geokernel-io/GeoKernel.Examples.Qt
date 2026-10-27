@@ -37,14 +37,14 @@ set QT_QPA_PLATFORM=offscreen
 
 These explicit verification modes write test rasters/GeoJSON/PNGs. Normal interactive use does not save predictions. Smoke tests check real inference, RGB/result rendering, fully transparent and half-opacity rendering, cancellation without partial output and optional Shapefile export. Numerical/execution checks are not an independent accuracy benchmark. CPU validated; GPU providers require separate hardware validation.
 
-## Published SDK1.5.37
+## Published SDK1.5.38
 
-Requires GeoKernel1.5.37 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
+Requires GeoKernel1.5.38 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
 
 To replace an older local SDK cached in CMake, configure with:
 
 ```bat
-cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.37
+cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.38
 cmake --build --preset windows-msvc-release
 ```
 
