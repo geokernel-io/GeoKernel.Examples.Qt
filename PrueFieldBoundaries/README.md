@@ -25,7 +25,7 @@ The sample ZIP field_analysis.zip was not available when this example was create
 
 Input: source 578 x 379 GeoTIFF, eight UInt16 Sentinel-2 bands containing two RGB+NIR periods. All eight bands are read as raw Float32 DN. The model graph performs DN/3000; manifest normalization is identity. Do not apply the normalization twice. The packaged model documents canonical window B RGBN followed by window A RGBN; the original example TIFF is passed in its existing upstream order. Training swaps whole four-band temporal windows. This example does not invent a second observation by duplicating a single date.
 
-AiRasterInferenceExecutor uses the model manifest input/output names, eight-band adapter, tile 256 with overlap 64, and softmax decoder. Native source resolution/CRS are preserved. Invalid/nodata/negative/nonfinite input samples are masked separately as -1, never confused with valid background class 0. Output classes: 0 background, 1 field interior, 2 field boundary. Only class 1 is polygonized; boundary pixels keep adjoining fields apart. No cadastral or ownership boundary claim is made. Cloud/shadow detection and accuracy assessment are outside this demonstration.
+AiRasterInferenceExecutor uses the model manifest input/output names, eight-band adapter, tile 384 with overlap 128, and softmax decoder. Native source resolution/CRS are preserved. Invalid/nodata/negative/nonfinite input samples are masked separately as -1, never confused with valid background class 0. Output classes: 0 background, 1 field interior, 2 field boundary. Only class 1 is polygonized; boundary pixels keep adjoining fields apart. No cadastral or ownership boundary claim is made. Cloud/shadow detection and accuracy assessment are outside this demonstration.
 
 GDAL C ABI from the SDK runtime handles raw band reads, Byte RGBA previews and explicit polygon export, without external GDAL headers/libraries or Python at runtime.
 
@@ -37,17 +37,19 @@ set QT_QPA_PLATFORM=offscreen
 
 These explicit verification modes write test rasters/GeoJSON/PNGs. Normal interactive use does not save predictions. Smoke tests check real inference, RGB/result rendering, fully transparent and half-opacity rendering, cancellation without partial output and optional Shapefile export. Numerical/execution checks are not an independent accuracy benchmark. CPU validated; GPU providers require separate hardware validation.
 
-## Published SDK1.5.38
+## Published SDK1.5.39
 
-Requires GeoKernel1.5.38 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
+Requires GeoKernel1.5.39 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
 
 To replace an older local SDK cached in CMake, configure with:
 
 ```bat
-cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.38
+cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.39
 cmake --build --preset windows-msvc-release
 ```
 
 The explicit version above reproduces the validated release; omit GEOKERNEL_SDK_VERSION on a fresh build to follow latest. SDK downloads and model downloads are separate caches.
 
 The executable contains only the interactive application workflow; command-line test/verification branches have been removed. Model/data preparation runs automatically at startup.
+
+PRUE model v2 uses the same CCBY checkpoint at native resolution with 384 × 384 tiles and 128-pixel overlap. It requires SDK 1.5.39. Larger context reduces the rectangular top-left omission in this sample; this is a visual regression check, not a general accuracy benchmark. Model v1 remains available under its original URL.

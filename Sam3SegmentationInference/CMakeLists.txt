@@ -26,7 +26,7 @@ get_filename_component(GEOKERNEL_ROOT "${GEOKERNEL_ROOT}" ABSOLUTE)
 list(PREPEND CMAKE_PREFIX_PATH "${GEOKERNEL_ROOT}")
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets Network Sql Svg)
-find_package(GeoKernel 1.5.38 CONFIG REQUIRED)
+find_package(GeoKernel 1.5.39 CONFIG REQUIRED)
 file(READ "${GEOKERNEL_ROOT}/include/GeoKernel.AI/GeoKernelAI.h" _sam3_ai_header)
 string(FIND "${_sam3_ai_header}" "AiSamTextSession" _sam3_api_position)
 if(_sam3_api_position EQUAL -1)

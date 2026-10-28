@@ -15,7 +15,7 @@ outputs\windows\Release\bin\HotosmBuildingFootprints.exe
 
 With no GEOKERNEL_ROOT, the acquisition script downloads the latest GitHub SDK.
 To reuse an extracted SDK, pass `-DGEOKERNEL_ROOT=<sdk-directory>` instead.
-Tested: Windows x64, SDK 1.5.38, Qt 6.11.0, Release. Linux presets are supplied
+Tested: Windows x64, SDK 1.5.39, Qt 6.11.0, Release. Linux presets are supplied
 but were not tested in this session. Qt and C++ build tools must be installed.
 
 ## Workflow
@@ -48,14 +48,14 @@ The interactive UI has no model-package, input-raster or model-download fields. 
 
 After successful inference, **Save Shapefile** opens a save-file dialog. Choose a `.shp` destination; the export includes `.shp`, `.shx`, `.dbf`, `.prj` and UTF-8 encoding metadata. Polygon geometry, instance IDs and the source CRS are preserved. Results remain session-only until explicitly exported; the button is disabled before inference and while a new inference is running.
 
-## Published SDK1.5.38
+## Published SDK1.5.39
 
-Requires GeoKernel1.5.38 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
+Requires GeoKernel1.5.39 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
 
 To replace an older local SDK cached in CMake, configure with:
 
 ```bat
-cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.38
+cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.39
 cmake --build --preset windows-msvc-release
 ```
 

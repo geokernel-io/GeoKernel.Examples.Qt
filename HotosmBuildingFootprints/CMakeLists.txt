@@ -26,7 +26,7 @@ get_filename_component(GEOKERNEL_ROOT "${GEOKERNEL_ROOT}" ABSOLUTE)
 list(PREPEND CMAKE_PREFIX_PATH "${GEOKERNEL_ROOT}")
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets Network Sql Svg)
-find_package(GeoKernel 1.5.38 CONFIG REQUIRED)
+find_package(GeoKernel 1.5.39 CONFIG REQUIRED)
 if(NOT TARGET GeoKernel::AI)
     message(FATAL_ERROR "The selected GeoKernel SDK does not contain GeoKernel::AI.")
 endif()

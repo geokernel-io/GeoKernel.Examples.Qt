@@ -44,7 +44,7 @@ struct Assets
 Assets prepareAssets(QWidget *parent = nullptr)
 {
     Assets a;
-    const QString manifest = ensureSampleFile(QUrl(ModelUrl), ModelArchive, "prue-model",
+    const QString manifest = ensureSampleFile(QUrl(ModelUrl), ModelArchive, "prue-model-v2",
                                               "geokernel-model.json", parent, ModelSha);
     if (manifest.isEmpty())
         return {};

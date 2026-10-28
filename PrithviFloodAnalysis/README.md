@@ -41,14 +41,14 @@ set QT_QPA_PLATFORM=offscreen
 
 Smoke verification runs the real downloaded model/data, checks source/result rendering, fully transparent and half-opacity rendering, cancellation after a tile, and optional Shapefile export. See DATA-SOURCES.md for source terms. Execution/parity checks do not constitute an independent flood-accuracy benchmark. CPU verified; GPU providers require separate hardware validation.
 
-## Published SDK1.5.38
+## Published SDK1.5.39
 
-Requires GeoKernel1.5.38 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
+Requires GeoKernel1.5.39 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
 
 To replace an older local SDK cached in CMake, configure with:
 
 ```bat
-cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.38
+cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.39
 cmake --build --preset windows-msvc-release
 ```
 

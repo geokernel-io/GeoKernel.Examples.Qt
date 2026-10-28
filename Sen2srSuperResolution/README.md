@@ -39,14 +39,14 @@ set QT_QPA_PLATFORM=offscreen
 
 Explicit smoke mode writes a scientific GeoTIFF and before/after comparison PNGs. It runs the real downloaded assets, checks visible original/AI differences, actual comparison slider endpoints, synchronized zoom and cancellation. Normal use writes predictions only after Save GeoTIFF. Numerical/native execution validation is not a guarantee of true2.5m sensor detail or improved downstream analysis. CPU validated; CUDA/DirectML may fall back for DFT and need hardware validation.
 
-## Published SDK1.5.38
+## Published SDK1.5.39
 
-Requires GeoKernel1.5.38 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
+Requires GeoKernel1.5.39 or newer. An empty GEOKERNEL_ROOT downloads the latest public SDK and verifies the release SHA-256. No SDK from GeoKernel/outputs/sam3-sdk is required.
 
 To replace an older local SDK cached in CMake, configure with:
 
 ```bat
-cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.38
+cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DGEOKERNEL_ROOT= -UGeoKernel_DIR -DGEOKERNEL_SDK_VERSION=1.5.39
 cmake --build --preset windows-msvc-release
 ```
 
