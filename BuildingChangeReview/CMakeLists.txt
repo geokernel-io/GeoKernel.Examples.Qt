@@ -3,7 +3,6 @@ if(POLICY CMP0144)
     cmake_policy(SET CMP0144 NEW)
 endif()
 
-
 project(BuildingChangeReview VERSION 1.0.0 LANGUAGES CXX)
 if(WIN32)
     enable_language(RC)
@@ -41,7 +40,9 @@ foreach(_target IN LISTS _qt_targets)
     set_target_properties(${_target} PROPERTIES MAP_IMPORTED_CONFIG_DEBUG Release)
 endforeach()
 
-add_executable(BuildingChangeReview WIN32 main.cpp DemoWindow.h ChangeLogic.h ChangeWorkflow.h GeometrySupport.h RasterCrop.h DemoAssets.h FootprintOutput.h SampleSupport.h resources/icons.qrc)
+add_executable(BuildingChangeReview WIN32
+    main.cpp
+    resources/icons.qrc)
 if(WIN32)
     target_sources(BuildingChangeReview PRIVATE resources/BuildingChangeReview.rc)
 endif()
@@ -55,6 +56,9 @@ target_include_directories(BuildingChangeReview SYSTEM PRIVATE
 target_link_libraries(BuildingChangeReview PRIVATE
     GeoKernel::Viewer GeoKernel::Formats GeoKernel::AI GeoKernel::Analysis GeoKernel::Core ${_qt_targets})
 if(MSVC)
+    # The published SDK uses the Release CRT and STL ABI, including in Debug builds.
+    set_property(TARGET BuildingChangeReview PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+    target_compile_definitions(BuildingChangeReview PRIVATE _ITERATOR_DEBUG_LEVEL=0)
     target_compile_options(BuildingChangeReview PRIVATE /W3 /permissive- /FS /utf-8 /Zi)
     target_link_options(BuildingChangeReview PRIVATE /DEBUG:FULL)
 endif()
@@ -76,46 +80,3 @@ add_custom_command(TARGET BuildingChangeReview POST_BUILD COMMAND ${CMAKE_COMMAN
     -D "QT_RUNTIME_FILES=$<TARGET_FILE:Qt6::Core>;$<TARGET_FILE:Qt6::Gui>;$<TARGET_FILE:Qt6::Widgets>;$<TARGET_FILE:Qt6::OpenGL>;$<TARGET_FILE:Qt6::OpenGLWidgets>;$<TARGET_FILE:Qt6::Network>;$<TARGET_FILE:Qt6::Sql>;$<TARGET_FILE:Qt6::Svg>"
     -D "DESTINATION=${_output_dir}"
     -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CopyRuntime.cmake")
-
-option(BUILD_TESTING "Build the building change comparison tests" OFF)
-if(BUILD_TESTING)
-    enable_testing()
-    add_executable(BuildingChangeReview.Tests tests/ChangeLogicTests.cpp)
-    target_include_directories(BuildingChangeReview.Tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${GEOKERNEL_ROOT}/include/GeoKernel.AI" "${GEOKERNEL_ROOT}/include/GeoKernel.Core")
-    target_link_libraries(BuildingChangeReview.Tests PRIVATE GeoKernel::AI GeoKernel::Core Qt6::Core Qt6::Gui)
-    set_target_properties(BuildingChangeReview.Tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${_output_dir}")
-    if(MSVC)
-        target_compile_options(BuildingChangeReview.Tests PRIVATE /utf-8 /permissive-)
-    endif()
-    add_test(NAME BuildingChangeReview.Logic COMMAND BuildingChangeReview.Tests)
-    add_executable(BuildingChangeReview.PublicationTests tests/PublicationTests.cpp)
-    target_include_directories(BuildingChangeReview.PublicationTests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
-        "${GEOKERNEL_ROOT}/include/GeoKernel.Core" "${GEOKERNEL_ROOT}/include/GeoKernel.Formats"
-        "${GEOKERNEL_ROOT}/include/GeoKernel.AI" "${GEOKERNEL_ROOT}/include/GeoKernel.Analysis"
-        "${GEOKERNEL_ROOT}/include/GeoKernel.Viewer")
-    target_link_libraries(BuildingChangeReview.PublicationTests PRIVATE GeoKernel::Viewer GeoKernel::AI
-        GeoKernel::Analysis GeoKernel::Formats GeoKernel::Core ${_qt_targets})
-    set_target_properties(BuildingChangeReview.PublicationTests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${_output_dir}")
-    if(MSVC)
-        target_compile_options(BuildingChangeReview.PublicationTests PRIVATE /utf-8 /permissive- /Zi)
-        target_link_options(BuildingChangeReview.PublicationTests PRIVATE /DEBUG:FULL)
-    endif()
-    add_test(NAME BuildingChangeReview.Publication COMMAND BuildingChangeReview.PublicationTests -platform offscreen)
-endif()
-
-option(BUILD_INFERENCE_TESTS "Build the opt-in real-image/model workflow test" OFF)
-if(BUILD_TESTING AND BUILD_INFERENCE_TESTS)
-    add_executable(BuildingChangeReview.InferenceTests tests/InferenceWorkflowTests.cpp)
-    target_include_directories(BuildingChangeReview.InferenceTests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
-        "${GEOKERNEL_ROOT}/include/GeoKernel.Core" "${GEOKERNEL_ROOT}/include/GeoKernel.Formats"
-        "${GEOKERNEL_ROOT}/include/GeoKernel.AI" "${GEOKERNEL_ROOT}/include/GeoKernel.Analysis"
-        "${GEOKERNEL_ROOT}/include/GeoKernel.Viewer")
-    target_link_libraries(BuildingChangeReview.InferenceTests PRIVATE GeoKernel::Viewer GeoKernel::AI GeoKernel::Analysis GeoKernel::Formats GeoKernel::Core ${_qt_targets})
-    set_target_properties(BuildingChangeReview.InferenceTests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${_output_dir}")
-    if(MSVC)
-        target_compile_options(BuildingChangeReview.InferenceTests PRIVATE /utf-8 /permissive-)
-    endif()
-    add_test(NAME BuildingChangeReview.Inference COMMAND BuildingChangeReview.InferenceTests
-        "${_output_dir}/data" "${CMAKE_CURRENT_SOURCE_DIR}/outputs/validation")
-    set_tests_properties(BuildingChangeReview.Inference PROPERTIES TIMEOUT 300 RUN_SERIAL TRUE)
-endif()

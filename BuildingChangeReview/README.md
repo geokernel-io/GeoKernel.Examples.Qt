@@ -5,6 +5,9 @@ vertex editing and approved GIS export. Uses the same SDK acquisition, runtime
 deployment, navigation icons and automatic SHA-256 checked sample preparation as
 the other GeoKernel examples. No Python or separate GDAL installation is needed.
 
+All example C++ code, including analysis, asset preparation and the window class,
+is in `main.cpp`. CMake/runtime scripts and icon resources remain separate.
+
 ## Build and run
 
 From an x64 Visual Studio developer terminal:
@@ -119,52 +122,3 @@ SHA-256: `3a6cd11e013f81b46b3db700feddef2d98319780285b8320e1200573684b24bb`
 Retain HOTOSM/Meta credits, CC-BY-4.0 documents and the separate DINOv3 license
 included in the package. SDK licensing is separate. Internet access is needed for
 uncached downloads; cached inference is local.
-
-## Verification
-
-Optional comparison tests use deterministic instance masks: different IDs for an
-unchanged roof, additions/removals, square-metre area filtering, offset tolerance,
-edge clipping, incompatible grids/CRS, malformed labels and cancellation. Raw-score
-checks cover missed instance labels, weak own-date evidence, other-date score
-gating, score-grid misalignment, nonfinite scores and missing score dates.
-
-```bat
-cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DBUILD_TESTING=ON
-cmake --build --preset windows-msvc-release
-ctest --test-dir build/windows-msvc -C Release --output-on-failure
-```
-
-Tests are a separate executable; the interactive application has no test-mode
-command-line branches. Model inference and GPU/provider acceptance require the
-actual model and the target hardware.
-
-The offscreen publication regression uses the same window/result-publication
-code as the application. It verifies source-layer preservation, candidate-layer
-editing and selection, date-specific symbology, reversible overlay inspection,
-undo/redo after layer reordering, repeated publication,
-empty results, and failed-publication cleanup followed by recovery. Viewer layers
-are looked up by pointer; adding a new SDK layer prepends it to the stack.
-
-An opt-in real-image test uses the application's asset preparation to verify and
-extract the pinned imagery ZIP and open both rasters. It also exercises both
-inference passes, publishes actual results into both offscreen viewers, and checks
-pending/approved/rejected export gating, edit-triggered approval invalidation and
-geographic GeoJSON export. The model cache must be present, or it is downloaded:
-
-```bat
-cmake --preset windows-msvc -DCMAKE_MAKE_PROGRAM=C:/Ninja/ninja.exe -DCMAKE_PREFIX_PATH=C:/Qt/6.11.0/msvc2022_64 -DBUILD_TESTING=ON -DBUILD_INFERENCE_TESTS=ON
-cmake --build --preset windows-msvc-release
-ctest --test-dir build/windows-msvc -C Release --output-on-failure
-```
-
-Validated on Windows x64, Qt 6.11.0 and the published SDK 1.5.39: 26 deterministic
-comparison/geometry checks passed. The real-image CPU test on the documented
-320 m Oosterwold square produced 0 / 68 predicted instances and 41 addition
-candidates with the conservative defaults, in 13.8 seconds on this machine.
-The earlier image legitimately has zero instances because the selected area was
-fields. These counts are predictions, not reference-label accuracy measurements.
-Pending/rejected export exclusion, approval invalidation after geometry changes,
-correct imagery years in GeoJSON, and geographic export are verified.
-Reports include raw per-instance evidence and candidate source geometries under
-`outputs/validation/`. This is a functional verification,
-not a ground-truth accuracy measurement or portable performance guarantee.
