@@ -2,6 +2,11 @@
 
 Official Qt/C++ examples for the GeoKernel native GIS SDK.
 
+- [BuildingChangeReview](BuildingChangeReview/README.md): two-date Almere / Oosterwold imagery,
+  local HOTOSM building inference, synchronized maps, review and vertex correction,
+  and approved GeoJSON export with source/model provenance. Sample/model assets
+  are acquired automatically and SHA-256 verified.
+
 ## Requirements
 
 - Windows 10 or later
