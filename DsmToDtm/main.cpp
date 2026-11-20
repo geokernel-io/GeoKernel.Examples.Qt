@@ -779,7 +779,9 @@ int main(int argc,char** argv)
     parser.addOption({"data-dir","Override the sample cache directory.","directory"});
     parser.process(app);
 
-    QVulkanInstance instance;instance.setApiVersion(QVersionNumber(1,1,0));
+    QVulkanInstance instance;
+    instance.setApiVersion(QVersionNumber(1,1,0));
+
     if(!instance.create()) {
         QMessageBox::critical(nullptr,"DsmToDtm","Vulkan could not be initialized.");
         return 1;
