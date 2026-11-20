@@ -2,6 +2,26 @@
 
 Official Qt/C++ examples for the GeoKernel native GIS SDK.
 
+- [DsmOrthoToDtm](DsmOrthoToDtm/README.md): compare classical, DSM-only pix_grad
+  and DSM+RGB rgb_grad_fm on aligned terrain/orthophoto inputs, with four linked
+  maps, common reference errors and complete numeric result export.
+- [DsmToDtmAI](DsmToDtmAI/README.md): run pix_grad through GeoKernel.AI and the
+  native classical method independently on the same full 1 km DSM; compare the
+  shared interior crop and export GeoTIFFs with source/model provenance.
+- [DsmToDtmProcessing](DsmToDtmProcessing/README.md): run classical DSM filtering
+  and TIN reconstruction live, adjust parameters, inspect removed heights and
+  quality flags, and export numeric GeoTIFFs with reference scores and provenance.
+- [DsmToDtmAccuracy](DsmToDtmAccuracy/README.md): compare classical/AI reference
+  error maps on one color scale, select a shared evaluation area, inspect source
+  pixels and export RMSE/MAE/bias/P95 with provenance. Reuses the Zurich v2 sample.
+- [DsmToDtmProfile](DsmToDtmProfile/README.md): draw an A–B transect on synchronized
+  2D maps, compare DSM/classical/AI/reference elevations and line errors, inspect
+  linked chart/map samples and export numeric CSV with provenance. Reuses the
+  published Zurich v2 sample from DsmToDtm.
+- [DsmToDtm](DsmToDtm/README.md): ground beneath buildings; linked native 3D views
+  of an original DSM and prepared classical/AI terrain, numeric height transition,
+  shared transect and reference metrics. Sample ZIP is downloaded automatically
+  from the SampleData v1 release and SHA-256 verified.
 - [BuildingChangeReview](BuildingChangeReview/README.md): two-date Almere / Oosterwold imagery,
   local HOTOSM building inference, synchronized maps, review and vertex correction,
   and approved GeoJSON export with source/model provenance. Sample/model assets
