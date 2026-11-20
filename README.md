@@ -2,6 +2,10 @@
 
 Official Qt/C++ examples for the GeoKernel native GIS SDK.
 
+- [AgentMapAssistant](AgentMapAssistant/README.md): ask for map operations in plain
+  language; an LLM (or the offline demo) proposes a workflow DSL v2 plan that is
+  validated, previewed, confirmed when it changes data, executed, undoable and
+  recorded with hash-chained provenance. Needs an SDK newer than 1.5.40.
 - [DsmOrthoToDtm](DsmOrthoToDtm/README.md): compare classical, DSM-only pix_grad
   and DSM+RGB rgb_grad_fm on aligned terrain/orthophoto inputs, with four linked
   maps, common reference errors and complete numeric result export.
