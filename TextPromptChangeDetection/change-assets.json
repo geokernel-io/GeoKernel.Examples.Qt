@@ -1,0 +1,145 @@
+{
+  "schema": "geokernel.sam3-download/1",
+  "repository": "geokernel-io/GeoKernel.SampleData",
+  "release": "v1",
+  "revision": "3c879f39826c281e95690f02c7821c4de09afae7",
+  "profiles": {
+    "text": {
+      "manifest": "sam3-package.json",
+      "files": [
+        {
+          "path": "decoder.onnx",
+          "sha256": "2fa4e4982f8d2f9024818a0dd44bfd8e97ce416a04e1dc408d4e08b191b8cfd9",
+          "bytes": 96546974
+        },
+        {
+          "path": "processor/processor_config.json",
+          "sha256": "13a9f4183ee01007d717384560c259d80e78a253057f3bb7e4a49fd226aed47f",
+          "bytes": 646
+        },
+        {
+          "path": "processor/tokenizer.json",
+          "sha256": "aa52e1ac1aa5e6669a42d9515f19c6598b9038ce20d5488c2c334145d97d44a2",
+          "bytes": 3642251
+        },
+        {
+          "path": "processor/tokenizer_config.json",
+          "sha256": "165e29078beda030e5591e520c0052779a1fa1caf0457675a31eead0b55cb9c6",
+          "bytes": 466
+        },
+        {
+          "path": "text_encoder.onnx",
+          "sha256": "7dad354abf5c6671d0036a16a63d01937549178ac80dd7a419e32e7be7fe3eaf",
+          "bytes": 1413086391
+        },
+        {
+          "path": "vision_encoder.onnx",
+          "sha256": "028599b7f2d4f5a9308ca62711b955fbe80d1aaa5e5a8bf2e6b40c83627b889c",
+          "bytes": 1852221498
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "bec48f70bd37bf8280a9d1ebf01642d26086f6122ba735baa08fe03c5a6e7448",
+          "bytes": 7352
+        },
+        {
+          "path": "sam3-package.json",
+          "bytes": 1904,
+          "sha256": "1c31a6391525023098d100b018b994f563cf5ce3140c1ecd5d095c07022d61b0"
+        }
+      ],
+      "assets": [
+        {
+          "name": "meta-sam3-text-fp32-geokernel-onnx-v1.zip",
+          "bytes": 3087973902,
+          "sha256": "95d9bc3ebdec6a6147a9bfa97325712bfbb77fccbd6bb3f20be453c381820931",
+          "files": [
+            "decoder.onnx",
+            "LICENSE",
+            "processor/processor_config.json",
+            "processor/tokenizer.json",
+            "processor/tokenizer_config.json",
+            "sam3-package.json",
+            "text_encoder.onnx",
+            "vision_encoder.onnx",
+            "ATTRIBUTION.txt",
+            "PACKAGE-README.md"
+          ]
+        }
+      ],
+      "base_url": "https://pub-00d214f25f754884b22349c19ac37bbf.r2.dev/geokernel-models/"
+    },
+    "series": {
+      "manifest": "oosterwold_2016-epsg25831-50cm.tif",
+      "base_url": "https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/",
+      "files": [
+        {
+          "path": "oosterwold_2016-epsg25831-50cm.tif",
+          "bytes": 4714891,
+          "sha256": "db723783db4c8738a716fe8b898de2e3099bab9394e335bd489db2412ae0c5c3"
+        },
+        {
+          "path": "oosterwold_2017-epsg25831-50cm.tif",
+          "bytes": 4800971,
+          "sha256": "400d4b50118d7119d8c9a619a23cd58c6cf0b7cd6fecdc8ff29bcc300832fc39"
+        },
+        {
+          "path": "oosterwold_2018-epsg25831-50cm.tif",
+          "bytes": 6406384,
+          "sha256": "3557a34893d2b018e10df5b3c9dbd4564bc7f0b775dccdfd76ba82326e2114db"
+        },
+        {
+          "path": "oosterwold_2019-epsg25831-50cm.tif",
+          "bytes": 6283534,
+          "sha256": "43b7cb54d70aeeb77ff492f2a24b0a4da4495021608da91dfc8c8c80a040f376"
+        },
+        {
+          "path": "oosterwold_2020-epsg25831-50cm.tif",
+          "bytes": 6439895,
+          "sha256": "e2eb196ca695ca2c630c2c143db8eb586cbc317167bca3dd992644aeb7b6df45"
+        },
+        {
+          "path": "oosterwold_2022-epsg25831-50cm.tif",
+          "bytes": 6529416,
+          "sha256": "0eba4f9c5a4693de9d9ec106edc9752abb66bb0bf564404b53a785e0ff8d94ba"
+        },
+        {
+          "path": "oosterwold_2023-epsg25831-50cm.tif",
+          "bytes": 6729980,
+          "sha256": "2c98ab11dc7c5db3fd7d3cb68c37f3ee2835dc1ca690b2b9c3a0466a78aad282"
+        },
+        {
+          "path": "oosterwold_2024-epsg25831-50cm.tif",
+          "bytes": 6848987,
+          "sha256": "5c9b387b90ceadfb195e765a4dab993da8f5a7d47e24f325833b6dd661c07a53"
+        },
+        {
+          "path": "oosterwold_2025-epsg25831-50cm.tif",
+          "bytes": 6855820,
+          "sha256": "7b1b12d8b27cd0714f140415004daf9fd0000495eda31366c7cd4aab218caa82"
+        }
+      ],
+      "assets": [
+        {
+          "name": "almere_oosterwold_series_2016_2025_v1.zip",
+          "bytes": 55628946,
+          "sha256": "080742d758d9c471ee23cebd379821f61c2e5b28a28947f20ac6e20f5cc44f4d",
+          "files": [
+            "oosterwold_2016-epsg25831-50cm.tif",
+            "oosterwold_2017-epsg25831-50cm.tif",
+            "oosterwold_2018-epsg25831-50cm.tif",
+            "oosterwold_2019-epsg25831-50cm.tif",
+            "oosterwold_2020-epsg25831-50cm.tif",
+            "oosterwold_2022-epsg25831-50cm.tif",
+            "oosterwold_2023-epsg25831-50cm.tif",
+            "oosterwold_2024-epsg25831-50cm.tif",
+            "oosterwold_2025-epsg25831-50cm.tif",
+            "ATTRIBUTION.txt",
+            "README.txt",
+            "source-manifest.json"
+          ]
+        }
+      ]
+    }
+  }
+}

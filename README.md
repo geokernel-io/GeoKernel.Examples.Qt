@@ -30,6 +30,10 @@ Official Qt/C++ examples for the GeoKernel native GIS SDK.
   local HOTOSM building inference, synchronized maps, review and vertex correction,
   and approved GeoJSON export with source/model provenance. Sample/model assets
   are acquired automatically and SHA-256 verified.
+- [TextPromptChangeDetection](TextPromptChangeDetection/README.md): type what to look for
+  ("building", "greenhouse") and see where it appeared and disappeared between two dates or
+  over a 9-date series, with a timeline, a QA review queue and GeoPackage export (SAM 3,
+  objects tracked from date to date). Needs an SDK newer than 1.5.40.
 
 ## Requirements
 
