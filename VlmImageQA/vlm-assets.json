@@ -1,0 +1,163 @@
+{
+  "schema": "geokernel.sam3-download/1",
+  "repository": "geokernel-io/GeoKernel.SampleData",
+  "release": "v1",
+  "revision": "vlm-image-qa-v1",
+  "profiles": {
+    "series": {
+      "manifest": "oosterwold_2025-epsg25831-50cm.tif",
+      "base_url": "https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/",
+      "files": [
+        {
+          "path": "oosterwold_2016-epsg25831-50cm.tif",
+          "bytes": 4714891,
+          "sha256": "db723783db4c8738a716fe8b898de2e3099bab9394e335bd489db2412ae0c5c3"
+        },
+        {
+          "path": "oosterwold_2017-epsg25831-50cm.tif",
+          "bytes": 4800971,
+          "sha256": "400d4b50118d7119d8c9a619a23cd58c6cf0b7cd6fecdc8ff29bcc300832fc39"
+        },
+        {
+          "path": "oosterwold_2018-epsg25831-50cm.tif",
+          "bytes": 6406384,
+          "sha256": "3557a34893d2b018e10df5b3c9dbd4564bc7f0b775dccdfd76ba82326e2114db"
+        },
+        {
+          "path": "oosterwold_2019-epsg25831-50cm.tif",
+          "bytes": 6283534,
+          "sha256": "43b7cb54d70aeeb77ff492f2a24b0a4da4495021608da91dfc8c8c80a040f376"
+        },
+        {
+          "path": "oosterwold_2020-epsg25831-50cm.tif",
+          "bytes": 6439895,
+          "sha256": "e2eb196ca695ca2c630c2c143db8eb586cbc317167bca3dd992644aeb7b6df45"
+        },
+        {
+          "path": "oosterwold_2022-epsg25831-50cm.tif",
+          "bytes": 6529416,
+          "sha256": "0eba4f9c5a4693de9d9ec106edc9752abb66bb0bf564404b53a785e0ff8d94ba"
+        },
+        {
+          "path": "oosterwold_2023-epsg25831-50cm.tif",
+          "bytes": 6729980,
+          "sha256": "2c98ab11dc7c5db3fd7d3cb68c37f3ee2835dc1ca690b2b9c3a0466a78aad282"
+        },
+        {
+          "path": "oosterwold_2024-epsg25831-50cm.tif",
+          "bytes": 6848987,
+          "sha256": "5c9b387b90ceadfb195e765a4dab993da8f5a7d47e24f325833b6dd661c07a53"
+        },
+        {
+          "path": "oosterwold_2025-epsg25831-50cm.tif",
+          "bytes": 6855820,
+          "sha256": "7b1b12d8b27cd0714f140415004daf9fd0000495eda31366c7cd4aab218caa82"
+        }
+      ],
+      "assets": [
+        {
+          "name": "almere_oosterwold_series_2016_2025_v1.zip",
+          "bytes": 55628946,
+          "sha256": "080742d758d9c471ee23cebd379821f61c2e5b28a28947f20ac6e20f5cc44f4d",
+          "files": [
+            "oosterwold_2016-epsg25831-50cm.tif",
+            "oosterwold_2017-epsg25831-50cm.tif",
+            "oosterwold_2018-epsg25831-50cm.tif",
+            "oosterwold_2019-epsg25831-50cm.tif",
+            "oosterwold_2020-epsg25831-50cm.tif",
+            "oosterwold_2022-epsg25831-50cm.tif",
+            "oosterwold_2023-epsg25831-50cm.tif",
+            "oosterwold_2024-epsg25831-50cm.tif",
+            "oosterwold_2025-epsg25831-50cm.tif",
+            "ATTRIBUTION.txt",
+            "README.txt",
+            "source-manifest.json"
+          ]
+        }
+      ]
+    },
+    "florence2": {
+      "manifest": "florence2.geokernel.json",
+      "base_url": "https://pub-00d214f25f754884b22349c19ac37bbf.r2.dev/geokernel-models/",
+      "files": [
+        {
+          "path": "vision_encoder.onnx",
+          "bytes": 365572287,
+          "sha256": "276b4fd99210fc5f1e6059bac070ac8d638ffc5797cea97d80677a4a4ee666b8"
+        },
+        {
+          "path": "embed_tokens.onnx",
+          "bytes": 157560044,
+          "sha256": "90cae3deb6406938c676a35b5246db02b478c9cc8cf93508361be80c05babf95"
+        },
+        {
+          "path": "encoder_model.onnx",
+          "bytes": 173380723,
+          "sha256": "cb0bccc232c64290397f5e1235eb3e1fa6ccf8c5afed9216480ee4eed80737fc"
+        },
+        {
+          "path": "decoder_model_merged.onnx",
+          "bytes": 388421753,
+          "sha256": "5207affad8815294233b8679ee9ecb614906f819a1890d95a01b9ca68c392a79"
+        },
+        {
+          "path": "processor/tokenizer.json",
+          "bytes": 3748144,
+          "sha256": "3ad7001f773409abe6bba33eac92662611a73d72f459bda2f00d2a221dd31ce4"
+        },
+        {
+          "path": "processor/processor_config.json",
+          "bytes": 2264,
+          "sha256": "cd0e3bf41a39b1276503fbd273bc03b9afc70d7a15ea681a92a1b4b77f858ee6"
+        },
+        {
+          "path": "processor/preprocessor_config.json",
+          "bytes": 603,
+          "sha256": "1396ec5a0a7adfe1c04fb777b09e8ba753be6dbb5868212ab3c3ef39d91fe031"
+        },
+        {
+          "path": "processor/generation_config.json",
+          "bytes": 292,
+          "sha256": "0251459c49cc358ac033b5d4b8569e61ac22bde5d76be404b97a44cfb33fb12e"
+        },
+        {
+          "path": "processor/config.json",
+          "bytes": 2387,
+          "sha256": "2a4dfe9885d183da121f239ada734bd700ee6908b650a7a25ab32eb104fe1d7a"
+        },
+        {
+          "path": "LICENSE",
+          "bytes": 1074,
+          "sha256": "7df20dcdf9197e9945c14858d41c60f11b52b93e5b69e2b63416b874d598d322"
+        },
+        {
+          "path": "florence2.geokernel.json",
+          "bytes": 3672,
+          "sha256": "f996ff4f6e3057fda215d6c87dfc17ea28868688afd8227cd21f381aba880df2"
+        }
+      ],
+      "assets": [
+        {
+          "name": "microsoft-florence-2-base-ft-fp32-geokernel-onnx-v1.zip",
+          "bytes": 630579977,
+          "sha256": "d848b2a7cbb2b1b2a68c6387abd6c5d0c79575d5b89a93f3373053d950b9e20a",
+          "files": [
+            "florence2.geokernel.json",
+            "vision_encoder.onnx",
+            "embed_tokens.onnx",
+            "encoder_model.onnx",
+            "decoder_model_merged.onnx",
+            "processor/tokenizer.json",
+            "processor/processor_config.json",
+            "processor/preprocessor_config.json",
+            "processor/generation_config.json",
+            "processor/config.json",
+            "LICENSE",
+            "ATTRIBUTION.txt",
+            "PACKAGE-README.md"
+          ]
+        }
+      ]
+    }
+  }
+}

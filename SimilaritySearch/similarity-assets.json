@@ -1,0 +1,41 @@
+{
+  "schema": "geokernel.sam3-download/1",
+  "repository": "geokernel-io/GeoKernel.SampleData",
+  "release": "v1",
+  "revision": "flevoland-alphaearth-2024-v1",
+  "profiles": {
+    "embeddings": {
+      "manifest": "flevoland_alphaearth_2024_80m.tif",
+      "base_url": "https://github.com/geokernel-io/GeoKernel.SampleData/releases/download/v1/",
+      "files": [
+        {
+          "path": "flevoland_alphaearth_2024_80m.tif",
+          "bytes": 31289628,
+          "sha256": "f7861bf1e46886e080200883e036b5fde1056a2589e7b177cca81899eb161bed"
+        },
+        {
+          "path": "ATTRIBUTION.txt",
+          "bytes": 537,
+          "sha256": "89c7d34fce64170235faa5e2f82ea5d56a592a026495d1ddb3594f814c3593e0"
+        },
+        {
+          "path": "README.txt",
+          "bytes": 556,
+          "sha256": "dc4ea7ec8bc1b90a6677c8de7e503edbc41ddc5d8f0f3ca07b0ae3a5ea08de34"
+        }
+      ],
+      "assets": [
+        {
+          "name": "flevoland_alphaearth_2024_80m_v1.zip",
+          "bytes": 30843359,
+          "sha256": "c0a9f05f8680be32f46b9db4f43fa22345f0753a9bfdd9e9ff7fad83bffc4d88",
+          "files": [
+            "flevoland_alphaearth_2024_80m.tif",
+            "ATTRIBUTION.txt",
+            "README.txt"
+          ]
+        }
+      ]
+    }
+  }
+}

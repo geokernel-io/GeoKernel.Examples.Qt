@@ -34,6 +34,11 @@ Official Qt/C++ examples for the GeoKernel native GIS SDK.
   ("building", "greenhouse") and see where it appeared and disappeared between two dates or
   over a 9-date series, with a timeline, a QA review queue and GeoPackage export (SAM 3,
   objects tracked from date to date). Needs an SDK newer than 1.5.40.
+- [SimilaritySearch](SimilaritySearch/README.md): pick a solar park, lake, town or field (or click
+  the map) and rank every 80 m cell of Flevoland by AlphaEarth embedding similarity; heat map,
+  ranked matches. Needs an SDK newer than 1.5.40.
+- [VlmImageQA](VlmImageQA/README.md): pick an area of an aerial photo; Florence-2 describes it and marks objects
+  named in plain language on this computer, and a remote vision model (optional) answers questions about it.
 
 ## Requirements
 
