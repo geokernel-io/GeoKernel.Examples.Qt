@@ -6,6 +6,10 @@ Official Qt/C++ examples for the GeoKernel native GIS SDK.
   language; an LLM (or the offline demo) proposes a workflow DSL v2 plan that is
   validated, previewed, confirmed when it changes data, executed, undoable and
   recorded with hash-chained provenance. Needs an SDK newer than 1.5.40.
+- [AgentPlannerBasics](AgentPlannerBasics/README.md): five lessons send map requests through
+  `NaturalLanguageGisPlanner` one stage at a time (proposal, validation, execution, provenance):
+  the same plan gives the same result, bad proposals never run, confirmation is bound to one exact
+  plan and the provenance record shows any change. Needs an SDK newer than 1.5.40.
 - [DsmOrthoToDtm](DsmOrthoToDtm/README.md): compare classical, DSM-only pix_grad
   and DSM+RGB rgb_grad_fm on aligned terrain/orthophoto inputs, with four linked
   maps, common reference errors and complete numeric result export.
